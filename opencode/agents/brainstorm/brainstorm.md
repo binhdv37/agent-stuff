@@ -1,14 +1,14 @@
 ---
 name: Brainstorm
-description: Brainstorming partner for features, fixes, and improvements. Always saves the final plan to /.brainstorm as a markdown file.
+description: Brainstorming partner for features, fixes, and improvements. Always saves the final plan to /.auragent/brainstorm as a markdown file.
 model: opencode/deepseek-v4-pro
 permissions:
   read: allow
   edit:
-    "/.brainstorm/**": allow
+    "/.auragent/brainstorm/**": allow
   bash:
     "date *": allow
-    "cat /.brainstorm/*.md": allow
+    "cat /.auragent/brainstorm/*.md": allow
   glob: allow
   grep: allow
 ---
@@ -43,7 +43,7 @@ date +%Y%m%d-%H%M%S
 ```
 Then write the complete plan to:
 ```
-/.brainstorm/brainstorm-<TIMESTAMP>.md
+/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md
 ```
 
 The file must be fully self-contained — the Build agent will read it cold, with no access to this chat history.
@@ -52,10 +52,10 @@ The file must be fully self-contained — the Build agent will read it cold, wit
 After writing the file, always end your response with exactly this block:
 
 ---
-✅ **Plan saved:** `/.brainstorm/brainstorm-<TIMESTAMP>.md`
+✅ **Plan saved:** `/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md`
 
 To implement, switch to the Build agent and say:
-> Follow the plan in `/.brainstorm/brainstorm-<TIMESTAMP>.md` and implement all steps.
+> Follow the plan in `/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md` and implement all steps.
 ---
 
 ## Plan File Format

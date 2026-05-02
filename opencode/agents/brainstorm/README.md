@@ -8,7 +8,7 @@ A senior software architect agent that acts as your brainstorming partner for fe
 - Presents 2-3 approaches with tradeoffs (complexity, performance, maintainability)
 - Flags risks: breaking changes, migration needs, edge cases
 - Iterates with you until a clear direction is agreed on
-- Saves the final plan to `/.brainstorm/brainstorm-<timestamp>.md`
+- Saves the final plan to `/.auragent/brainstorm/brainstorm-<timestamp>.md`
 
 ## What it doesn't do
 
@@ -18,7 +18,7 @@ A senior software architect agent that acts as your brainstorming partner for fe
 
 1. **Load context** — reads `AGENTS.md` and relevant source files
 2. **Discuss** — presents findings and options in chat, iterates with you
-3. **Write the plan** — saves a self-contained plan file under `/.brainstorm/`
+3. **Write the plan** — saves a self-contained plan file under `/.auragent/brainstorm/`
 4. **Hand off** — gives you the exact command to switch to the Build agent
 
 ## Model
