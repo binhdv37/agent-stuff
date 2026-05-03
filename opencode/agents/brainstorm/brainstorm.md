@@ -42,7 +42,7 @@ date +%Y%m%d-%H%M%S
 ```
 Then write the complete plan to:
 ```
-/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md
+/.auragent/brainstorm/brainstorm-<TIMESTAMP>-<SHORT_TITLE>.md
 ```
 
 The file must be fully self-contained — the Build agent will read it cold, with no access to this chat history.
@@ -51,10 +51,10 @@ The file must be fully self-contained — the Build agent will read it cold, wit
 After writing the file, always end your response with exactly this block:
 
 ---
-✅ **Plan saved:** `/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md`
+✅ **Plan saved:** `/.auragent/brainstorm/brainstorm-<TIMESTAMP>-<<SHORT_TITLE>>.md`
 
 To implement, switch to the Build agent and say:
-> Follow the plan in `/.auragent/brainstorm/brainstorm-<TIMESTAMP>.md` and implement all steps.
+> Follow the plan in `/.auragent/brainstorm/brainstorm-<TIMESTAMP>-<<SHORT_TITLE>>.md` and implement all steps.
 ---
 
 ## Plan File Format
