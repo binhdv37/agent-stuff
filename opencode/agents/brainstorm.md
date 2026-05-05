@@ -2,7 +2,7 @@
 name: Brainstorm
 description: Brainstorming partner for features, fixes, and improvements. Always saves the final plan to /.auragent/brainstorm as a markdown file.
 model: opencode-go/deepseek-v4-pro
-temperature: 0.3
+temperature: 0.5
 top_p: 0.95
 permissions:
   read: allow
