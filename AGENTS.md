@@ -8,6 +8,8 @@ files with frontmatter.
 Current content areas:
 - `opencode/agents/`: OpenCode-style agent definitions
 - `skills/`: Codex-style skills (`SKILL.md`)
+- `prompts/`: tool-agnostic prompt snippets
+- `templates/`: scaffolds for the formats above
 
 This is not a runtime application repository. There is no build, server, or app
 entrypoint to run.
@@ -43,6 +45,20 @@ Files under `skills/` should:
 - Include minimal frontmatter with `name` and `description`.
 - Describe trigger conditions in `description` ("Use when ...").
 - Keep steps explicit and executable in Codex workflows.
+
+## Tool-Agnostic Prompt Conventions
+
+Files under `prompts/` should:
+- Be named as `prompts/<kebab-case-name>.md` (one concern per file).
+- Include minimal frontmatter with `name` and `description` only.
+- Put the actual reusable text under a `## Prompt` heading.
+- Document `<placeholder>` substitutions under a `## Variables` heading.
+- Stay tool-agnostic — no OpenCode or Codex frontmatter fields.
+
+## Template Conventions
+
+Files under `templates/` are scaffolds and may contain placeholders. They are
+not consumed by any runtime and should be kept minimal and self-explanatory.
 
 ## Validation Checklist
 

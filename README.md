@@ -30,11 +30,26 @@ Skill definitions live in `skills/`.
 - `skills/roll-dice/SKILL.md` defines a simple skill for rolling dice using a
   random number command in shell or PowerShell.
 
+### Tool-agnostic prompts
+
+Reusable prompt snippets live in `prompts/`.
+
+- `prompts/README.md` is the index. Add new snippets by copying
+  `templates/snippet.md` and filling it in.
+
+### Templates
+
+Scaffolds for new assets live in `templates/`.
+
+- `templates/agent.md` — starting point for a new OpenCode agent
+- `templates/skill.md` — starting point for a new Codex skill
+- `templates/snippet.md` — starting point for a new tool-agnostic snippet
+
 ## Current State
 
 The repository currently has no package manifest, build system, tests, or
 runtime entrypoint. Most files are Markdown documents with frontmatter consumed
-by external agent tools.
+by external agent tools, plus a small set of tool-agnostic prompt snippets.
 
 Git history indicates the repository is being used to iterate on reusable agent
 definitions, especially planning, brainstorming, architecture, and code
