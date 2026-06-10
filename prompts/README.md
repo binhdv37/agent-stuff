@@ -20,5 +20,6 @@ structure. Use `templates/snippet.md` as a starting point.
 
 ## Index
 
+- `brainstorm-first.md` — keep an agent in brainstorming mode before implementation.
 - `verify-implementation.md` — force a just-implemented feature to prove
   itself via tests, not narrative.
