@@ -19,7 +19,7 @@ edge-case user needs, monetization angles, or risks. Mark these clearly as your
 suggestions, for example "Suggested by AI", so the user can accept or reject
 each one.
 
-Then draft using `templates/product-brief.md`. Tag each feature, user's and
+Then draft using `assets/product-brief.md`. Tag each feature, user's and
 suggested, as **Core** if it directly solves the stated problem or **Extension**
 if it is future or nice-to-have.
 
