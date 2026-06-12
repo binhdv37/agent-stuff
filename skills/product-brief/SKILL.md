@@ -26,4 +26,15 @@ if it is future or nice-to-have.
 Push back on vague problem statements or feature lists that aren't grounded in a
 real problem.
 
-End by asking the user to review and iterate.
+Ask the user to review and iterate until they explicitly agree that the proposed
+Product Brief is ready.
+
+After agreement, create `docs/product/` if it does not exist, then write the
+brief to `docs/product/product-brief.md`. Do this automatically without asking
+for a destination first.
+
+If `docs/product/product-brief.md` already exists, do not overwrite it. Report
+the conflict to the user and ask for instructions, such as where to save the new
+brief or what to do with the existing file.
+
+After writing the file, report the saved path back to the user.
