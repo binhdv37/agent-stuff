@@ -69,7 +69,10 @@ Write a **realistic, exam-authentic question** for the chosen part and topic.
 List **8–12 topic-specific words and phrases** the user should know for this topic.
 
 Format each entry as:
-- **word/phrase** — definition or usage note *(example sentence)*
+- **word/phrase** `/pronunciation/` — definition or usage note *(example sentence)*
+
+Include a simple pronunciation guide for every vocabulary item. Prefer IPA when
+confident; otherwise use a clear learner-friendly respelling.
 
 Group into 2 categories if relevant (e.g., Nouns / Verbs & Phrases).
 
@@ -142,6 +145,7 @@ After delivering the full package, ask:
 
 - All questions must sound like real IELTS exam questions — not generic conversation starters
 - Vocabulary must be topic-specific and exam-relevant (not just common words)
+- Every suggested vocabulary item must include pronunciation
 - Sentence structures must be reusable templates, not one-off sentences
 - Model answers must demonstrate range: varied grammar, C1-level vocabulary, natural cohesion
 - Avoid robotic or overly formal language in the model answer — it should sound like a confident, educated speaker
