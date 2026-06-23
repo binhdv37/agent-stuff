@@ -113,9 +113,57 @@ Use natural spoken English. Bold any vocabulary from the Vocabulary section when
 After delivering the full package, ask:
 
 > Would you like to:
+> - **Give your answer** — answer the question(s) above and get IELTS-style feedback
 > - **Practice another question** on the same topic?
 > - **Try a different topic or part?**
 > - **See a harder/easier version** of this question?
+
+---
+
+### Step 5 — Handle User Choice
+
+Auto-detect the user's intent from their response:
+
+| User Input | Agent Action |
+|---|---|
+| Types an answer to the question(s) | Go to **Review & Score** below, then loop back to Step 4 options |
+| Says "give your answer" or similar | Prompt them to type their answer |
+| Picks "another question" | Generate new question on same topic (Step 3) |
+| Picks "different topic/part" | Go to Step 2 |
+| Picks "harder/easier" | Generate adjusted difficulty version (Step 3) |
+
+---
+
+### Review & Score (when user gives an answer)
+
+Provide the following:
+
+#### Band Score: X.X
+
+Give a realistic IELTS band score estimate (e.g., 5.5, 6.0, 6.5, 7.0, 7.5, 8.0).
+
+#### Feedback
+
+2–3 specific bullet points:
+- **What was good** — one thing the user did well
+- **What needs improvement** — grammar, vocabulary range, coherence, or task response issues
+- **One actionable suggestion** — a concrete tip to level up
+
+#### Refined Answer
+
+Write an improved version of the user's answer:
+- Keep the user's original ideas and structure
+- Fix grammar and vocabulary errors
+- Upgrade weak phrases to stronger, more natural ones
+- Show what a higher-band version would sound like
+
+Then loop back:
+
+> Would you like to:
+> - **Try again** — re-answer the same question with this feedback in mind
+> - **Next question** — move to a follow-up question on this topic
+> - **New topic/part** — switch to something different
+> - **See model answer** — view the band 7–8 sample answer
 
 ---
 
