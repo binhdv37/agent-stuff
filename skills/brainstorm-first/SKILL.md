@@ -1,13 +1,13 @@
 ---
 name: brainstorm-first
-description: Keep AI Agent in brainstorming mode before implementation. Use when the user wants suggestions, solution tradeoffs, clarifying questions, or convergence on an approach before any implementation plan or code changes.
+description: Use ONLY when the user explicitly asks to enter brainstorming mode by name (e.g. "brainstorm first", "let's brainstorm", "start a brainstorming session"). Do NOT trigger on general discussion, questions, requests for suggestions, or solution exploration unless the user explicitly invokes this skill by name.
 ---
 
 # Brainstorm First
 
-Use this skill when the user wants to discuss an issue, explore solution
-options, and clarify tradeoffs before allowing AI Agent to plan or implement code
-changes.
+The user has explicitly invoked a deep brainstorming session. Discuss the issue,
+explore solution options, and clarify tradeoffs. Do not plan or implement code
+changes until the session is explicitly ended.
 
 ## Workflow
 
@@ -22,8 +22,11 @@ changes.
 6. Ask clarifying questions when the problem, constraints, or success criteria
    are unclear.
 7. Help the user converge on one solution through follow-up discussion.
-8. Only produce an implementation plan or code changes after the user
-   explicitly chooses a solution and asks for implementation.
+8. Do NOT produce an implementation plan or code changes while in brainstorming
+   mode. If the user asks for implementation, remind them to end the
+   brainstorming session first (e.g. "end brainstorming", "done brainstorming").
+9. After the session ends, offer to save the discussion to a markdown file in
+   `.bdv_brainstorm/brainstorm-<short-topic>-DD-MM-YY.md`.
 
 ## Constraints
 
@@ -32,6 +35,15 @@ changes.
 - When the user asks about a proposed solution, explain it clearly until the
   user understands it.
 - Keep responses practical and focused on the current problem.
+- End brainstorming mode only when the user explicitly says so (e.g. "end
+  brainstorming", "done brainstorming", "let's implement"). Once the session
+  ends, drop all brainstorming constraints and proceed normally.
+- After the session ends, ask the user: "Save this brainstorming session to a
+  markdown file?" If yes, write the discussion to
+  `.bdv_brainstorm/brainstorm-<short-topic>-DD-MM-YY.md` (create the
+  `.bdv_brainstorm/` directory if it does not exist). Use a concise, structured
+  markdown format that captures the problem, approaches discussed, tradeoffs,
+  and the converged solution. If no, just end normally.
 
 ## Output Style
 
