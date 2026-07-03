@@ -20,15 +20,18 @@ Agent definitions live in `opencode/agents/`.
 - `experimental_plan.md` defines a planning-only agent. It explores a codebase,
   designs an implementation approach, and writes a plan file for a separate
   execution agent to follow.
-- `brainstorm.md.old` is an older brainstorm-agent definition that appears to be
-  deprecated but retained for reference.
 
-### Codex skills
+### Agent skills
 
-Skill definitions live in `skills/`.
+Skill definitions live in `skills/`. All skills use the `bdv-` prefix and follow
+the open Agent Skills standard (`SKILL.md` with YAML frontmatter).
 
-- `skills/roll-dice/SKILL.md` defines a simple skill for rolling dice using a
-  random number command in shell or PowerShell.
+- `bdv-brainstorm-first` — deep brainstorming mode before implementation
+- `bdv-grill-me` — stress-test a plan or design through relentless Q&A
+- `bdv-ielts-speaking-coach` — guided IELTS Speaking practice sessions
+- `bdv-interview-coach` — mock technical interview practice
+- `bdv-product-brief` — turn rough product ideas into structured briefs
+- `bdv-api-handoff` — generate frontend-ready API handoff docs
 
 ### Tool-agnostic prompts
 
@@ -45,21 +48,18 @@ Scaffolds for new assets live in `templates/`.
 - `templates/skill.md` — starting point for a new Codex skill
 - `templates/snippet.md` — starting point for a new tool-agnostic snippet
 
+## Installer
+
+`install.sh` provides a one-command setup for installing skills into your
+local agent environment. It supports OpenCode, Codex, and Claude Code, with
+both global and per-project installation.
+
+```bash
+bash install.sh
+```
+
 ## Current State
 
-The repository currently has no package manifest, build system, tests, or
-runtime entrypoint. Most files are Markdown documents with frontmatter consumed
-by external agent tools, plus a small set of tool-agnostic prompt snippets.
-
-Git history indicates the repository is being used to iterate on reusable agent
-definitions, especially planning, brainstorming, architecture, and code
-explanation workflows.
-
-## Notes
-
-- Some agents assume an `AGENTS.md` file may exist in the target project they
-  are used against. This repository itself does not currently include one.
-- Planning-oriented agents write to `/.auragent/...` paths according to their
-  configured permissions and workflow instructions.
-- The `.old` brainstorm file should be treated as historical/reference material
-  unless intentionally restored.
+The repository stores reusable agent definitions and skills as Markdown files
+with frontmatter, consumed by external agent tools. `install.sh` copies
+skills and agents to the appropriate directories for your chosen agent.

@@ -6,10 +6,11 @@ This repository stores AI agent and skill definitions, primarily as Markdown
 files with frontmatter.
 
 Current content areas:
-- `opencode/agents/`: OpenCode-style agent definitions
-- `skills/`: Codex-style skills (`SKILL.md`)
+- `opencode/agents/`: OpenCode agent definitions
+- `skills/`: Agent skills (`SKILL.md`), all prefixed with `bdv-`
 - `prompts/`: tool-agnostic prompt snippets
 - `templates/`: scaffolds for the formats above
+- `install.sh`: one-command installer for skills and agents
 
 This is not a runtime application repository. There is no build, server, or app
 entrypoint to run.
@@ -38,13 +39,13 @@ Files under `opencode/agents/` should:
 - Keep permissions intentional and minimal.
 - Avoid tool references that are unavailable in the target environment.
 
-## Codex Skill Conventions
+## Agent Skill Conventions
 
 Files under `skills/` should:
-- Be named as `skills/<skill-name>/SKILL.md`.
+- Be named as `skills/bdv-<skill-name>/SKILL.md` (use `bdv-` prefix).
 - Include minimal frontmatter with `name` and `description`.
 - Describe trigger conditions in `description` ("Use when ...").
-- Keep steps explicit and executable in Codex workflows.
+- Keep steps explicit and executable in agent workflows.
 
 ## Tool-Agnostic Prompt Conventions
 
