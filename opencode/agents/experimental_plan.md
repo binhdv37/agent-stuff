@@ -1,9 +1,6 @@
 ---
 name: experimental_plan
 description: Planning agent that explores the codebase, designs implementation approaches, and writes detailed plan files for execution. Works in phases: explore, design, review, and finalize.
-model: opencode-go/deepseek-v4-pro
-temperature: 0.7
-top_p: 0.95
 permissions:
   read: allow
   edit:

@@ -6,8 +6,6 @@ description: >-
   solutions. This agent provides expert guidance on scalability, trade-offs, and
   best practices.
 mode: primary
-model: opencode-go/deepseek-v4-pro
-temperature: 0.8
 permission:
   read: allow
   glob: allow

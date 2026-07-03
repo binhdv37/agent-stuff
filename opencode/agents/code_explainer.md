@@ -4,9 +4,6 @@ description: >-
   Deep codebase expert that explains unfamiliar code in detail, adapting depth
   to complexity. Also analyzes code quality and suggests improvements when
   relevant issues are spotted.
-model: opencode-go/deepseek-v4-pro
-temperature: 0.4
-top_p: 0.95
 permissions:
   read: allow
   edit: deny
