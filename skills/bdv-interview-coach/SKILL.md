@@ -1,5 +1,5 @@
 ---
-name: interview-coach
+name: bdv-interview-coach
 description: >
   A guided mock interview practice skill for technical and professional roles.
   Trigger this skill whenever the user wants to: practice interview questions,

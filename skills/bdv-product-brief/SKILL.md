@@ -1,5 +1,5 @@
 ---
-name: product-brief
+name: bdv-product-brief
 description: Use when the user shares a vague/rough product idea and wants help turning it into a structured Product Brief. Triggers on "I have an idea for...", "help me flesh this out", "turn this idea into something".
 ---
 

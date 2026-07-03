@@ -1,5 +1,5 @@
 ---
-name: api-handoff
+name: bdv-api-handoff
 description: Generate concise frontend-ready API handoff documentation from backend implementation logic. Use when the user asks to document, hand off, summarize, or prepare FE integration notes for an API endpoint or API change.
 ---
 

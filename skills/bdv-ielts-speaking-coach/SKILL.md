@@ -1,5 +1,5 @@
 ---
-name: ielts-speaking-coach
+name: bdv-ielts-speaking-coach
 description: >
   IELTS Speaking Coach — a guided, interactive session that walks the user through
   IELTS Speaking practice for Part 1, Part 2, or Part 3. Trigger this skill whenever

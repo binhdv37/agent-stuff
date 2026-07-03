@@ -1,5 +1,5 @@
 ---
-name: brainstorm-first
+name: bdv-brainstorm-first
 description: Use ONLY when the user explicitly asks to enter brainstorming mode by name (e.g. "brainstorm first", "let's brainstorm", "start a brainstorming session"). Do NOT trigger on general discussion, questions, requests for suggestions, or solution exploration unless the user explicitly invokes this skill by name.
 ---
 
