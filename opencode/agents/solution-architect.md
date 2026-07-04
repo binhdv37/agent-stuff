@@ -1,5 +1,5 @@
 ---
-name: solution_architect
+name: solution-architect
 description: >-
   Use this agent when you need to tackle complex technical problems, design
   system architectures, evaluate technology choices, or brainstorm innovative

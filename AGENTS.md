@@ -8,7 +8,7 @@ A curated collection of agent-agnostic skills, prompt snippets, and tool-specifi
 
 | Directory | Purpose | Scope |
 |---|---|---|
-| `skills/` | Agent-agnostic skills (each in its own dir with `SKILL.md`) | OpenCode, Codex, Claude Code |
+| `skills/` | Agent-agnostic skills (each in its own dir with `SKILL.md`; may also contain `references/`, `assets/`, or `agents/` subdirs) | OpenCode, Codex, Claude Code |
 | `opencode/agents/` | OpenCode custom agent definitions | OpenCode only |
 | `opencode/commands/` | OpenCode custom commands | OpenCode only |
 | `prompts/` | Tool-agnostic prompt snippets | Any AI tool |
@@ -21,8 +21,8 @@ More tool-specific directories (like `opencode/`) may be added in the future for
 - Skills use `bdv-` prefix: `bdv-brainstorm-first`, `bdv-api-handoff`, etc.
 - Skill directory names and `name` in frontmatter must match.
 - Prompt files use kebab-case: `brainstorm-first.md`, `verify-implementation.md`.
-- Agent files use snake_case: `code_explainer.md`, `experimental_plan.md`, `solution_architect.md`.
-- Command files use kebab-case: `change-report.md`.
+- Agent files use kebab-case: `solution-architect.md`, `experimental-plan.md`.
+- Command files use `bdv-` prefix with kebab-case: `bdv-change-report.md`.
 
 ## Skill structure
 
@@ -35,16 +35,22 @@ description: <triggers for activation>
 ---
 ```
 
-Skills may have a `references/` subdirectory (e.g. `bdv-api-handoff/references/handoff-template.md`). When a skill references files in `references/`, use paths relative to the skill root.
+Skills may have resource subdirectories:
+- `references/` — templates or documents referenced by the skill (e.g. `bdv-api-handoff/references/handoff-template.md`). Use paths relative to the skill root.
+- `assets/` — static assets like templates (e.g. `bdv-product-brief/assets/product-brief.md`).
+- `agents/` — agent-specific config overrides (e.g. `agents/openai.yaml` for Codex CLI's `allow_implicit_invocation`).
 
 ## Agent structure
 
-Each file in `opencode/agents/` has YAML frontmatter with `name`, `description`, and `permissions`:
+Each file in `opencode/agents/` has YAML frontmatter with `name`, `description`, `mode`, and `permissions`. Optional fields include `model`, `temperature`, and `hidden`.
 
 ```yaml
-name: agent_name
+name: agent-name
 description: >-
   When to invoke.
+mode: primary|subagent|all
+model: <model-id>  # optional; inherits from global config if omitted
+temperature: <0.0-1.0>  # optional
 permissions:
   read: allow
   edit: deny
@@ -52,7 +58,33 @@ permissions:
   glob: allow
   grep: allow
   question: allow
+  subagent: allow  # allows invoking subagents via the Task tool
 ```
+
+Permissions support scoped values for finer-grained control. Instead of a flat `allow|deny|ask`, use a glob pattern as a key:
+
+```yaml
+permissions:
+  edit:
+    "/.auragent/plans/**": allow
+    "*": deny
+  bash:
+    "git status": allow
+    "*": deny
+```
+
+Rules are evaluated in order and the last matching rule wins.
+
+## Command structure
+
+Each file in `opencode/commands/` has YAML frontmatter with `description` and optionally `argument-hint`:
+
+```yaml
+description: <short description of what the command does>
+argument-hint: "[optional: <description of command arguments>]"
+```
+
+The command body is plain Markdown. Use `$ARGUMENTS` to reference the user-provided arguments.
 
 ## Prompt snippet structure
 
@@ -78,7 +110,10 @@ Target paths:
 
 ## Known quirks
 
-- One agent (`solution_architect.md`) has `permission` (singular) in its frontmatter — verify field name if you edit agent files. All other agents and the template use `permissions` (plural).
-- The `experimental_plan.md` agent has a `subagent: allow` permission not present in the agent template — this is intentional for that agent type.
+- One agent (`solution-architect.md`) has `permission` (singular) in its frontmatter — verify field name if you edit agent files. All other agents and the template use `permissions` (plural).
+- The `experimental-plan.md` agent has a `subagent: allow` permission not present in the agent template — this is intentional for that agent type.
+- Both agents use `mode: primary`, a field not present in the older agent template. New agents should include it.
+- `experimental-plan.md` uses scoped permission values (e.g. `edit: "/.auragent/plans/**": allow`) while `solution-architect.md` uses flat values.
+- Command files may include an `argument-hint` field (see `command structure` above).
 - Skills are installed by copying the entire subdirectory from `skills/`. Keep all skill resources within the skill's directory.
 - Agent definitions are OpenCode-specific and are only installed when the user selects OpenCode.
