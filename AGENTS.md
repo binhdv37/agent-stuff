@@ -24,6 +24,12 @@ More tool-specific directories (like `opencode/`) may be added in the future for
 - Agent files use kebab-case: `solution-architect.md`, `experimental-plan.md`.
 - Command files use `bdv-` prefix with kebab-case: `bdv-change-report.md`.
 
+## Conventions when adding new assets
+
+When you create a new skill, command, agent, or prompt snippet in this repo,
+you MUST also add the corresponding entry to `README.md` in the appropriate
+table. The user should not need to explicitly ask for this.
+
 ## Skill structure
 
 Every skill is a directory containing `SKILL.md` with YAML frontmatter:
