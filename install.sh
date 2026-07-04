@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================================
 #  Agent Stuff — Skills Installer
-#  Usage: curl -fsSL https://raw.githubusercontent.com/binhdv37/agent-stuff/main/install.sh | bash
+#  Usage: curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
 # ============================================================================
 set -uo pipefail
 
@@ -89,9 +89,9 @@ select_option() {
   draw
   hide_cursor
   while true; do
-    IFS= read -rsn1 key
+    IFS= read -rsn1 key < /dev/tty
     if [[ $key == $'\x1b' ]]; then
-      IFS= read -rsn2 rest
+      IFS= read -rsn2 rest < /dev/tty
       case "$rest" in
         '[A') selected=$((selected - 1)); [ "$selected" -lt 0 ] && selected=$((count - 1)) ;;
         '[B') selected=$((selected + 1)); [ "$selected" -ge "$count" ] && selected=0 ;;
@@ -109,6 +109,14 @@ select_option() {
 
 # ---------------------------- Main -------------------------------------------
 main() {
+  if [ ! -e /dev/tty ]; then
+    printf '%sThis installer needs an interactive terminal (arrow-key menus).%s\n' "$RED" "$RESET"
+    printf 'Download and run it directly instead:\n'
+    printf '  curl -fsSL https://raw.githubusercontent.com/%s/%s/%s/install.sh -o install.sh\n' "$REPO_OWNER" "$REPO_NAME" "$BRANCH"
+    printf '  bash install.sh\n'
+    exit 1
+  fi
+
   clear 2>/dev/null || true
   print_logo
 
