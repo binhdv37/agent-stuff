@@ -1,6 +1,6 @@
 ---
 name: bdv-product-brief
-description: Use when the user shares a vague/rough product idea and wants help turning it into a structured Product Brief. Triggers on "I have an idea for...", "help me flesh this out", "turn this idea into something".
+description: Use ONLY when the user explicitly asks for it — e.g. "create a product brief", "flesh this out", "turn this idea into a product brief", or similar direct requests. Do NOT trigger on general product discussions or idea sharing unless the user explicitly invokes this skill by name.
 ---
 
 # Product Brief

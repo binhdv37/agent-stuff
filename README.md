@@ -31,6 +31,16 @@ Specialized roles that extend your AI agent's capabilities. Each has a defined m
 | **experimental_plan** | Explores code and writes step-by-step implementation plans | Planning before coding |
 | **solution_architect** | Designs system architecture and evaluates trade-offs | Technical design decisions |
 
+## Commands
+
+Custom OpenCode commands — type `/` followed by the command name in the TUI.
+
+| Command | What It Does | Usage |
+|---------|-------------|-------|
+| **bdv-change-report** | Generates a high-level change report for recent code changes | `/bdv-change-report` or `/bdv-change-report src/auth` |
+
+> Commands are OpenCode-only. Installed to `~/.config/opencode/commands/` (global) or `.opencode/commands/` (local).
+
 ## Skills
 
 Trigger-based workflows. Say the right phrase and the skill activates automatically.

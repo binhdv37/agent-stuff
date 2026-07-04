@@ -1,13 +1,6 @@
 ---
 name: bdv-interview-coach
-description: >
-  A guided mock interview practice skill for technical and professional roles.
-  Trigger this skill whenever the user wants to: practice interview questions,
-  prepare for a job interview, do a mock interview, drill technical Q&A,
-  practice system design questions, behavioral questions, or mentions
-  "interview", "phỏng vấn", "luyện phỏng vấn", "mock interview", "câu hỏi phỏng vấn",
-  "ôn tập phỏng vấn", "chuẩn bị phỏng vấn" — even if they don't explicitly call the skill by name.
-  Always use this skill for any interview prep request.
+description: Use ONLY when the user explicitly asks for it — e.g. "mock interview me", "do a mock interview", "practice interview questions", "interview me", "drill technical Q&A", or similar direct requests. Do NOT trigger on general interview-related discussion unless the user explicitly invokes this skill by name.
 ---
 
 # Interview Coach Skill

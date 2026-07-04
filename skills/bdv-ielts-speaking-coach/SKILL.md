@@ -1,13 +1,6 @@
 ---
 name: bdv-ielts-speaking-coach
-description: >
-  IELTS Speaking Coach — a guided, interactive session that walks the user through
-  IELTS Speaking practice for Part 1, Part 2, or Part 3. Trigger this skill whenever
-  the user mentions IELTS speaking, wants to practice speaking English for an exam,
-  asks for IELTS questions, wants to learn IELTS vocabulary, or says anything like
-  "IELTS speaking", "practice IELTS", "speaking exam prep", "IELTS part 1/2/3",
-  or "help me with IELTS". Always use this skill — do not just answer with a
-  question directly without following the guided flow below.
+description: Use ONLY when the user explicitly asks for it — e.g. "practice IELTS speaking", "IELTS speaking practice", "help me with IELTS", "IELTS part 1/2/3", or similar direct requests. Do NOT trigger on general mentions of IELTS or English speaking unless the user explicitly invokes this skill by name.
 ---
 
 # IELTS Speaking Coach

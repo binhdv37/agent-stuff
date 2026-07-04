@@ -13,6 +13,7 @@ REPO_NAME="agent-stuff"
 BRANCH="main"
 SKILLS_SUBDIR="skills"           # skills/<skill-name>/SKILL.md
 OPENCODE_AGENTS_SUBDIR="opencode/agents"   # opencode/agents/<name>.md
+OPENCODE_COMMANDS_SUBDIR="opencode/commands" # opencode/commands/<name>.md
 # ---------------------------------------------------------------------------
 
 # ---------------------------- Colors ---------------------------------------
@@ -175,6 +176,17 @@ main() {
     printf '%s-> Custom agents will be installed to: %s%s\n\n' "$DIM" "$OPENCODE_AGENTS_TARGET_DIR" "$RESET"
   fi
 
+  # If OpenCode, also resolve the custom commands target dir
+  local OPENCODE_COMMANDS_TARGET_DIR=""
+  if [ "$AGENT_IDX" -eq 1 ]; then
+    if [ "$MODE_IDX" -eq 0 ]; then
+      OPENCODE_COMMANDS_TARGET_DIR="$HOME/.config/opencode/commands"
+    else
+      OPENCODE_COMMANDS_TARGET_DIR="$(pwd)/.opencode/commands"
+    fi
+    printf '%s-> Custom commands will be installed to: %s%s\n\n' "$DIM" "$OPENCODE_COMMANDS_TARGET_DIR" "$RESET"
+  fi
+
   # 3) Download the repo
   printf '%sFetching skills from %s/%s...%s\n' "$CYAN" "$REPO_OWNER" "$REPO_NAME" "$RESET"
   TMP_DIR=$(mktemp -d)
@@ -240,10 +252,35 @@ main() {
     fi
   fi
 
+  # 6) If OpenCode, also install custom commands
+  if [ "$AGENT_IDX" -eq 1 ]; then
+    local COMMANDS_SRC="${SRC_ROOT}/${OPENCODE_COMMANDS_SUBDIR}"
+    if [ -d "$COMMANDS_SRC" ]; then
+      local COMMAND_FILES=()
+      while IFS= read -r -d '' f; do
+        COMMAND_FILES+=("$(basename "$f")")
+      done < <(find "$COMMANDS_SRC" -mindepth 1 -maxdepth 1 -type f -name "*.md" -print0 | sort -z)
+
+      if [ ${#COMMAND_FILES[@]} -gt 0 ]; then
+        mkdir -p "$OPENCODE_COMMANDS_TARGET_DIR"
+        echo
+        printf '%sInstalling %d custom command(s):%s\n' "$BOLD" "${#COMMAND_FILES[@]}" "$RESET"
+        local f
+        for f in "${COMMAND_FILES[@]}"; do
+          cp -f "${COMMANDS_SRC}/${f}" "${OPENCODE_COMMANDS_TARGET_DIR}/${f}"
+          printf '  %s✔%s %s\n' "$GREEN" "$RESET" "$f"
+        done
+      fi
+    else
+      printf '\n%sNote: no "%s" directory found in the repo, skipping custom commands.%s\n' "$YELLOW" "$OPENCODE_COMMANDS_SUBDIR" "$RESET"
+    fi
+  fi
+
   echo
   printf '%s%sDone!%s\n' "$GREEN" "$BOLD" "$RESET"
   printf '%sInstalled into: %s%s\n' "$DIM" "$SKILLS_TARGET_DIR" "$RESET"
   [ -n "$OPENCODE_AGENTS_TARGET_DIR" ] && printf '%sCustom agents:  %s%s\n' "$DIM" "$OPENCODE_AGENTS_TARGET_DIR" "$RESET"
+  [ -n "$OPENCODE_COMMANDS_TARGET_DIR" ] && printf '%sCustom commands: %s%s\n' "$DIM" "$OPENCODE_COMMANDS_TARGET_DIR" "$RESET"
   printf '%s-> Restart %s to pick up the new skills.%s\n' "$DIM" "$AGENT_NAME" "$RESET"
 }
 

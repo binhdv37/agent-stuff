@@ -1,6 +1,6 @@
 ---
 name: bdv-api-handoff
-description: Generate concise frontend-ready API handoff documentation from backend implementation logic. Use when the user asks to document, hand off, summarize, or prepare FE integration notes for an API endpoint or API change.
+description: Use ONLY when the user explicitly asks for it — e.g. "document this API", "hand off this endpoint", "prepare FE integration notes", or similar direct requests. Do NOT trigger automatically when documenting or summarizing code — wait for the user to ask.
 ---
 
 # API Handoff
