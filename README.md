@@ -36,6 +36,7 @@ Custom OpenCode commands — type `/` followed by the command name in the TUI.
 | Command | What It Does | Usage |
 |---------|-------------|-------|
 | **bdv-change-report** | Generates a high-level change report for recent code changes | `/bdv-change-report` or `/bdv-change-report src/auth` |
+| **bdv-explain-code** | Explains existing code for quick review — no diff needed | `/bdv-explain-code <file/dir/function>` |
 
 > Commands are OpenCode-only. Installed to `~/.config/opencode/commands/` (global) or `.opencode/commands/` (local).
 
@@ -48,6 +49,7 @@ Trigger-based workflows. Say the right phrase and the skill activates automatica
 | **bdv-api-handoff** | Generates FE-ready API docs from backend code | "document this API", "hand off" |
 | **bdv-brainstorm-first** | Forces brainstorming before any code is written | "brainstorm first", "let's brainstorm" |
 | **bdv-change-report** | Generates a high-level report of code changes | "change report", "summarize the changes" |
+| **bdv-explain-code** | Explains existing code for quick review — no diff needed | "explain this code", "walk me through" |
 | **bdv-grill-me** | Interviews you relentlessly on a plan until it's solid | "grill me", "stress-test my plan" |
 | **bdv-ielts-speaking-coach** | Interactive IELTS Speaking practice with scoring | "IELTS speaking", "practice IELTS" |
 | **bdv-interview-coach** | Mock technical interview with model answers | "interview", "mock interview" |
