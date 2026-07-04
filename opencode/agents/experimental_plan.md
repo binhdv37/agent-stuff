@@ -1,6 +1,7 @@
 ---
 name: experimental_plan
 description: Planning agent that explores the codebase, designs implementation approaches, and writes detailed plan files for execution. Works in phases: explore, design, review, and finalize.
+mode: primary
 permissions:
   read: allow
   edit:

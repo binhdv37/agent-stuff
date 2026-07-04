@@ -4,6 +4,7 @@ description: >-
   Deep codebase expert that explains unfamiliar code in detail, adapting depth
   to complexity. Also analyzes code quality and suggests improvements when
   relevant issues are spotted.
+mode: primary
 permissions:
   read: allow
   edit: deny
