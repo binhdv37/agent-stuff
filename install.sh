@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ============================================================================
 #  Agent Stuff — Skills Installer
-#  Usage: curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
+#  Usage: curl -fsSL https://raw.githubusercontent.com/binhdv37/agent-stuff/main/install.sh | bash
 # ============================================================================
 set -uo pipefail
 
 # ---------------------------------------------------------------------------
 # CONFIG — update these 3 lines for your repo
 # ---------------------------------------------------------------------------
-REPO_OWNER="your-github-username"
-REPO_NAME="your-repo-name"
+REPO_OWNER="binhdv37"
+REPO_NAME="agent-stuff"
 BRANCH="main"
 SKILLS_SUBDIR="skills"           # skills/<skill-name>/SKILL.md
 OPENCODE_AGENTS_SUBDIR="opencode/agents"   # opencode/agents/<name>.md
