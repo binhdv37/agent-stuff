@@ -21,14 +21,6 @@ curl -fsSL https://raw.githubusercontent.com/binhdv37/agent-stuff/main/install.s
 
 The installer will ask which AI agent you use (OpenCode, Codex, or Claude Code) and whether to install globally or for a single project.
 
-**Prefer to clone?**
-
-```bash
-git clone https://github.com/binhdv37/agent-stuff.git
-cd agent-stuff
-bash local-install.sh
-```
-
 ## Agents
 
 Specialized roles that extend your AI agent's capabilities. Each has a defined model, permissions, and workflow.
@@ -60,13 +52,3 @@ Drop-in text snippets that work anywhere — OpenCode, ChatGPT, Claude, or your 
 |--------|-------------|-------------|
 | **brainstorm-first** | Keeps an agent in brainstorming mode, blocks implementation | Before choosing an approach |
 | **verify-implementation** | Forces proof that a feature works via tests, not explanation | After implementing something |
-
-## Make Your Own
-
-Want to create your own agents, skills, or prompts? Templates are included:
-
-- `templates/agent.md` — for new agent definitions
-- `templates/skill.md` — for new skill modules
-- `templates/snippet.md` — for new prompt snippets
-
-Copy a template, fill it in, drop it in the right folder. See existing examples for reference.
