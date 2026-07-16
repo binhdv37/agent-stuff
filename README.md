@@ -31,14 +31,14 @@ Specialized roles that extend your AI agent's capabilities. Each has a defined m
 
 ## Commands
 
-Custom OpenCode commands — type `/` followed by the command name in the TUI.
+Custom OpenCode and Claude Code commands — type `/` followed by the command name.
 
 | Command | What It Does | Usage |
 |---------|-------------|-------|
 | **bdv-change-report** | Generates a high-level change report for recent code changes | `/bdv-change-report` or `/bdv-change-report src/auth` |
 | **bdv-explain-code** | Explains existing code for quick review — no diff needed | `/bdv-explain-code <file/dir/function>` |
 
-> Commands are OpenCode-only. Installed to `~/.config/opencode/commands/` (global) or `.opencode/commands/` (local).
+> Commands are installed to `~/.config/opencode/commands/` (global) or `.opencode/commands/` (local) for OpenCode, and `~/.claude/commands/` (global) or `.claude/commands/` (local) for Claude Code.
 
 ## Skills
 
