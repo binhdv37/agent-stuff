@@ -1,6 +1,7 @@
 ---
 name: bdv-interview-coach
-description: Use ONLY when the user explicitly asks for it — e.g. "mock interview me", "do a mock interview", "practice interview questions", "interview me", "drill technical Q&A", or similar direct requests. Do NOT trigger on general interview-related discussion unless the user explicitly invokes this skill by name.
+description: Run a technical mock interview for requests such as "mock interview me", "do a mock interview", "practice interview questions", "interview me", or "drill technical Q&A". Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # Interview Coach Skill

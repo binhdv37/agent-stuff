@@ -1,6 +1,7 @@
 ---
 name: bdv-brainstorm-first
-description: Use ONLY when the user explicitly asks to enter brainstorming mode by name (e.g. "brainstorm first", "let's brainstorm", "start a brainstorming session"). Do NOT trigger on general discussion, questions, requests for suggestions, or solution exploration unless the user explicitly invokes this skill by name.
+description: Facilitate a deep brainstorming session for requests such as "brainstorm first", "let's brainstorm", or "start a brainstorming session". Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # Brainstorm First

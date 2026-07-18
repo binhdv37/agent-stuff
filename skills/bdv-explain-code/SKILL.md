@@ -1,6 +1,7 @@
 ---
 name: bdv-explain-code
-description: Use ONLY when the user explicitly asks for it — e.g. "explain this code," "walk me through this module/feature/API," "review this for me," "/explain-code," or points at a file/function/snippet and asks what it does. Produces a short, high-level report on existing (already-committed, no-diff) code: what it does, how it's structured, non-obvious behavior, edge cases, risk flags, open questions, and where to look next. Do NOT trigger automatically just because code is present in context or was recently discussed — wait for the user to ask.
+description: Explain existing (already-committed, no-diff) code for requests such as "explain this code," "walk me through this module/feature/API," "review this for me," "/explain-code," or a question about a file, function, or snippet. Produces a short, high-level report covering structure, non-obvious behavior, edge cases, risk flags, open questions, and where to look next. Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # Explain Code

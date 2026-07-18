@@ -1,6 +1,7 @@
 ---
 name: bdv-api-handoff
-description: Use ONLY when the user explicitly asks for it — e.g. "document this API", "hand off this endpoint", "prepare FE integration notes", or similar direct requests. Do NOT trigger automatically when documenting or summarizing code — wait for the user to ask.
+description: Prepare frontend integration documentation for APIs and endpoints — e.g. "document this API", "hand off this endpoint", "prepare FE integration notes", or similar direct requests. Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # API Handoff

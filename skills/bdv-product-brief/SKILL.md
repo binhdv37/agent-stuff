@@ -1,6 +1,7 @@
 ---
 name: bdv-product-brief
-description: Use ONLY when the user explicitly asks for it — e.g. "create a product brief", "flesh this out", "turn this idea into a product brief", or similar direct requests. Do NOT trigger on general product discussions or idea sharing unless the user explicitly invokes this skill by name.
+description: Create a product brief for requests such as "create a product brief", "flesh this out", or "turn this idea into a product brief". Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # Product Brief

@@ -63,7 +63,7 @@ Custom OpenCode commands — type `/` followed by the command name.
 
 ## Skills
 
-Trigger-based workflows. Say the right phrase and the skill activates automatically.
+Reusable workflows. Most skills require an explicit request; `bdv-grill-me` and `bdv-smart-commit` may activate from matching requests.
 
 | Skill | What It Does | Say This to Trigger |
 |-------|-------------|-------------------|
@@ -72,7 +72,9 @@ Trigger-based workflows. Say the right phrase and the skill activates automatica
 | **bdv-change-report** | Generates a high-level report of code changes | "change report", "summarize the changes" |
 | **bdv-explain-code** | Explains existing code for quick review — no diff needed | "explain this code", "walk me through" |
 | **bdv-grill-me** | Interviews you relentlessly on a plan until it's solid | "grill me", "stress-test my plan" |
+| **bdv-handoff** | Creates a concise, redacted handoff document for the next agent or session | "create a session handoff", "handoff for the next agent" |
 | **bdv-ielts-speaking-coach** | Interactive IELTS Speaking practice with scoring | "IELTS speaking", "practice IELTS" |
 | **bdv-interview-coach** | Mock technical interview with model answers | "interview", "mock interview" |
 | **bdv-product-brief** | Turns vague ideas into structured product briefs | "I have an idea for..." |
 | **bdv-smart-commit** | Stages changes, generates a Conventional Commit, commits | "commit", "commit this" |
+| **bdv-teach** | Creates a stateful learning workspace with lessons, trusted resources, and learning records | "teach me <topic>", "help me learn <topic>" |

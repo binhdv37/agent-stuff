@@ -1,6 +1,7 @@
 ---
 name: bdv-change-report
-description: Use ONLY when the user explicitly asks for it — e.g. "give me the change report," "summarize the changes," "what did you change," "/change-report," or similar direct requests. Produces a short, high-level report (not a line-by-line walkthrough) covering what changed, behavior differences, assumptions made, known gaps, risk areas, and what to verify manually — so the user can review quickly without reading the whole diff. Do NOT trigger this automatically after writing or editing code — wait for the user to ask.
+description: Produce a short, high-level report for requests such as "give me the change report," "summarize the changes," "what did you change," or "/change-report." Covers behavior differences, assumptions, known gaps, risk areas, and manual verification without a line-by-line walkthrough. Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # Change Report

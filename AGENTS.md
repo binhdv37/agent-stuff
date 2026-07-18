@@ -41,6 +41,19 @@ description: <triggers for activation>
 ---
 ```
 
+Before creating a skill, always ask whether it should be eligible for automatic
+model invocation. Default to explicit-only unless the user opts in. For an
+explicit-only skill:
+
+- Add `disable-model-invocation: true` to its `SKILL.md` frontmatter.
+- Add `agents/openai.yaml` with `policy.allow_implicit_invocation: false`.
+- End its description with: `Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.`
+
+`disable-model-invocation` and `agents/openai.yaml` are respected by agents
+that support them. OpenCode ignores unknown skill frontmatter, so the
+description is its in-skill guard; users can enforce approval through OpenCode
+`permission.skill` rules.
+
 Skills may have resource subdirectories:
 - `references/` — templates or documents referenced by the skill (e.g. `bdv-api-handoff/references/handoff-template.md`). Use paths relative to the skill root.
 - `assets/` — static assets like templates (e.g. `bdv-product-brief/assets/product-brief.md`).

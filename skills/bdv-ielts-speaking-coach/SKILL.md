@@ -1,6 +1,7 @@
 ---
 name: bdv-ielts-speaking-coach
-description: Use ONLY when the user explicitly asks for it — e.g. "practice IELTS speaking", "IELTS speaking practice", "help me with IELTS", "IELTS part 1/2/3", or similar direct requests. Do NOT trigger on general mentions of IELTS or English speaking unless the user explicitly invokes this skill by name.
+description: Guide a full IELTS Speaking practice session for requests such as "practice IELTS speaking", "IELTS speaking practice", "help me with IELTS", or "IELTS part 1/2/3". Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.
+disable-model-invocation: true
 ---
 
 # IELTS Speaking Coach
