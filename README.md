@@ -13,11 +13,33 @@ A curated collection of agent definitions and modular skills you can install in 
 
 ## Install
 
+### All Agent Stuff
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/binhdv37/agent-stuff/main/install.sh | bash
 ```
 
-The installer will ask which AI agent you use (OpenCode, Codex, or Claude Code) and whether to install globally or for a single project.
+The installer will ask which AI agent you use (OpenCode, Codex, or Claude Code) and whether to install globally or for a single project. For OpenCode, it also installs this repository's custom agents and commands.
+
+### Skills Only
+
+Use the [skills CLI](https://skills.sh) to install this repository's skills:
+
+```bash
+npx skills add binhdv37/agent-stuff
+```
+
+The CLI lets you choose the skills, target agents, and installation scope. For example:
+
+```bash
+# List available skills
+npx skills add binhdv37/agent-stuff --list
+
+# Install one skill globally for OpenCode
+npx skills add binhdv37/agent-stuff --skill bdv-brainstorm-first --global --agent opencode
+```
+
+> The skills CLI installs only the contents of `skills/`. Use the full installer above when you also want the OpenCode agents and commands.
 
 ## Agents
 
