@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-A curated collection of agent-agnostic skills, prompt snippets, and tool-specific agent definitions. Not an app or library — this is content that gets installed into other tools via `install.sh`.
+A curated collection of agent-agnostic skills and tool-specific agent definitions. Not an app or library — this is content that gets installed into other tools via `install.sh`. The `prompts/` directory contains the author's personal draft prompts and is not part of the end-user offering.
 
 ## Directory ownership
 
@@ -11,8 +11,7 @@ A curated collection of agent-agnostic skills, prompt snippets, and tool-specifi
 | `skills/` | Agent-agnostic skills (each in its own dir with `SKILL.md`; may also contain `references/`, `assets/`, or `agents/` subdirs) | OpenCode, Codex, Claude Code |
 | `opencode/agents/` | OpenCode custom agent definitions | OpenCode only |
 | `opencode/commands/` | OpenCode custom commands | OpenCode only |
-| `prompts/` | Tool-agnostic prompt snippets | Any AI tool |
-| `templates/` | Templates for creating new skills/agents/prompts | N/A |
+| `prompts/` | Author's personal quick/draft prompts | Author only |
 
 More tool-specific directories (like `opencode/`) may be added in the future for other agents.
 
@@ -26,9 +25,10 @@ More tool-specific directories (like `opencode/`) may be added in the future for
 
 ## Conventions when adding new assets
 
-When you create a new skill, command, agent, or prompt snippet in this repo,
-you MUST also add the corresponding entry to `README.md` in the appropriate
-table. The user should not need to explicitly ask for this.
+When you create a new skill, command, or agent in this repo, you MUST also add
+the corresponding entry to `README.md` in the appropriate table. The user
+should not need to explicitly ask for this. Personal prompts are intentionally
+not listed in the root README.
 
 ## Skill structure
 
@@ -92,13 +92,9 @@ argument-hint: "[optional: <description of command arguments>]"
 
 The command body is plain Markdown. Use `$ARGUMENTS` to reference the user-provided arguments.
 
-## Prompt snippet structure
+## Personal prompt structure
 
-Each `prompts/*.md` file has minimal frontmatter (`name`, `description`) and a `## Prompt` section containing the ready-to-paste text. Use `<angle-bracket>` placeholders for variables and document them under `## Variables`.
-
-## Template placeholders
-
-Template files (`templates/`) use `<angle-bracket>` placeholders (e.g. `<kebab-case-agent-name>`, `<role description>`). When generating new content from templates, replace all angle-bracket placeholders with concrete values.
+Each `prompts/*.md` file is an author-maintained, ready-to-paste draft with minimal frontmatter (`name`, `description`) and a `## Prompt` section. Use `<angle-bracket>` placeholders for variables and document them under `## Variables`.
 
 ## Installation flow (install.sh)
 
@@ -116,9 +112,9 @@ Target paths:
 
 ## Known quirks
 
-- One agent (`solution-architect.md`) has `permission` (singular) in its frontmatter — verify field name if you edit agent files. All other agents and the template use `permissions` (plural).
-- The `experimental-plan.md` agent has a `subagent: allow` permission not present in the agent template — this is intentional for that agent type.
-- Both agents use `mode: primary`, a field not present in the older agent template. New agents should include it.
+- One agent (`solution-architect.md`) has `permission` (singular) in its frontmatter — verify field name if you edit agent files. All other agents use `permissions` (plural).
+- The `experimental-plan.md` agent has a `subagent: allow` permission — this is intentional for that agent type.
+- Both agents use `mode: primary`. New agents should include it.
 - `experimental-plan.md` uses scoped permission values (e.g. `edit: "/.auragent/plans/**": allow`) while `solution-architect.md` uses flat values.
 - Command files may include an `argument-hint` field (see `command structure` above).
 - Skills are installed by copying the entire subdirectory from `skills/`. Keep all skill resources within the skill's directory.

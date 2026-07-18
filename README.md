@@ -1,16 +1,15 @@
 # Agent Stuff
 
-> Ready-to-use AI agents, skills, and prompt snippets for OpenCode, Codex, and Claude Code.
+> Ready-to-use AI agents and skills for OpenCode, Codex, and Claude Code.
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/binhdv37/agent-stuff?style=flat-square)](https://github.com/binhdv37/agent-stuff)
 
 ## What You Get
 
-A curated collection of agent definitions, modular skills, and drop-in prompts you can install in seconds. Each one is battle-tested and ready to enhance your AI coding workflow.
+A curated collection of agent definitions and modular skills you can install in seconds. Each one is battle-tested and ready to enhance your AI coding workflow.
 
 - **Agents** — Specialized AI roles (planner, architect) with defined permissions and behavior
 - **Skills** — Trigger-based workflows (brainstorming, interview prep, API handoff) activated by what you say
-- **Prompts** — Copy-paste text snippets that work in any chat, any tool
 
 ## Install
 
@@ -55,12 +54,3 @@ Trigger-based workflows. Say the right phrase and the skill activates automatica
 | **bdv-interview-coach** | Mock technical interview with model answers | "interview", "mock interview" |
 | **bdv-product-brief** | Turns vague ideas into structured product briefs | "I have an idea for..." |
 | **bdv-smart-commit** | Stages changes, generates a Conventional Commit, commits | "commit", "commit this" |
-
-## Prompts
-
-Drop-in text snippets that work anywhere — OpenCode, ChatGPT, Claude, or your system prompt.
-
-| Prompt | What It Does | When to Use |
-|--------|-------------|-------------|
-| **brainstorm-first** | Keeps an agent in brainstorming mode, blocks implementation | Before choosing an approach |
-| **verify-implementation** | Forces proof that a feature works via tests, not explanation | After implementing something |

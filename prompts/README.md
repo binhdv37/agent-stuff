@@ -1,13 +1,13 @@
 # Prompts
 
-Tool-agnostic prompt snippets. Each file in this directory is a self-contained
-piece of reusable text that can be copied into any chat, system prompt, or
-agent's user message — no OpenCode or Codex frontmatter required.
+The author's personal collection of quick and draft prompts. These files are
+not part of the end-user offering or installer; they are reusable text for the
+author to copy into chats, system prompts, or agent messages.
 
 ## Format
 
-Every snippet is a Markdown file with minimal frontmatter and a consistent
-structure. Use `templates/snippet.md` as a starting point.
+Every prompt is a Markdown file with minimal frontmatter and a consistent
+structure.
 
 ## Conventions
 
