@@ -1,11 +1,11 @@
 ---
 name: bdv-smart-commit
-description: Stage all changes, generate a Conventional Commit message from the diff, and commit. Use when the user says "commit", "commit this", "commit my changes", "commit for me", or wants a clean git commit without manual staging or message writing.
+description: With approval before staging and committing, stage all changes, generate a Conventional Commit message from the diff, and commit. Use when the user says "commit", "commit this", "commit my changes", "commit for me", or wants a clean git commit without manual staging or message writing.
 ---
 
 # Smart Commit
 
-Automates the git commit workflow: stage, generate message, commit.
+Guides the git commit workflow: approve staging, stage, generate message, approve commit, commit.
 
 ## Workflow
 
@@ -13,18 +13,29 @@ Automates the git commit workflow: stage, generate message, commit.
    - Run `git status --short` to detect staged and unstaged changes.
    - If nothing to commit, report "Nothing to commit" and stop.
 
-2. **Stage all changes**
-   - Run `git add -A` to stage everything.
-   - This is intentional — the user has explicitly asked for smart-commit.
+2. **Approve staging**
+   - Show the files from `git status --short`, including their status (staged, modified, deleted, or untracked).
+   - Use the current conversation history to identify files changed by the agent. Attribution is file-level: a file changed by both the agent and the user is agent-related.
+   - If the agent changed files in this conversation and other changed files are not agent-related:
+     - List agent-related and unrelated files separately.
+     - Tell the user that unrelated changes were detected and ask whether to include them.
+     - If the user approves, propose `git add -A` and ask for explicit approval to run it.
+     - If the user declines, propose `git add -- <agent-related paths>` and ask for explicit approval to run it.
+   - If every changed file is agent-related, propose `git add -- <agent-related paths>` and ask for explicit approval to run it.
+   - If this is a new conversation or the agent made no code changes, propose `git add -A` and ask for explicit approval to run it.
+   - If staging is declined, make no changes and stop.
 
-3. **Analyze the diff**
+3. **Stage all changes**
+   - Run only the staging command approved by the user.
+
+4. **Analyze the diff**
    - Run `git diff --cached` to review staged changes.
    - Identify:
      - Primary change type (feat, fix, refactor, chore, docs, test, style, perf, ci, build)
      - Scope (which module, file, or area was affected)
      - What changed and why (infer from code context)
 
-4. **Generate commit message**
+5. **Generate commit message**
    - Use **Conventional Commits** format:
 
      ```
@@ -40,13 +51,15 @@ Automates the git commit workflow: stage, generate message, commit.
      - `body` is optional — add only when the change is non-obvious or multi-part
      - If the diff mixes types (e.g. a fix + a refactor), pick the dominant type and mention the other in the body
 
-5. **Confirm before committing**
+6. **Confirm before committing**
    - Show the user:
      - The proposed commit message
      - Summary of files changed (count + names)
-     - Ask for approval before running `git commit`
+      - Ask for explicit approval before running `git commit`
+   - If declined, leave the approved changes staged and stop.
+   - If the staged changes have changed since they were reviewed, review the current staged diff and ask for approval again.
 
-6. **Commit**
+7. **Commit**
    - Run `git commit -m "<message>"` with the approved message.
    - Report the resulting commit hash and branch.
 
