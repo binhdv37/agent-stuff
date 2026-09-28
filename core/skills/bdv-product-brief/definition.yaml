@@ -1,0 +1,11 @@
+schema_version: 1
+kind: skill
+id: bdv-product-brief
+description: Create a product brief for requests such as "create a product
+  brief", "flesh this out", or "turn this idea into a product brief". Do not
+  invoke automatically. Use this skill only when the user explicitly requests
+  this workflow or names the skill.
+activation: explicit
+instructions: instructions.md
+resources:
+  - assets/product-brief.md

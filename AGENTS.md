@@ -2,133 +2,81 @@
 
 ## What this repo is
 
-A curated collection of agent-agnostic skills and tool-specific agent definitions. Not an app or library — this is content that gets installed into other tools via `install.sh`. The `prompts/` directory contains the author's personal draft prompts and is not part of the end-user offering.
+Portable agent content plus a TypeScript adapter CLI. `core/` is the source of
+truth. Adapters render harness-specific files; the installer manages file changes.
+`prompts/` contains personal drafts and is excluded from distribution.
 
 ## Directory ownership
 
-| Directory | Purpose | Scope |
-|---|---|---|
-| `skills/` | Agent-agnostic skills (each in its own dir with `SKILL.md`; may also contain `references/`, `assets/`, or `agents/` subdirs) | OpenCode, Codex, Claude Code |
-| `opencode/agents/` | OpenCode custom agent definitions | OpenCode only |
-| `opencode/commands/` | OpenCode custom commands | OpenCode only |
-| `prompts/` | Author's personal quick/draft prompts | Author only |
+| Directory | Purpose |
+|---|---|
+| `core/skills/` | Portable workflows and their resources |
+| `core/agents/` | Role, instructions, and portable policy |
+| `core/commands/` | Entry points referencing skill workflows |
+| `adapters/` | OpenCode, Codex, and Claude Code rendering |
+| `tool/src/` | Schema, loader, CLI, installation state, recovery |
+| `tests/fixtures/` | Frozen test inputs and migration hashes; not authoring copies |
+| `docs/` | Authoring, compatibility, and migration notes |
+| `prompts/` | Personal ready-to-paste drafts |
 
-More tool-specific directories (like `opencode/`) may be added in the future for other agents.
+## Authoring conventions
 
-## Naming conventions
+- Skills and commands use `bdv-` prefixed kebab-case IDs; agent IDs use kebab-case.
+- Asset directory name and `id` must match. Full keys are `skill/<id>`,
+  `agent/<id>`, and `command/<id>`; identical IDs in different kinds are allowed.
+- New public assets MUST be added to the appropriate README table.
+- Before creating a new skill, ask whether automatic invocation should be allowed.
+  Default to explicit-only unless the user opts in. Preserve activation when
+  migrating an existing skill; do not ask again for an established preference.
+- Personal prompts use minimal `name`/`description` frontmatter, a `## Prompt`
+  section, angle-bracket placeholders and a `## Variables` section.
 
-- Skills use `bdv-` prefix: `bdv-brainstorm-first`, `bdv-api-handoff`, etc.
-- Skill directory names and `name` in frontmatter must match.
-- Prompt files use kebab-case: `brainstorm-first.md`, `verify-implementation.md`.
-- Agent files use kebab-case: `solution-architect.md`, `experimental-plan.md`.
-- Command files use `bdv-` prefix with kebab-case: `bdv-change-report.md`.
+## Core format
 
-## Conventions when adding new assets
+Each asset has `definition.yaml` with `schema_version: 1`, `kind`, `id`, and
+`description`. Skills and agents also reference `instructions.md`. List every
+resource in `resources`; paths must stay within the asset directory. Root-level
+resource documents are supported. See `tool/src/core/schema.ts` for the exact schema.
 
-When you create a new skill, command, or agent in this repo, you MUST also add
-the corresponding entry to `README.md` in the appropriate table. The user
-should not need to explicitly ask for this. Personal prompts are intentionally
-not listed in the root README.
+Skills declare `activation: explicit | matching-request`. Optional metadata:
+`display_name`, `short_description`, `argument_hint`. Adapters generate native
+invocation flags and the explicit-invocation description guard; do not add
+harness config files to core. Keep workflow instructions harness-independent.
 
-## Skill structure
+Commands reference `workflow: skill/<id>` and may declare `argument_hint`.
+Maintain the actual workflow once in its skill. Native placeholders such as
+`$ARGUMENTS` belong in adapter wrappers.
 
-Every skill is a directory containing `SKILL.md` with YAML frontmatter:
+Agents declare `role: primary | delegated` and `policy`. Existing agents are
+primary. Preserve the planner's intent to delegate; do not silently remove it to
+make an adapter pass. Policies use `allow | ask | deny`, defaulting to deny, with
+optional project-relative `write_paths`. Unsupported policy must be reported and
+blocked; a prompt sentence is not equivalent to enforced permission.
 
-```yaml
----
-name: bdv-skill-name
-description: <triggers for activation>
----
-```
+## Adapter and installer boundaries
 
-Before creating a skill, always ask whether it should be eligible for automatic
-model invocation. Default to explicit-only unless the user opts in. For an
-explicit-only skill:
+Adapters implement `tool/src/adapter.ts`, declare target directories, report
+compatibility, and return files in memory. No filesystem writes or network calls
+inside adapters. Never silently downgrade an asset or skip unsupported selection.
 
-- Add `disable-model-invocation: true` to its `SKILL.md` frontmatter.
-- Add `agents/openai.yaml` with `policy.allow_implicit_invocation: false`.
-- End its description with: `Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.`
+The shared installer owns global/project resolution, manifests, previews,
+conflicts, file updates and recovery. Only operate on tracked paths. Preserve
+untracked files and locally modified files. Retain journals when recovery would
+clobber an external edit. Do not hand-edit generated `dist/` files.
 
-`disable-model-invocation` and `agents/openai.yaml` are respected by agents
-that support them. OpenCode ignores unknown skill frontmatter, so the
-description is its in-skill guard; users can enforce approval through OpenCode
-`permission.skill` rules.
+OpenCode uses singular `permission`; catch-all rules precede exceptions. Verify
+current official documentation before changing native format or permissions.
+The bundled agents currently have unsupported policy combinations; see
+`docs/compatibility.md` before claiming they can be installed.
 
-Skills may have resource subdirectories:
-- `references/` — templates or documents referenced by the skill (e.g. `bdv-api-handoff/references/handoff-template.md`). Use paths relative to the skill root.
-- `assets/` — static assets like templates (e.g. `bdv-product-brief/assets/product-brief.md`).
-- `agents/` — agent-specific config overrides (e.g. `agents/openai.yaml` for Codex CLI's `allow_implicit_invocation`).
+## Validation and distribution
 
-## Agent structure
-
-Each file in `opencode/agents/` has YAML frontmatter with `name`, `description`, `mode`, and `permissions`. Optional fields include `model`, `temperature`, and `hidden`.
-
-```yaml
-name: agent-name
-description: >-
-  When to invoke.
-mode: primary|subagent|all
-model: <model-id>  # optional; inherits from global config if omitted
-temperature: <0.0-1.0>  # optional
-permissions:
-  read: allow
-  edit: deny
-  bash: allow|deny|ask
-  glob: allow
-  grep: allow
-  question: allow
-  subagent: allow  # allows invoking subagents via the Task tool
-```
-
-Permissions support scoped values for finer-grained control. Instead of a flat `allow|deny|ask`, use a glob pattern as a key:
-
-```yaml
-permissions:
-  edit:
-    "/.auragent/plans/**": allow
-    "*": deny
-  bash:
-    "git status": allow
-    "*": deny
-```
-
-Rules are evaluated in order and the last matching rule wins.
-
-## Command structure
-
-Each file in `opencode/commands/` has YAML frontmatter with `description` and optionally `argument-hint`:
-
-```yaml
-description: <short description of what the command does>
-argument-hint: "[optional: <description of command arguments>]"
-```
-
-The command body is plain Markdown. Use `$ARGUMENTS` to reference the user-provided arguments.
-
-## Personal prompt structure
-
-Each `prompts/*.md` file is an author-maintained, ready-to-paste draft with minimal frontmatter (`name`, `description`) and a `## Prompt` section. Use `<angle-bracket>` placeholders for variables and document them under `## Variables`.
-
-## Installation flow (install.sh)
-
-1. User chooses agent (OpenCode / Codex / Claude Code)
-2. User chooses global or local install
-3. Script downloads the repo tarball, extracts skills into the correct target dir
-4. For OpenCode only: also copies agents from `opencode/agents/` and commands from `opencode/commands/`
-
-Target paths:
-- **OpenCode**: `~/.config/opencode/skills/` (global) or `.opencode/skills/` (local)
-- **Codex**: `~/.agents/skills/` or `.agents/skills/`
-- **Claude Code**: `~/.claude/skills/` or `.claude/skills/`
-- OpenCode agents: `~/.config/opencode/agents/` or `.opencode/agents/`
-- OpenCode commands: `~/.config/opencode/commands/` or `.opencode/commands/`
-
-## Known quirks
-
-- One agent (`solution-architect.md`) has `permission` (singular) in its frontmatter — verify field name if you edit agent files. All other agents use `permissions` (plural).
-- The `experimental-plan.md` agent has a `subagent: allow` permission — this is intentional for that agent type.
-- Both agents use `mode: primary`. New agents should include it.
-- `experimental-plan.md` uses scoped permission values (e.g. `edit: "/.auragent/plans/**": allow`) while `solution-architect.md` uses flat values.
-- Command files may include an `argument-hint` field (see `command structure` above).
-- Skills are installed by copying the entire subdirectory from `skills/`. Keep all skill resources within the skill's directory.
-- Agent definitions are OpenCode-specific and are only installed when the user selects OpenCode.
+- Run `npm test` for implementation changes and `npm run typecheck` as needed.
+- Use temporary home/project contexts in filesystem tests, never personal config.
+- Run `npm run cli -- validate --source .` for content changes.
+- Keep `tests/fixtures/migration-inventory.json` as the migration baseline; do not
+  regenerate hashes to hide unintended content changes. Update intentionally with
+  an explanation if a workflow is deliberately revised later.
+- `bash install.sh` builds and runs the CLI from a checkout.
+- `npm pack` builds a local distribution containing compiled CLI/adapters and core.
+- Publishing, tagging, or sending a message is a separate externally visible action.

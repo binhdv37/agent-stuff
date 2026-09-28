@@ -1,0 +1,16 @@
+schema_version: 1
+kind: agent
+id: experimental-plan
+description: "Planning agent that explores the codebase, designs implementation
+  approaches, and writes detailed plan files for execution. Works in phases:
+  explore, design, review, and finalize."
+role: primary
+instructions: instructions.md
+policy:
+  workspace_read: allow
+  workspace_write: deny
+  write_paths:
+    - .auragent/plans/*
+  shell: deny
+  questions: allow
+  delegation: allow

@@ -1,0 +1,7 @@
+schema_version: 1
+kind: command
+id: bdv-explain-code
+description: Explain an existing feature, module, API, or code block for quick
+  review — no diff needed
+workflow: skill/bdv-explain-code
+argument_hint: "[file, dir, function/class name, API route, or paste a snippet]"

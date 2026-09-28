@@ -1,0 +1,10 @@
+schema_version: 1
+kind: skill
+id: bdv-ielts-speaking-coach
+description: Guide a full IELTS Speaking practice session for requests such as
+  "practice IELTS speaking", "IELTS speaking practice", "help me with IELTS", or
+  "IELTS part 1/2/3". Do not invoke automatically. Use this skill only when the
+  user explicitly requests this workflow or names the skill.
+activation: explicit
+instructions: instructions.md
+resources: []

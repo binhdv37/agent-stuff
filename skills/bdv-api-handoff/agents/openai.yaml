@@ -1,3 +1,0 @@
-# Codex CLI-specific config (other agents ignore this file)
-policy:
-  allow_implicit_invocation: false   # only runs when explicitly called, e.g. $change-report

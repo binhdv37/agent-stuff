@@ -1,0 +1,85 @@
+[
+  {
+    "key": "skill/bdv-api-handoff",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "be91a6ccd261f802420b7b307f778a49532b415afd5f61290492fd277e56e599",
+      "references/handoff-template.md": "5928cab6c10bd7adbdeaaef04db7881ebb4e54e78f394bfee26f5c22eb0c877b"
+    }
+  },
+  {
+    "key": "skill/bdv-brainstorm-first",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "f33f7940944666288fb964953e8b08f1c136420894f8a4bc415e8463a13dcf14"
+    }
+  },
+  {
+    "key": "skill/bdv-change-report",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "d0e4bfa3d40db30cc2dfe17d6ebc719ec0a9682f6a36959198195bb08c4fc40e"
+    }
+  },
+  {
+    "key": "skill/bdv-explain-code",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "8ceeac37c7b31e856af6f3f20a903764733c26f42364ed1d94b2262a5154b9e8"
+    }
+  },
+  {
+    "key": "skill/bdv-grill-me",
+    "activation": "matching-request",
+    "hashes": {
+      "instructions.md": "976c8a1bca80d541ebf0e3011f9a31d55dc9115641cbc27125dd82cdd2668451"
+    }
+  },
+  {
+    "key": "skill/bdv-handoff",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "db7c0bee351b5712f809f5f4a0a561748348ca852f07a870745560a41eb5fcc6"
+    }
+  },
+  {
+    "key": "skill/bdv-ielts-speaking-coach",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "ea1639e74b36ba72b94444bcbef586df4ae33e1f31e42747fa8b12ff20b7567e"
+    }
+  },
+  {
+    "key": "skill/bdv-interview-coach",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "6f4c10a0b2d06f005a60b41e563f23edbfa3739e7583746d4b6cedccae54aa99"
+    }
+  },
+  {
+    "key": "skill/bdv-product-brief",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "e9e39250b5b21199ba4f0088afb5f6afe694054219eefbfd68e307fdb0ae7171",
+      "assets/product-brief.md": "4748b282b6bbde6fa47781497d9f6d933986371340cd3e8c10e5094374f0475e"
+    }
+  },
+  {
+    "key": "skill/bdv-smart-commit",
+    "activation": "matching-request",
+    "hashes": {
+      "instructions.md": "2cf048a671b83cb31669e669b3ee82b1d2514f1f8268212df8f6884f1962f648"
+    }
+  },
+  {
+    "key": "skill/bdv-teach",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "7ac488b9edb252ab8169ca87ab9015677f9fb8f7c3521e81808e726a63765b4c",
+      "GLOSSARY-FORMAT.md": "d177def491519d97873291f2e860d8f1d60ead78feecb82eee022177958069c6",
+      "LEARNING-RECORD-FORMAT.md": "855f81017625256584bbf62bd5edb9b0c86605c4cc1139c56acc36b802595d17",
+      "MISSION-FORMAT.md": "8da6d3ac84eb2eb19f17c260b6acf01c560d3ac7a4501c415eea0e985602f4d7",
+      "RESOURCES-FORMAT.md": "2bc634a64b0d0daa10904f9222e7aa0d361420dfacabbf092fbe3a72222edc08"
+    }
+  }
+]

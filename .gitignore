@@ -6,4 +6,7 @@
 .vscode/
 .history/
 .trash/
-
+node_modules/
+dist/
+.agent-stuff/
+*.tgz

@@ -1,0 +1,6 @@
+schema_version: 1
+kind: command
+id: bdv-change-report
+description: Generate a high-level change report for recent code changes
+workflow: skill/bdv-change-report
+argument_hint: "[optional: specific files or scope, e.g. src/auth]"

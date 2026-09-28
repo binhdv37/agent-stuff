@@ -1,0 +1,15 @@
+schema_version: 1
+kind: agent
+id: solution-architect
+description: Use this agent when you need to tackle complex technical problems,
+  design system architectures, evaluate technology choices, or brainstorm
+  innovative solutions. This agent provides expert guidance on scalability,
+  trade-offs, and best practices.
+role: primary
+instructions: instructions.md
+policy:
+  workspace_read: allow
+  workspace_write: deny
+  shell: ask
+  questions: allow
+  delegation: deny
