@@ -4,7 +4,35 @@
 
 Portable agent content plus a TypeScript adapter CLI. `core/` is the source of
 truth. Adapters render harness-specific files; the installer manages file changes.
-`prompts/` contains personal drafts and is excluded from distribution.
+
+The goal is to author each workflow, role, or command once in a portable form,
+then install it into a chosen harness and global/project scope. This is a content
+repository and installer, not an application that runs the workflows itself.
+Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
+`npx skills add` as the distribution path.
+
+## Start here in a new session
+
+1. Read this file, then `README.md` for user-facing behavior. Consult
+   `docs/adapter-development.md` for the schema/CLI and `docs/compatibility.md`
+   before changing a harness mapping. `docs/migration.md` records deliberate
+   changes from the old layout. `docs/plans/core-adapter-migration.md` is the
+   original design plan, not the current implementation contract.
+2. Check `git status --short` before editing. Trace a behavior from its core
+   definition through the relevant adapter and `tool/src/` instead of editing
+   generated output. Inspect the existing tests for the same behavior.
+3. Keep the portable content in core, harness syntax in adapters, and all
+   filesystem changes in the shared installer. Update the README inventory and
+   compatibility notes when public behavior changes.
+4. Verify with the commands under "Validation and distribution". Runtime
+   discovery checks are separate from tests that only inspect generated files.
+
+Current inventory: 11 skills, two primary agents, one read-only delegated agent,
+and two commands (16 assets). OpenCode renders all of them, with limited
+enforcement of explicit skill invocation. Codex and Claude Code currently render
+skills only; their command and agent assets are reported unsupported. Claude Code
+has not had a runtime smoke test in this repo. See `docs/compatibility.md` for
+the exact checks and limits.
 
 ## Directory ownership
 
@@ -17,7 +45,6 @@ truth. Adapters render harness-specific files; the installer manages file change
 | `tool/src/` | Schema, loader, CLI, installation state, recovery |
 | `tests/fixtures/` | Frozen test inputs and migration hashes; not authoring copies |
 | `docs/` | Authoring, compatibility, and migration notes |
-| `prompts/` | Personal ready-to-paste drafts |
 
 ## Authoring conventions
 
@@ -28,8 +55,6 @@ truth. Adapters render harness-specific files; the installer manages file change
 - Before creating a new skill, ask whether automatic invocation should be allowed.
   Default to explicit-only unless the user opts in. Preserve activation when
   migrating an existing skill; do not ask again for an established preference.
-- Personal prompts use minimal `name`/`description` frontmatter, a `## Prompt`
-  section, angle-bracket placeholders and a `## Variables` section.
 
 ## Core format
 
@@ -48,7 +73,8 @@ Maintain the actual workflow once in its skill. Native placeholders such as
 `$ARGUMENTS` belong in adapter wrappers.
 
 Agents declare `role: primary | delegated` and `policy`. The two user-facing
-agents are primary; `bdv-plan-reviewer` is their read-only delegated helper.
+agents are primary; `bdv-plan-reviewer` is the planner's read-only delegated
+helper.
 Policies use `allow | ask | deny`, defaulting to deny, with optional
 project-relative `write_paths` and explicit `delegation_targets`. A delegated
 target must deny edits, shell access and further delegation. Unsupported policy

@@ -116,5 +116,5 @@ npm pack --pack-destination /path/to/output
 ```
 
 Prepack build TypeScript. Gói gồm CLI/adapters đã compile và core; không gồm
-prompts cá nhân, fixture hoặc nội dung legacy. Có thể cài tgz bằng npm trong
+fixture hoặc nội dung legacy. Có thể cài tgz bằng npm trong
 prefix riêng để thử command `agent-stuff`. Repo chưa publish package hoặc release.

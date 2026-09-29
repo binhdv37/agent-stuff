@@ -8,6 +8,8 @@ Xem [hướng dẫn hiện hành](../adapter-development.md),
 
 Các phần dưới là kế hoạch thiết kế ban đầu; tài liệu hiện hành ở trên ghi lại
 những quyết định và giới hạn của bản triển khai thực tế.
+Quyết định ban đầu về việc giữ `prompts/` đã được thay đổi: thư mục này đã xóa;
+`skills/`, `claude/` và `opencode/` cũ cũng đã xóa sau khi xác nhận rỗng.
 
 ## 1. Mục tiêu và phạm vi
 

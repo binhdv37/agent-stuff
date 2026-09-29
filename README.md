@@ -1,10 +1,15 @@
 # Agent Stuff
 
-Portable workflows for OpenCode, Codex, and Claude Code.
+Portable agent content for OpenCode, Codex, and Claude Code.
 
 Write instructions once in `core/`. The TypeScript CLI validates the definitions,
 uses an adapter to generate harness files, and installs the selected assets into
 a global or project directory.
+
+The repository is for authoring and distributing agent content, not running the
+workflows itself. `core/` holds portable definitions; adapters translate them to
+each tool's format; the CLI previews and manages installation. Personal drafts
+are not part of this repository.
 
 ## Install from a checkout
 
@@ -63,19 +68,33 @@ remove managed files that have local edits.
 | `adapters/` | Harness-specific rendering and compatibility decisions |
 | `tool/src/` | CLI, validation, installation, and recovery |
 | `tests/` | Fixtures, migration checks, and filesystem lifecycle tests |
-| `prompts/` | Personal drafts, excluded from distribution |
 
 ## Current adapter support
 
 | Adapter | Skills | Commands | Agents |
 |---|---|---|---|
-| OpenCode | All 11; explicit invocation has a reported limitation | Both commands | Both primary agents and their read-only review helper |
-| Codex | All 11, including native invocation policy | Invoke corresponding skills | Not mapped |
-| Claude Code | All 11, also available as slash commands | Use skill slash commands | Primary roles not mapped |
+| OpenCode | All 11; explicit invocation has a reported limitation | Both commands | Two primary agents and the planner's read-only review helper |
+| Codex | All 11, including native invocation policy | No separate command files; invoke the corresponding skills | Not mapped |
+| Claude Code | All 11, also available as slash commands | No separate command files; use skill slash commands | Not mapped |
 
-See [compatibility](docs/compatibility.md) for sources, runtime checks and policy
-limitations. [Development guide](docs/adapter-development.md) explains the schema,
-CLI and tests; [migration notes](docs/migration.md) list intentional changes.
+See [compatibility](docs/compatibility.md) for runtime checks and policy limits;
+[migration notes](docs/migration.md) list intentional changes from the old layout.
+
+## Working on this repository
+
+Start with [AGENTS.md](AGENTS.md) for the authoring rules and a new-session
+checklist. Write portable content in `core/`, harness-specific output rules in
+`adapters/`, and installation behavior in `tool/src/`. Generated `dist/` files
+are build output. Add new public assets to the tables below, then run
+`npm run cli -- validate --source .` for content changes and `npm test` for
+implementation changes. The [development guide](docs/adapter-development.md)
+has CLI and recovery details; [compatibility](docs/compatibility.md) separates
+filesystem tests from runtime checks.
+
+The adapter CLI currently contains 16 assets: 11 skills, three agents, and two
+commands. Claude Code discovery has not been checked on a live runtime here;
+the package has not been published or tagged. The original
+[migration plan](docs/plans/core-adapter-migration.md) is historical context.
 
 ## Agents
 

@@ -2,8 +2,9 @@
 
 ## Nguồn nội dung
 
-11 skill, 2 agent và 2 command đã chuyển vào `core/`. Metadata YAML tách khỏi
-Markdown. Resource của skill giữ nguyên đường dẫn tương đối, kể cả bốn tài liệu
+11 skill, 2 agent chính và 2 command đã chuyển vào `core/`; sau đó thêm agent
+phụ chỉ đọc `bdv-plan-reviewer` cho planner. Hiện có 16 asset. Metadata YAML tách
+khỏi Markdown. Resource của skill giữ nguyên đường dẫn tương đối, kể cả bốn tài liệu
 `*-FORMAT.md` ở gốc teach. Hash nội dung skill và resource trước migration nằm ở
 `tests/fixtures/migration-inventory.json` và được kiểm tra bằng test.
 
@@ -43,6 +44,11 @@ adapter không sinh thêm command trùng tên.
 mục. Bỏ hướng dẫn `npx skills add` và cách `curl | bash`; clone checkout hoặc dùng
 file tgz tạo bằng `npm pack`. Có thể chọn tag/commit bằng Git trước khi build.
 CLI không tự tải release hoặc cập nhật chính nó.
+
+Các thư mục `claude/`, `skills/` và `opencode/` cũ chỉ còn rỗng sau migration
+nên đã xóa.
+`prompts/` là bản nháp cá nhân không thuộc nội dung phân phối và cũng đã được
+gỡ khỏi repo theo quyết định sau migration.
 
 Bản cài từ installer cũ chưa có manifest. File trùng đích sẽ gây conflict; cần
 backup và di chuyển các file đó trước khi dùng installer mới. CLI không xóa cả
