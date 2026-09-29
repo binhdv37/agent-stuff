@@ -1,0 +1,12 @@
+schema_version: 1
+kind: agent
+id: bdv-plan-reviewer
+description: Explore code and review implementation plans for the planning agent.
+role: delegated
+instructions: instructions.md
+policy:
+  workspace_read: allow
+  workspace_write: deny
+  shell: deny
+  questions: deny
+  delegation: deny

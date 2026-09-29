@@ -10,7 +10,7 @@ import { getAdapter } from '../tool/src/registry.js';
 
 test('migration preserves all skill instruction/resource bytes and activation modes', async () => {
   const catalog = await loadCore('.');
-  assert.equal(catalog.size, 15);
+  assert.equal(catalog.size, 16);
   const inventory = JSON.parse(await readFile('tests/fixtures/migration-inventory.json', 'utf8')) as { key: string; activation: string; hashes: Record<string, string> }[];
   assert.equal(inventory.length, 11);
   assert.equal(inventory.filter(a => a.activation === 'explicit').length, 9);

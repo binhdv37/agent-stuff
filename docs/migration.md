@@ -32,10 +32,10 @@ adapter không sinh thêm command trùng tên.
   cho tên tool `question`.
 - Core planner giữ ý định đọc workspace, ghi trong thư mục plan và ủy nhiệm;
   quyền shell mkdir tuyệt đối cũ không được mang sang core. Shell mặc định deny.
-- Architect giữ shell ask và cấm ghi. Đây là tổ hợp chưa đáp ứng yêu cầu cấm ghi
-  qua mọi công cụ; OpenCode adapter chặn thay vì âm thầm đổi quyền.
-- Planner cũng bị chặn vì adapter chưa hỗ trợ scoped write cùng delegation.
-  Hai định nghĩa được bảo toàn để tiếp tục hoàn thiện; không quảng bá là cài được.
+- Architect chuyển shell ask thành shell deny để giữ đúng vai trò chỉ đọc.
+- Planner được phép ghi vào `.auragent/plans/` qua `edit`, nhưng shell vẫn deny.
+  Planner chỉ gọi `bdv-plan-reviewer` chỉ đọc, thay cho các general subagent có
+  thể sửa file. CLI tự cài helper khi chọn planner.
 
 ## Cài đặt
 

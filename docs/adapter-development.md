@@ -55,9 +55,9 @@ có resource hoặc cú pháp interpolation native bị chặn trong đường c
 Codex/Claude Code dùng skill tương ứng; không sinh command riêng trong adapter.
 
 Policy agent có mặc định deny, role primary/delegated và write_paths tương đối.
-OpenCode hỗ trợ policy cơ bản không có resource/scoped write. Khi hạn chế ghi,
-shell và delegation phải deny để tránh đường ghi khác. Hai agent trong core chưa
-đáp ứng điều kiện này; xem compatibility trước khi chọn cài.
+OpenCode hỗ trợ policy cơ bản và scoped write vào thư mục plan. Khi hạn chế ghi,
+shell phải deny; delegation chỉ được mở đến agent phụ chỉ đọc được khai báo trong
+`delegation_targets`. Chọn planner tự thêm helper vào selection.
 
 ## Vòng đời file
 

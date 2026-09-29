@@ -1,8 +1,8 @@
 # Kế hoạch chuyển sang core và adapter
 
 Trạng thái: đã có schema, ba adapter, CLI tương tác, install/update/uninstall/recover
-và migration 15 asset sang core. Có kiểm tra crash bằng SIGKILL. Hai agent đi kèm
-vẫn bị chặn vì policy chưa được ánh xạ an toàn; chưa có tải release tự động.
+và migration 16 asset sang core. Có kiểm tra crash bằng SIGKILL. Hai primary agent
+OpenCode nay cài được cùng helper chỉ đọc; chưa có tải release tự động.
 Xem [hướng dẫn hiện hành](../adapter-development.md),
 [compatibility](../compatibility.md) và [migration notes](../migration.md).
 
@@ -329,9 +329,10 @@ không tuyên bố đã hoàn thành chỉ vì snapshot pass.
 
 ## 10. Phần còn lại sau migration
 
-- Giải quyết policy architect (cấm ghi nhưng shell ask) và scoped write/delegation
-  của planner trước khi tuyên bố hỗ trợ hai agent này.
-- Smoke test Codex/Claude Code thực tế; hiện đã kiểm tra file sinh và filesystem.
+- Đã giải quyết policy architect và scoped write/delegation của planner bằng
+  helper chỉ đọc; runtime OpenCode xác nhận rule được nạp.
+- Codex app-server đã nhận skill trong project tạm. Cần smoke test Claude Code
+  khi có CLI và kiểm tra một phiên model thực thi workflow nếu muốn xác nhận hành vi.
 - Tải release/tag/commit tự động và cập nhật CLI nằm ngoài bản cài local hiện tại.
   Người dùng hiện chọn source version bằng checkout Git hoặc gói npm pack local.
 - Repo chưa được publish/tag; cần review bản thay đổi trước bước phát hành.

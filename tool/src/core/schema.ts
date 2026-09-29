@@ -25,6 +25,7 @@ export const definitionSchema = z.discriminatedUnion('kind', [
       workspace_read: decision.default('deny'), workspace_write: decision.default('deny'),
       shell: decision.default('deny'), questions: decision.default('deny'),
       delegation: decision.default('deny'),
+      delegation_targets: z.array(z.string().regex(/^agent\/[a-z0-9]+(-[a-z0-9]+)*$/)).default([]),
       write_paths: z.array(relativePath).default([]),
     }),
   }),

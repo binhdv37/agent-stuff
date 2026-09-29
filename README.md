@@ -69,7 +69,7 @@ remove managed files that have local edits.
 
 | Adapter | Skills | Commands | Agents |
 |---|---|---|---|
-| OpenCode | All 11; explicit invocation has a reported limitation | Both commands | Basic policies supported; both bundled agents currently blocked |
+| OpenCode | All 11; explicit invocation has a reported limitation | Both commands | Both primary agents and their read-only review helper |
 | Codex | All 11, including native invocation policy | Invoke corresponding skills | Not mapped |
 | Claude Code | All 11, also available as slash commands | Use skill slash commands | Primary roles not mapped |
 
@@ -79,13 +79,14 @@ CLI and tests; [migration notes](docs/migration.md) list intentional changes.
 
 ## Agents
 
-These definitions are preserved in core. They are not currently installable without
-changing their policies or extending the adapter; the CLI reports the exact reason.
+OpenCode installs both primary agents. Selecting the planner also installs its
+read-only review helper.
 
-| Agent | What It Does | Current installation limitation |
+| Agent | What It Does | Permission boundary |
 |---|---|---|
-| **experimental-plan** | Explores code and writes implementation plans | Scoped writes and delegation are not yet mapped safely |
-| **solution-architect** | Designs architecture and evaluates trade-offs | Shell approval can bypass the declared prohibition on writing |
+| **experimental-plan** | Explores code and writes implementation plans | Can edit only `.auragent/plans/` and call the review helper |
+| **solution-architect** | Designs architecture and evaluates trade-offs | Read-only; shell and edits denied |
+| **bdv-plan-reviewer** | Reads code and critiques a proposed plan for the planner | Read-only subagent; shell, edits and further delegation denied |
 
 ## Commands
 
@@ -95,46 +96,6 @@ OpenCode commands share the instructions of the corresponding core skill.
 |---|---|---|
 | **bdv-change-report** | Generates a high-level change report | `/bdv-change-report [scope]` |
 | **bdv-explain-code** | Explains existing code | `/bdv-explain-code <target>` |
-
-## Skills Only
-
-Use the [skills CLI](https://skills.sh) to install this repository's skills:
-
-```bash
-npx skills add binhdv37/agent-stuff
-```
-
-The CLI lets you choose the skills, target agents, and installation scope. For example:
-
-```bash
-# List available skills
-npx skills add binhdv37/agent-stuff --list
-
-# Install one skill globally for OpenCode
-npx skills add binhdv37/agent-stuff --skill bdv-brainstorm-first --global --agent opencode
-```
-
-> The skills CLI installs only the contents of `skills/`. Use the full installer above when you also want the OpenCode agents and commands.
-
-## Agents
-
-Specialized roles that extend your AI agent's capabilities. Each has a defined model, permissions, and workflow.
-
-| Agent | What It Does | Best For |
-|-------|-------------|----------|
-| **experimental-plan** | Explores code and writes step-by-step implementation plans | Planning before coding |
-| **solution-architect** | Designs system architecture and evaluates trade-offs | Technical design decisions |
-
-## Commands
-
-Custom OpenCode commands — type `/` followed by the command name.
-
-| Command | What It Does | Usage |
-|---------|-------------|-------|
-| **bdv-change-report** | Generates a high-level change report for recent code changes | `/bdv-change-report` or `/bdv-change-report src/auth` |
-| **bdv-explain-code** | Explains existing code for quick review — no diff needed | `/bdv-explain-code <file/dir/function>` |
-
-> Commands are installed to `~/.config/opencode/commands/` (global) or `.opencode/commands/` (local).
 
 ## Skills
 

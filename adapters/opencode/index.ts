@@ -9,9 +9,18 @@ export const opencode: Adapter = {
     const result = (status: Compatibility['status'], reason: string): Compatibility => ({ asset: asset.key, status, reason });
     if (d.kind === 'agent') {
       if (asset.resources.size) return result('unsupported', 'Agent resources are not mapped yet.');
-      if (d.policy.write_paths.length) return result('unsupported', 'Scoped writes need project-aware permission mapping and are not supported yet.');
-      if (d.policy.workspace_write !== 'allow' && (d.policy.shell !== 'deny' || d.policy.delegation !== 'deny')) {
-        return result('unsupported', 'Restricted writes require shell and delegation to be denied to prevent alternate write paths.');
+      if (d.policy.workspace_write !== 'allow' && d.policy.shell !== 'deny') {
+        return result('unsupported', 'Restricted writes require shell access to be denied.');
+      }
+      if (d.policy.delegation !== 'deny' && d.policy.delegation !== 'allow') return result('unsupported', 'Ask-on-delegation has no restricted target mapping.');
+      if (d.policy.delegation === 'allow' && !d.policy.delegation_targets.length) return result('unsupported', 'Delegation requires explicit read-only targets.');
+      for (const key of d.policy.delegation_targets) {
+        const target = catalog.get(key);
+        if (!target || target.definition.kind !== 'agent' || target.definition.role !== 'delegated' ||
+            target.definition.policy.workspace_write !== 'deny' || target.definition.policy.write_paths.length ||
+            target.definition.policy.shell !== 'deny' || target.definition.policy.delegation !== 'deny') {
+          return result('unsupported', `Delegate ${key} must be a read-only agent without shell or delegation.`);
+        }
       }
       return result('supported', 'Native role and deny-by-default tool permissions.');
     }
@@ -42,12 +51,18 @@ export const opencode: Adapter = {
       return [{ asset: asset.key, path: `commands/${d.id}.md`, content: markdown({ description: d.description }, wrapper + workflow.body) }];
     }
     if (d.kind === 'agent') {
+      const edit = d.policy.write_paths.length
+        ? { '*': d.policy.workspace_write, ...Object.fromEntries(d.policy.write_paths.map(item => [item, 'allow'])) }
+        : d.policy.workspace_write;
+      const task = d.policy.delegation_targets.length
+        ? { '*': 'deny', ...Object.fromEntries(d.policy.delegation_targets.map(key => [key.slice('agent/'.length), 'allow'])) }
+        : d.policy.delegation;
       return [{ asset: asset.key, path: `agents/${d.id}.md`, content: markdown({
         description: d.description, mode: d.role === 'primary' ? 'primary' : 'subagent',
         permission: { '*': 'deny', read: d.policy.workspace_read, glob: d.policy.workspace_read,
           grep: d.policy.workspace_read, list: d.policy.workspace_read,
-          edit: d.policy.workspace_write, bash: d.policy.shell,
-          question: d.policy.questions, task: d.policy.delegation, external_directory: 'deny' },
+          edit, bash: d.policy.shell,
+          question: d.policy.questions, task, external_directory: 'deny' },
       }, asset.body) }];
     }
     throw new Error(`Unsupported asset: ${asset.key}`);

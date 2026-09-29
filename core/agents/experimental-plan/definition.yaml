@@ -14,3 +14,5 @@ policy:
   shell: deny
   questions: allow
   delegation: allow
+  delegation_targets:
+    - agent/bdv-plan-reviewer

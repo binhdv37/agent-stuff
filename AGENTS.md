@@ -47,11 +47,12 @@ Commands reference `workflow: skill/<id>` and may declare `argument_hint`.
 Maintain the actual workflow once in its skill. Native placeholders such as
 `$ARGUMENTS` belong in adapter wrappers.
 
-Agents declare `role: primary | delegated` and `policy`. Existing agents are
-primary. Preserve the planner's intent to delegate; do not silently remove it to
-make an adapter pass. Policies use `allow | ask | deny`, defaulting to deny, with
-optional project-relative `write_paths`. Unsupported policy must be reported and
-blocked; a prompt sentence is not equivalent to enforced permission.
+Agents declare `role: primary | delegated` and `policy`. The two user-facing
+agents are primary; `bdv-plan-reviewer` is their read-only delegated helper.
+Policies use `allow | ask | deny`, defaulting to deny, with optional
+project-relative `write_paths` and explicit `delegation_targets`. A delegated
+target must deny edits, shell access and further delegation. Unsupported policy
+must be reported and blocked; a prompt sentence is not equivalent to permission.
 
 ## Adapter and installer boundaries
 
@@ -66,8 +67,8 @@ clobber an external edit. Do not hand-edit generated `dist/` files.
 
 OpenCode uses singular `permission`; catch-all rules precede exceptions. Verify
 current official documentation before changing native format or permissions.
-The bundled agents currently have unsupported policy combinations; see
-`docs/compatibility.md` before claiming they can be installed.
+The bundled planner can edit only plan paths and invoke its review helper;
+the architect cannot edit or run shell commands. See `docs/compatibility.md`.
 
 ## Validation and distribution
 

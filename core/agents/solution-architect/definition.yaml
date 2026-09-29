@@ -10,6 +10,6 @@ instructions: instructions.md
 policy:
   workspace_read: allow
   workspace_write: deny
-  shell: ask
+  shell: deny
   questions: allow
   delegation: deny
