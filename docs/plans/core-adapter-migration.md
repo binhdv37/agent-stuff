@@ -1,13 +1,15 @@
 # Kế hoạch chuyển sang core và adapter
 
-Trạng thái: đã có schema, ba adapter, CLI tương tác, install/update/uninstall/recover
-và migration 16 asset sang core. Có kiểm tra crash bằng SIGKILL. Hai primary agent
-OpenCode nay cài được cùng helper chỉ đọc; chưa có tải release tự động.
+Trạng thái ngày 2026-09-30: phần triển khai migration đã hoàn thành, với 16 asset,
+ba adapter và CLI install/update/uninstall/recover. Bộ 26 test đã qua. OpenCode
+đã nạp agent và permission; Codex đã phát hiện skill; người dùng xác nhận thử
+Claude Code thành công. Các kiểm tra bổ sung và việc phát hành nằm ở mục 10.
 Xem [hướng dẫn hiện hành](../adapter-development.md),
 [compatibility](../compatibility.md) và [migration notes](../migration.md).
 
-Các phần dưới là kế hoạch thiết kế ban đầu; tài liệu hiện hành ở trên ghi lại
-những quyết định và giới hạn của bản triển khai thực tế.
+Mục 1–7 là kế hoạch thiết kế ban đầu; tài liệu hiện hành ở trên ghi lại những
+quyết định và giới hạn của bản triển khai thực tế. Mục 8–10 theo dõi tiến độ hiện
+tại: `[x]` là đã hoàn thành, `[ ]` là chưa hoàn thành trong phạm vi được ghi.
 Quyết định ban đầu về việc giữ `prompts/` đã được thay đổi: thư mục này đã xóa;
 `skills/`, `claude/` và `opencode/` cũ cũng đã xóa sau khi xác nhận rỗng.
 
@@ -262,81 +264,108 @@ release/tag/commit, phân giải và ghi lại revision cụ thể; không ghi n
 cùng phiên bản. `install.sh` là launcher kiểm tra runtime và gọi CLI của gói đó.
 Chưa cần phát hành npm để chạy luồng phát triển hoặc bản đầu.
 
-## 8. Các giai đoạn triển khai và tiêu chí hoàn thành
+## 8. Tiến độ triển khai
 
 ### Giai đoạn A — Nền tảng và fixture
 
-- Thêm `package.json`, lockfile, TypeScript config, script build/typecheck/test.
-- Dùng Node test runner; chọn và khóa thư viện YAML/schema khi triển khai.
-- Tạo loader, validator, resolver, contract adapter và compatibility report.
-- Dùng fixture đại diện: brainstorm-first, api-handoff, handoff, teach,
+- [x] Thêm `package.json`, lockfile, TypeScript config, script build/typecheck/test.
+- [x] Dùng Node test runner; khóa thư viện YAML/schema bằng lockfile.
+- [x] Tạo loader, validator, resolver, contract adapter và compatibility report.
+- [x] Dùng fixture đại diện: brainstorm-first, api-handoff, handoff, teach,
   solution-architect và change-report cùng command.
-- Chốt policy agent dựa trên nguồn hiện tại và kiểm chứng ở mục 6.
+- [x] Chốt policy agent và xác nhận rule được OpenCode nạp; thay đổi có chủ đích
+  được ghi trong migration notes.
 
-Hoàn thành khi fixture hợp lệ đọc được; dữ liệu lỗi có thông báo đúng file và
-trường; nội dung Markdown/resource không bị biến đổi ngoài dự kiến.
+Đã hoàn thành. Loader/schema và nội dung fixture được kiểm tra trong
+`tests/core-adapter.test.ts`; byte skill/resource được bảo toàn qua migration.
 
 ### Giai đoạn B — Một luồng OpenCode hoàn chỉnh
 
-- Implement render, target resolution, build, plan và dry-run.
-- Thêm manifest và apply với xử lý conflict cơ bản trước lần cài thật đầu tiên.
-- Cài fixture vào project tạm; kiểm tra discovery và gọi workflow bằng harness
-  khi runtime có sẵn. Nếu không có runtime, ghi rõ phần chưa kiểm chứng.
+- [x] Implement render, target resolution, build, plan và dry-run.
+- [x] Thêm manifest và apply với xử lý conflict.
+- [x] Cài fixture vào project tạm; kiểm tra discovery skill/command và rule agent
+  trên OpenCode; ghi rõ phần chưa kiểm chứng trong compatibility.
 
-Hoàn thành khi preview khớp file thực tế, cài lần hai không đổi, resource dùng
-được và policy được kiểm chứng hoặc chặn rõ ràng nếu không hỗ trợ.
+Đã hoàn thành phần triển khai và discovery. Preview, cài lại no-op, resource và
+permission được kiểm tra; phiên model thực thi workflow vẫn là mục riêng ở mục 10.
 
 ### Giai đoạn C — Vòng đời cài đặt và hai adapter còn lại
 
-- Hoàn thiện update, uninstall, backup, journal, recovery và khóa cài đặt.
-- Thêm Codex/Claude Code qua cùng contract; kiểm chứng theo mục 6.
-- Thêm menu selection, xử lý non-interactive và thông báo compatibility.
+- [x] Hoàn thiện update, uninstall, backup, journal, recovery và khóa cài đặt.
+- [x] Thêm Codex/Claude Code qua cùng contract; kiểm tra render/install và hai
+  scope bằng filesystem tạm. Codex app-server nhận skill; Claude Code được
+  người dùng thử runtime thành công.
+- [x] Thêm menu selection, xử lý non-interactive và thông báo compatibility.
 
-Hoàn thành khi mỗi adapter được kiểm tra cả global/project trong môi trường
-tạm, chỉnh sửa của người dùng được bảo toàn và không có bỏ qua asset âm thầm.
+Đã hoàn thành. Filesystem tests kiểm tra cả global/project cho ba adapter,
+bảo toàn chỉnh sửa của người dùng và kiểm tra recovery sau SIGKILL.
 
 ### Giai đoạn D — Chuyển toàn bộ nội dung và thay installer
 
-- Chuyển 11 skill, 2 agent, 2 command sang core; bảo toàn tên và resource.
-- Hợp nhất nội dung command/skill với bảng đối chiếu các khác biệt đã giải quyết.
-- Chuyển metadata Codex sang trường core phù hợp; adapter sinh native config.
-- Chuẩn hóa planner path và diễn đạt tool theo khả năng; giữ ý định ủy nhiệm.
-- Cập nhật `README.md`, `AGENTS.md`, thêm hướng dẫn authoring/adapter và ma trận
-  compatibility. Bỏ mục `npx skills add` khi tài liệu installer mới sẵn sàng.
-- Thay `install.sh`, kiểm tra gói phát hành rồi xóa nguồn cũ để chỉ còn core.
+- [x] Chuyển 11 skill, 2 agent, 2 command sang core; bảo toàn tên và resource.
+- [x] Thêm helper `bdv-plan-reviewer`; hiện có 16 asset, chọn planner tự kèm helper.
+- [x] Hợp nhất nội dung command/skill và ghi các khác biệt đã giải quyết.
+- [x] Chuyển metadata Codex sang core; adapter sinh native config.
+- [x] Chuẩn hóa planner path và diễn đạt tool theo khả năng; giữ ủy nhiệm chỉ đọc.
+- [x] Cập nhật `README.md`, `AGENTS.md`, hướng dẫn authoring/adapter và compatibility;
+  bỏ hướng dẫn `npx skills add`.
+- [x] Thay `install.sh` bằng launcher build và chạy CLI từ checkout.
+- [x] Cấu hình `npm pack` để build và đóng gói CLI/adapters/core.
+- [x] Xóa nguồn cũ và `prompts/`; core là nguồn authoring duy nhất.
 
-Hoàn thành khi không còn nội dung phải sửa ở hai nơi; bộ cài từ checkout và gói
-phát hành đều hoạt động; mỗi asset có kết quả hỗ trợ cụ thể cho từng harness.
+Đã hoàn thành migration nội dung và installer. Mỗi asset có kết quả hỗ trợ cụ
+thể cho từng harness. Kiểm tra gói trước khi phát hành được giữ ở mục 10.
 
-## 9. Kiểm tra cần có
+## 9. Kiểm tra đã hoàn thành
 
-| Nhóm | Tình huống quan trọng |
-|---|---|
-| Schema | Version lạ, field sai, ID trùng, reference/resource thiếu |
-| Render | Nội dung và metadata, explicit invocation, wrapper đối số, tên va chạm |
-| Resource | File root của teach, template lồng thư mục, reference tương đối |
-| Policy | Không mở rộng quyền, scope ghi file, primary/delegated, unsupported |
-| Scope | Global/project tách biệt; source khác target; project path có dấu cách |
-| Install | Dry-run không ghi, cài lại no-op, conflict trước apply |
-| Update | Sửa file đã cài, resource cũ biến mất, selection một phần |
-| Uninstall | Giữ file lạ và file đã sửa; chỉ xóa file thuộc manifest |
-| Recovery | Ghi thất bại giữa chừng, transaction dở dang, hai tiến trình cùng cài |
-| Boundary | Path traversal, symlink, manifest hỏng hoặc trỏ ra ngoài root |
-| Migration | Đủ 11/2/2 asset; 9 explicit + 2 matching-request; resource đầy đủ |
+- [x] Bộ 26 test qua trong lần chạy gần nhất; TypeScript build nằm trong `npm test`.
+- [x] `npm run cli -- validate --source .` xác nhận đủ 16 asset.
+
+| Nhóm | Kiểm tra đã có | Bằng chứng |
+|---|---|---|
+| Schema | Version lạ, field sai, reference/resource thiếu, path không hợp lệ | `tests/core-adapter.test.ts` |
+| Render | Nội dung và metadata, invocation flags, wrapper đối số, tên va chạm | `tests/core-adapter.test.ts`, `tests/lifecycle.test.ts` |
+| Resource | File root của teach, template lồng thư mục, byte resource | `tests/core-adapter.test.ts`, `tests/migration.test.ts` |
+| Policy | Scope ghi file, primary/delegated, helper chỉ đọc, unsupported | `tests/agent-policy.test.ts`, `tests/lifecycle.test.ts` |
+| Scope | Global/project tách biệt cho ba adapter; source khác target | `tests/lifecycle.test.ts`, `tests/migration.test.ts` |
+| Install | Dry-run không ghi, cài lại no-op, conflict trước apply | `tests/core-adapter.test.ts` |
+| Update | Resource cũ biến mất, selection một phần, giữ file sửa cục bộ | `tests/core-adapter.test.ts`, `tests/lifecycle.test.ts` |
+| Uninstall | Giữ file lạ và từ chối xóa file đã sửa | `tests/lifecycle.test.ts`, `tests/migration.test.ts` |
+| Recovery | Rollback, SIGKILL, external edit, không chiếm lock đang hoạt động | `tests/lifecycle.test.ts` |
+| Boundary | Path traversal, symlink, manifest hỏng | `tests/core-adapter.test.ts` |
+| Migration | Đủ 16 asset; 9 explicit + 2 matching-request; hash skill/resource | `tests/migration.test.ts` |
 
 Test filesystem dùng thư mục tạm và truyền home/project context riêng, không
 ghi vào cấu hình cá nhân. Snapshot phục vụ review định dạng; assertion ngữ nghĩa
 kiểm tra policy và hành vi installer. Smoke test trên harness thật là bước riêng,
 không tuyên bố đã hoàn thành chỉ vì snapshot pass.
 
-## 10. Phần còn lại sau migration
+## 10. Kiểm tra runtime và việc tiếp theo
 
-- Đã giải quyết policy architect và scoped write/delegation của planner bằng
-  helper chỉ đọc; runtime OpenCode xác nhận rule được nạp.
-- Codex app-server đã nhận skill trong project tạm. Runtime smoke Claude Code
-  đã hoàn thành qua lần thử thủ công được người dùng xác nhận ngày 2026-09-30;
-  xem compatibility để biết phạm vi bằng chứng. Một phiên model OpenCode/Codex
-  thực thi workflow vẫn chưa được ghi nhận.
-- Tải release/tag/commit tự động và cập nhật CLI nằm ngoài bản cài local hiện tại.
-  Người dùng hiện chọn source version bằng checkout Git hoặc gói npm pack local.
-- Repo chưa được publish/tag; cần review bản thay đổi trước bước phát hành.
+Đã hoàn thành:
+
+- [x] OpenCode nhận skill/command và nạp đúng role/permission của hai primary
+  agent cùng helper chỉ đọc.
+- [x] Codex app-server phát hiện skill trong project tạm cùng metadata giao diện.
+- [x] Claude Code runtime được người dùng thử thủ công thành công ngày 2026-09-30.
+  Phạm vi bằng chứng được ghi trong `docs/compatibility.md`.
+
+Việc tiếp theo được đề xuất:
+
+- [ ] Kiểm tra lại gói phân phối trước phát hành: `npm pack` vào thư mục tạm,
+  cài tgz trong npm prefix riêng và chạy CLI validate/list/install dry-run từ
+  ngoài checkout. Ghi kết quả để xác nhận package tự đủ core và adapters.
+- [ ] Kiểm tra launcher/project đích có đường dẫn chứa dấu cách.
+- [ ] Nếu cần xác nhận hành vi model: chạy một workflow OpenCode/Codex trong
+  project tạm; với planner, kiểm tra tạo plan và từ chối ghi ngoài plan directory.
+- [ ] Nếu quyết định phát hành: review gói, viết release notes, rồi tạo tag/publish
+  theo yêu cầu riêng của người dùng. Repo hiện chưa publish/tag.
+
+Ngoài phạm vi bản đầu, chỉ triển khai khi có yêu cầu:
+
+- Tải release/tag/commit tự động và tự cập nhật CLI. Hiện chọn source version
+  bằng checkout Git hoặc gói npm pack local.
+- Ánh xạ agent/command riêng cho Codex hoặc Claude Code khi có thể bảo toàn
+  vai trò và permission; hiện CLI báo unsupported và người dùng dùng skill.
+- Native enforcement cho explicit invocation trên OpenCode nếu harness hỗ trợ;
+  adapter hiện báo limited và yêu cầu người dùng chấp nhận giới hạn.
