@@ -41,7 +41,7 @@ workflow thật. Report lưu tại [activation evidence](runtime/activation-2026
 | Harness | Scope | Discovery | Explicit / implicit / matching-request đối chứng |
 |---|---|---|---|
 | Codex CLI 0.157.1 | Project và global | Probe được app-server phát hiện, enabled; không có loader error | Explicit trả marker; implicit với activation explicit không trả marker; đối chứng matching-request trả marker |
-| OpenCode 1.18.33, V1 | Project và global | `debug skill` nhận tên và body probe ở cả hai activation | Các lượt model với openai/gpt-6-luna lỗi mạng; chưa có kết luận hành vi model; explicit-only vẫn limited |
+| OpenCode 1.18.33, V1, deepseek/deepseek-flash | Project và global | `debug skill` nhận tên và body probe ở cả hai activation | Cả sáu lượt hoàn thành: explicit và đối chứng đều trả marker; implicit với activation explicit vẫn nạp skill ở project, trả NO_MATCH ở global; explicit-only vẫn limited |
 | Claude Code | Chưa chạy tại máy này | CLI không có; người dùng xác nhận dùng môi trường khác | Runner đã chuẩn bị để người dùng chạy; chưa ghi phiên bản hoặc kết quả mới |
 
 Codex dùng client-default trong home tạm, app-server báo `gpt-6-astra`, không nạp
@@ -51,9 +51,17 @@ thành công sau khi cho process truy cập mạng ngoài sandbox của môi tr�
 native enforcement. Mã policy render được kiểm tra riêng; smoke chỉ xác nhận hành
 vi quan sát được với probe/prompt này, không suy rộng sang mọi prompt hay overrides.
 
-OpenCode đã thử gọi model cả trong và ngoài sandbox; các lượt vẫn lỗi mạng, nên
-không tính timeout/error thành “không auto-trigger”. Provider thử bổ sung DeepSeek
-không cho kết quả inference hợp lệ; không dùng ca này để đánh giá activation.
+OpenCode thử lại ngoài sandbox với DeepSeek cho kết quả inference hợp lệ. Một
+lượt project tự nạp skill explicit-only dù có description guard, nên guard không
+bảo đảm manual-only; kết quả global khác không chứng minh có enforcement theo
+scope. Đây là các lượt độc lập, không phải so sánh scope có kiểm soát độ ngẫu nhiên.
+Chẩn đoán OpenAI xác nhận API báo hết credits; runner hiện bật log trong bộ nhớ
+để phân loại `quota`, không lưu log thô. Những lượt cũ bị chặn DNS trong sandbox
+hoặc timeout không dùng để kết luận activation. Tên DeepSeek cũ `deepseek-chat`
+không có trong danh sách API hiện tại; lượt mới dùng `deepseek-flash`.
+Runner cũng đặt `PWD` đúng project tạm: OpenCode 1.18.33 đã chọn project từ `PWD`
+kế thừa dù process có cwd tạm. Evidence OpenCode mới thay thế kết luận scope từ
+những lượt cũ; không sửa adapter hay personal config.
 Claude giữ nguyên bằng chứng manual trước đó, không nâng kết quả đó thành bộ ba ca
 mới. Người dùng sẽ chạy runner tại môi trường Claude Code của họ.
 

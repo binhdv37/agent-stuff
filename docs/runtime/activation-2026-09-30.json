@@ -8,9 +8,10 @@
   "limits": [
     "Synthetic probe; does not test all bundled workflows.",
     "Model smoke is an observation for these prompts/configurations, not proof for every prompt.",
-    "OpenCode model calls failed; no implicit behavior conclusion.",
     "Claude Code is on another environment; user will run the prepared runner.",
-    "Reports were collected during runner development; fields can differ between runs."
+    "Reports were collected during runner development; fields can differ between runs.",
+    "Earlier OpenCode reports inherited PWD; corrected-PWD retry supersedes their scope conclusions.",
+    "OpenCode explicit-only guard was bypassed in one project request; a global NO_MATCH is not proof of enforcement."
   ],
   "reports": [
     {
@@ -78,7 +79,7 @@
             "markerObserved": true,
             "skillLoadEvents": 1,
             "model": "gpt-6-astra",
-            "response": "I’ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
+            "response": "I\u2019ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
           },
           "verdict": "positive-control-observed"
         },
@@ -141,7 +142,7 @@
             "markerObserved": true,
             "skillLoadEvents": 1,
             "model": "gpt-6-astra",
-            "response": "I’ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
+            "response": "I\u2019ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
           },
           "verdict": "positive-control-observed"
         }
@@ -416,6 +417,182 @@
           "skipped": true,
           "reason": "binary-unavailable"
         }
+      ]
+    },
+    {
+      "date": "2026-09-30T16:27:07.248Z",
+      "source": "<checkout>",
+      "runModels": true,
+      "results": [
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "deepseek/deepseek-flash",
+            "response": "<probe-marker>"
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "deepseek/deepseek-flash",
+            "response": "<probe-marker>"
+          },
+          "verdict": "implicit-activation-observed"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "deepseek/deepseek-flash",
+            "response": "<probe-marker>"
+          },
+          "verdict": "positive-control-observed"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "deepseek/deepseek-flash",
+            "response": "I'll load that skill.\n<probe-marker>"
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": false,
+            "skillLoadEvents": 0,
+            "model": "deepseek/deepseek-flash",
+            "response": "NO_MATCH"
+          },
+          "verdict": "observed-manual-only"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "deepseek/deepseek-flash",
+            "response": "<probe-marker>"
+          },
+          "verdict": "positive-control-observed"
+        }
+      ],
+      "check": "opencode-model-corrected-pwd",
+      "runner_changes": [
+        "PWD set to temporary project",
+        "OpenCode --print-logs; sanitized categories only",
+        "quota classification"
+      ]
+    },
+    {
+      "date": "2026-09-30T16:27:28.438Z",
+      "source": "<checkout>",
+      "runModels": true,
+      "results": [
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": false,
+            "failure": "quota",
+            "errorNames": [],
+            "eventTypes": [],
+            "stdoutBytes": 0,
+            "stderrBytes": 6966
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "quota",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "quota",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        }
+      ],
+      "check": "opencode-openai-quota-corrected-pwd",
+      "runner_changes": [
+        "PWD set to temporary project",
+        "OpenCode --print-logs; sanitized categories only",
+        "quota classification"
       ]
     }
   ]

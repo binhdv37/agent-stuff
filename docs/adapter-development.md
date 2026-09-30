@@ -139,6 +139,10 @@ hay raw stderr vào report. Các biến auth như `OPENAI_API_KEY`, `ANTHROPIC_A
 và `CLAUDE_CODE_OAUTH_TOKEN` được kế thừa; config/discovery injections bị loại.
 Provider config/plugin cá nhân không được copy, nên credential phụ thuộc gateway
 hoặc plugin riêng có thể không hoạt động. Chọn provider chuẩn có auth hoạt động.
+Runner đặt cả cwd và `PWD` vào project tạm; OpenCode 1.18.33 dùng `PWD` khi tạo
+session. OpenCode model runs bật `--print-logs` để nhận diện lỗi quota/billing
+trong bộ nhớ, nhưng report chỉ giữ category, không lưu log thô. API key hợp lệ
+và model có trong danh sách chưa chứng minh tài khoản còn credits để inference.
 
 Codex discovery dùng app-server `skills/list`; API này trong binary đã thử không
 trả policy, nên report ghi null, không suy ra policy bị thiếu. Model runs dùng

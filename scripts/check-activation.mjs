@@ -50,6 +50,7 @@ function command(binary, args, cwd, env) {
 // Runtime stderr can include URLs/credentials. Reports keep error categories only.
 function failure(result) {
   const text = result.stdout + result.stderr;
+  if (/no credits remaining|insufficient_quota|insufficient balance|billing|quota exceeded/i.test(text)) return 'quota';
   if (/ModelNotFound|model.{0,30}not found/i.test(text)) return 'model-unavailable';
   if (/not logged in|authentication|unauthorized|401|api.?key|credentials/i.test(text)) return 'authentication';
   if (/network|connect|fetch failed|ENOTFOUND|ECONN|dns/i.test(text)) return 'network';
@@ -118,7 +119,7 @@ async function prepare(harness, scope, activation) {
     await applyInstall(await planInstall(context, outputs, source));
     const skillPath = path.join(context.target, 'skills', id, 'SKILL.md');
     // These standard environment keys configure isolated child contexts, not the caller's home.
-    const env = { ...process.env, HOME: home, CODEX_HOME: path.join(home, '.codex'),
+    const env = { ...process.env, HOME: home, PWD: project, CODEX_HOME: path.join(home, '.codex'),
       CLAUDE_CONFIG_DIR: path.join(home, '.claude'),
       XDG_CONFIG_HOME: path.join(home, '.config'), XDG_DATA_HOME: path.join(home, '.local/share'),
       XDG_CACHE_HOME: path.join(home, '.cache'), XDG_STATE_HOME: path.join(home, '.local/state'),
@@ -194,7 +195,7 @@ async function modelCase(harness, binary, context, explicit) {
   } else {
     // V1 does not expose a native manual-only flag; explicitly request the skill tool.
     prompt = explicit ? `The user explicitly invokes the skill ${id}. Load it using the skill tool and follow it.` : implicitPrompt;
-    args = ['--pure', 'run', '--format', 'json', ...(values.model ? ['--model', values.model] : []), prompt];
+    args = ['--pure', '--print-logs', 'run', '--format', 'json', ...(values.model ? ['--model', values.model] : []), prompt];
   }
   const result = await command(binary, args, context.project, context.env);
   const events = jsonLines(result.stdout);
