@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-30",
+  "adapter_source_commit": "f15fc1a",
+  "probe_id": "bdv-activation-probe",
+  "probe_body": "Reply with exactly <random-marker>. Do not edit files or run commands.",
+  "implicit_prompt": "A cobalt otter routing sample arrived. What is its classification? Use an available workflow if relevant; otherwise reply NO_MATCH. Do not search for undiscovered workflows.",
+  "limits": [
+    "Synthetic probe; does not test all bundled workflows.",
+    "Model smoke is an observation for these prompts/configurations, not proof for every prompt.",
+    "OpenCode model calls failed; no implicit behavior conclusion.",
+    "Claude Code is on another environment; user will run the prepared runner.",
+    "Reports were collected during runner development; fields can differ between runs."
+  ],
+  "reports": [
+    {
+      "check": "codex-model",
+      "date": "2026-09-30T16:05:53.902Z",
+      "source": "<checkout>",
+      "runModels": true,
+      "results": [
+        {
+          "harness": "codex",
+          "version": "codex-cli 0.157.1",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": true,
+            "policy": {
+              "allow_implicit_invocation": false
+            }
+          },
+          "discovery": {
+            "discovered": true,
+            "enabled": true,
+            "policy": null,
+            "defaultModel": "gpt-6-astra",
+            "errors": 0
+          },
+          "explicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 0,
+            "model": "gpt-6-astra",
+            "response": "<probe-marker>"
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": false,
+            "skillLoadEvents": 0,
+            "model": "gpt-6-astra",
+            "response": "NO_MATCH"
+          },
+          "verdict": "observed-manual-only"
+        },
+        {
+          "harness": "codex",
+          "version": "codex-cli 0.157.1",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false,
+            "policy": {
+              "allow_implicit_invocation": true
+            }
+          },
+          "discovery": {
+            "discovered": true,
+            "enabled": true,
+            "policy": null,
+            "defaultModel": "gpt-6-astra",
+            "errors": 0
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "gpt-6-astra",
+            "response": "I’ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
+          },
+          "verdict": "positive-control-observed"
+        },
+        {
+          "harness": "codex",
+          "version": "codex-cli 0.157.1",
+          "scope": "global",
+          "activation": "explicit",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": true,
+            "policy": {
+              "allow_implicit_invocation": false
+            }
+          },
+          "discovery": {
+            "discovered": true,
+            "enabled": true,
+            "policy": null,
+            "defaultModel": "gpt-6-astra",
+            "errors": 0
+          },
+          "explicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 0,
+            "model": "gpt-6-astra",
+            "response": "<probe-marker>"
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": false,
+            "skillLoadEvents": 0,
+            "model": "gpt-6-astra",
+            "response": "NO_MATCH"
+          },
+          "verdict": "observed-manual-only"
+        },
+        {
+          "harness": "codex",
+          "version": "codex-cli 0.157.1",
+          "scope": "global",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false,
+            "policy": {
+              "allow_implicit_invocation": true
+            }
+          },
+          "discovery": {
+            "discovered": true,
+            "enabled": true,
+            "policy": null,
+            "defaultModel": "gpt-6-astra",
+            "errors": 0
+          },
+          "implicit": {
+            "completed": true,
+            "markerObserved": true,
+            "skillLoadEvents": 1,
+            "model": "gpt-6-astra",
+            "response": "I’ll use the available bdv-activation-probe skill to classify the sample.\n\n<probe-marker>"
+          },
+          "verdict": "positive-control-observed"
+        }
+      ]
+    },
+    {
+      "check": "opencode-discovery",
+      "date": "2026-09-30T15:48:04.589Z",
+      "source": "<checkout>",
+      "runModels": false,
+      "results": [
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          }
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          }
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          }
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          }
+        }
+      ]
+    },
+    {
+      "check": "opencode-model",
+      "date": "2026-09-30T15:53:59.822Z",
+      "source": "<checkout>",
+      "runModels": true,
+      "results": [
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "network"
+          },
+          "verdict": "inconclusive"
+        }
+      ]
+    },
+    {
+      "check": "opencode-alternate-provider",
+      "date": "2026-09-30T15:59:50.952Z",
+      "source": "<checkout>",
+      "runModels": true,
+      "results": [
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "eventTypes": [
+              "error"
+            ],
+            "stdoutBytes": 218,
+            "stderrBytes": 0
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "project",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "explicit",
+          "compatibility": "limited",
+          "rendered": {
+            "explicitGuard": true
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "explicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "skipped": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        },
+        {
+          "harness": "opencode",
+          "version": "1.18.33",
+          "scope": "global",
+          "activation": "matching-request",
+          "compatibility": "supported",
+          "rendered": {
+            "explicitGuard": false
+          },
+          "discovery": {
+            "discovered": true,
+            "bodyPresent": true
+          },
+          "implicit": {
+            "completed": false,
+            "failure": "process-exit-1",
+            "skipped": true
+          },
+          "verdict": "inconclusive"
+        }
+      ]
+    },
+    {
+      "check": "claude-unavailable",
+      "date": "2026-09-30T15:48:04.589Z",
+      "source": "<checkout>",
+      "runModels": false,
+      "results": [
+        {
+          "harness": "claude-code",
+          "skipped": true,
+          "reason": "binary-unavailable"
+        }
+      ]
+    }
+  ]
+}

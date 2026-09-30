@@ -28,11 +28,13 @@
     "dist/tool/",
     "dist/adapters/",
     "core/",
+    "scripts/check-activation.mjs",
     "README.md",
     "docs/compatibility.md",
     "docs/adapter-development.md",
     "docs/harness-development.md",
     "docs/harnesses/",
+    "docs/runtime/",
     "docs/migration.md"
   ]
 }

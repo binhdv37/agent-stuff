@@ -108,6 +108,73 @@ thuộc host khác, recovery từ chối thay vì đoán rằng lock đã cũ.
 
 ## Kiểm chứng và đóng gói
 
+### Smoke activation từ checkout
+
+Runner riêng tại `scripts/check-activation.mjs` tạo core probe tạm, render qua
+adapter và cài qua shared installer. Probe chỉ trả marker ngẫu nhiên; không thay
+workflow/inventory thật. Mỗi scope có ba ca model độc lập: gọi explicit với
+activation explicit, request chỉ khớp description với activation explicit, rồi
+cùng request đó với matching-request làm đối chứng. Marker không có trong request.
+
+```bash
+npm run build
+
+# Discovery: không gọi model; binary thiếu được báo skip
+node scripts/check-activation.mjs --harness codex
+node scripts/check-activation.mjs --harness opencode
+
+# Model smoke: global và project, tổng cộng 6 lượt nếu không gặp lỗi runtime
+node scripts/check-activation.mjs --harness codex --run-models \
+  --auth-file /path/to/codex/auth.json --output /tmp/codex-activation.json
+node scripts/check-activation.mjs --harness opencode --run-models \
+  --model provider/model --auth-file /path/to/opencode/auth.json \
+  --output /tmp/opencode-activation.json
+```
+
+`--scope project|global|both` mặc định both; `--binary /path/to/cli` chọn binary;
+`--model` chọn model; `--timeout-ms` mặc định 120000 cho mỗi process.
+`--auth-file` chỉ được copy khi gọi model; chỉ dùng với một harness, và file phải
+có đúng native auth format. Runner xóa context tạm sau mỗi ca; không ghi lại auth
+hay raw stderr vào report. Các biến auth như `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
+và `CLAUDE_CODE_OAUTH_TOKEN` được kế thừa; config/discovery injections bị loại.
+Provider config/plugin cá nhân không được copy, nên credential phụ thuộc gateway
+hoặc plugin riêng có thể không hoạt động. Chọn provider chuẩn có auth hoạt động.
+
+Codex discovery dùng app-server `skills/list`; API này trong binary đã thử không
+trả policy, nên report ghi null, không suy ra policy bị thiếu. Model runs dùng
+`codex exec` read-only và ephemeral. OpenCode dùng `--pure`, discovery qua
+`debug skill`, chỉ mở tool skill; explicit case là user yêu cầu tool nạp skill,
+không phải một slash entry native của V1. Không dùng `--bare` cho Claude vì flag
+đó bỏ discovery skill. Nguồn: [Codex app-server](https://learn.chatgpt.com/docs/app-server),
+[Claude headless](https://code.claude.com/docs/en/headless).
+
+### Chạy Claude Code ở môi trường khác
+
+Chuẩn bị auth qua biến môi trường để dùng home tạm. API key dùng
+`ANTHROPIC_API_KEY`; tài khoản subscription có thể tạo token bằng `claude setup-token`
+và đặt `CLAUDE_CODE_OAUTH_TOKEN` trong môi trường chạy.
+Nguồn: [Claude CLI](https://code.claude.com/docs/en/cli-reference).
+
+```bash
+npm run build
+node scripts/check-activation.mjs --harness claude-code --run-models \
+  --output /tmp/claude-activation.json
+```
+
+Có thể thêm `--binary` hoặc `--model` nếu cần. Runner gọi `claude --print`,
+stream-json, không lưu session, chỉ mở/pre-approve Skill và deny MCP. Đây là
+đường chạy chuẩn bị theo docs, **chưa chạy tại máy hiện tại vì thiếu Claude CLI**.
+Sau khi chạy, gửi report JSON để cập nhật compatibility; không gửi auth file/token.
+
+Exit code 0 nghĩa các ca đã yêu cầu chạy xong và không có lỗi được phát hiện;
+1 là lỗi setup/discovery hoặc activation vi phạm ở harness được báo supported;
+2 là thiếu binary, lỗi model/runtime hoặc đối chứng chưa quan sát được. OpenCode
+limited có thể quan sát implicit activation mà runner không coi là regression.
+Đọc verdict và đối chứng cùng nhau; một lần không gọi skill không chứng minh
+enforcement. Kết quả chỉ áp dụng cho prompt, binary, model và config đã thử.
+
+### Test và package
+
 `npm test` kiểm tra schema, migration hash, policy, resources, scope, CLI,
 update/uninstall, conflict, rollback và recovery sau SIGKILL. Test chỉ dùng
 filesystem tạm. Kiểm tra runtime harness được ghi riêng trong compatibility;

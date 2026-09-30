@@ -19,15 +19,43 @@ tại, không phải khẳng định harness không có custom agent hoặc comm
 | Claude Code | 11 skill, slash entry và invocation policy | Render/install và global/project bằng filesystem test; người dùng xác nhận runtime chạy thành công ngày 2026-09-30 |
 | Codex/Claude Code | Agent primary và command riêng | Không ánh xạ; CLI báo unsupported |
 
-Global được kiểm tra bằng filesystem context tạm; các kiểm tra runtime OpenCode
-và Codex ghi nhận ở trên dùng project tạm. Smoke OpenCode dùng XDG
-config/data/cache/state riêng và pure mode; chưa gọi model để thực thi workflow.
+Các kiểm tra trước đợt activation smoke bên dưới dùng global filesystem context
+tạm và discovery runtime project tạm. Smoke OpenCode dùng XDG config/data/cache/state
+riêng và pure mode; discovery không tự chứng minh model thực thi workflow.
 
 Claude Code đã được người dùng thử thủ công và xác nhận hoạt động ngày
 2026-09-30, nên mục runtime smoke được đánh dấu hoàn thành. Chưa ghi nhận phiên
 bản CLI, scope, skill cụ thể hoặc các bước thử; kết quả này không xác nhận riêng
 toàn bộ 11 skill, cả hai scope hay hành vi invocation policy. Kết quả runtime
 không suy rộng sang mọi phiên bản hoặc cấu hình permission do người dùng ghi đè.
+
+## Activation smoke ngày 2026-09-30
+
+Runner: [scripts/check-activation.mjs](../scripts/check-activation.mjs), hướng dẫn
+chạy lại trong [development guide](adapter-development.md#smoke-activation-từ-checkout).
+Các ca dùng core probe chỉ trả marker ngẫu nhiên, cùng adapter và installer thật,
+home/project/XDG tạm, fresh model session cho mỗi request. Không sửa personal config
+hoặc nội dung 16 asset. Đây là smoke của mapping activation, không phải thử toàn bộ
+workflow thật. Report lưu tại [activation evidence](runtime/activation-2026-09-30.json).
+
+| Harness | Scope | Discovery | Explicit / implicit / matching-request đối chứng |
+|---|---|---|---|
+| Codex CLI 0.157.1 | Project và global | Probe được app-server phát hiện, enabled; không có loader error | Explicit trả marker; implicit với activation explicit không trả marker; đối chứng matching-request trả marker |
+| OpenCode 1.18.33, V1 | Project và global | `debug skill` nhận tên và body probe ở cả hai activation | Các lượt model với openai/gpt-6-luna lỗi mạng; chưa có kết luận hành vi model; explicit-only vẫn limited |
+| Claude Code | Chưa chạy tại máy này | CLI không có; người dùng xác nhận dùng môi trường khác | Runner đã chuẩn bị để người dùng chạy; chưa ghi phiên bản hoặc kết quả mới |
+
+Codex dùng client-default trong home tạm, app-server báo `gpt-6-astra`, không nạp
+user config. Cả sáu lượt model
+thành công sau khi cho process truy cập mạng ngoài sandbox của môi trường kiểm thử.
+`skills/list` của binary này không trả policy; kết quả discovery không tự chứng minh
+native enforcement. Mã policy render được kiểm tra riêng; smoke chỉ xác nhận hành
+vi quan sát được với probe/prompt này, không suy rộng sang mọi prompt hay overrides.
+
+OpenCode đã thử gọi model cả trong và ngoài sandbox; các lượt vẫn lỗi mạng, nên
+không tính timeout/error thành “không auto-trigger”. Provider thử bổ sung DeepSeek
+không cho kết quả inference hợp lệ; không dùng ca này để đánh giá activation.
+Claude giữ nguyên bằng chứng manual trước đó, không nâng kết quả đó thành bộ ba ca
+mới. Người dùng sẽ chạy runner tại môi trường Claude Code của họ.
 
 ## Agent policy
 

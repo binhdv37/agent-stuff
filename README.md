@@ -94,6 +94,9 @@ Follow the [harness development flow](docs/harness-development.md) for asset and
 adapter changes, including evidence checks and criteria for future native overrides.
 The [harness research notes](docs/harnesses/README.md) explain native concepts,
 version differences, and the checks needed before extending a mapping.
+The [activation smoke runner](docs/adapter-development.md#smoke-activation-từ-checkout)
+checks discovery and optional model behavior in temporary global/project contexts;
+recorded outcomes and pending checks are in compatibility notes.
 
 The adapter CLI currently contains 16 assets: 11 skills, three agents, and two
 commands. A manual Claude Code runtime test was confirmed successful by the
