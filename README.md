@@ -92,8 +92,8 @@ has CLI and recovery details; [compatibility](docs/compatibility.md) separates
 filesystem tests from runtime checks.
 
 The adapter CLI currently contains 16 assets: 11 skills, three agents, and two
-commands. Claude Code discovery has not been checked on a live runtime here;
-the package has not been published or tagged. The original
+commands. A manual Claude Code runtime test was confirmed successful by the
+user on 2026-09-30. The package has not been published or tagged. The original
 [migration plan](docs/plans/core-adapter-migration.md) is historical context.
 
 ## Agents

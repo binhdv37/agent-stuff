@@ -30,9 +30,9 @@ Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
 Current inventory: 11 skills, two primary agents, one read-only delegated agent,
 and two commands (16 assets). OpenCode renders all of them, with limited
 enforcement of explicit skill invocation. Codex and Claude Code currently render
-skills only; their command and agent assets are reported unsupported. Claude Code
-has not had a runtime smoke test in this repo. See `docs/compatibility.md` for
-the exact checks and limits.
+skills only; their command and agent assets are reported unsupported. The user
+confirmed a successful manual Claude Code runtime test on 2026-09-30. See
+`docs/compatibility.md` for the exact checks and limits.
 
 ## Directory ownership
 

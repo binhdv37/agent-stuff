@@ -1,6 +1,6 @@
 # Tương thích adapter
 
-Kiểm tra ngày 2026-09-29. Các định dạng và giới hạn dưới đây thuộc adapter hiện tại.
+Cập nhật ngày 2026-09-30. Các định dạng và giới hạn dưới đây thuộc adapter hiện tại.
 
 | Harness | Thành phần | Trạng thái |
 |---|---|---|
@@ -10,13 +10,18 @@ Kiểm tra ngày 2026-09-29. Các định dạng và giới hạn dưới đây 
 | OpenCode 1.18.32 | Agent có policy cơ bản | Đã kiểm tra config role và tập tool bị vô hiệu hóa trên runtime |
 | OpenCode 1.18.33 | Hai primary agent và helper chỉ đọc | Đã kiểm tra runtime discovery, role và permission rules |
 | Codex CLI | 11 skill, metadata UI và invocation policy | Render/install bằng filesystem test; app-server đã phát hiện handoff skill trong project tạm |
-| Claude Code | 11 skill, slash entry và invocation policy | Render/install và global/project bằng filesystem test; chưa runtime smoke |
+| Claude Code | 11 skill, slash entry và invocation policy | Render/install và global/project bằng filesystem test; người dùng xác nhận runtime chạy thành công ngày 2026-09-30 |
 | Codex/Claude Code | Agent primary và command riêng | Không ánh xạ; CLI báo unsupported |
 
-Global được kiểm tra bằng filesystem context tạm; chưa kiểm tra discovery global
-bằng harness thật. Smoke OpenCode dùng XDG config/data/cache/state riêng và pure
-mode trong project tạm. Chưa gọi model để thực thi workflow. Kết quả không suy
-rộng sang mọi phiên bản hoặc cấu hình permission do người dùng ghi đè.
+Global được kiểm tra bằng filesystem context tạm; các kiểm tra runtime OpenCode
+và Codex ghi nhận ở trên dùng project tạm. Smoke OpenCode dùng XDG
+config/data/cache/state riêng và pure mode; chưa gọi model để thực thi workflow.
+
+Claude Code đã được người dùng thử thủ công và xác nhận hoạt động ngày
+2026-09-30, nên mục runtime smoke được đánh dấu hoàn thành. Chưa ghi nhận phiên
+bản CLI, scope, skill cụ thể hoặc các bước thử; kết quả này không xác nhận riêng
+toàn bộ 11 skill, cả hai scope hay hành vi invocation policy. Kết quả runtime
+không suy rộng sang mọi phiên bản hoặc cấu hình permission do người dùng ghi đè.
 
 ## Agent policy
 

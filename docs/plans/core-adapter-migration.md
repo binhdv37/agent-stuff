@@ -333,8 +333,10 @@ không tuyên bố đã hoàn thành chỉ vì snapshot pass.
 
 - Đã giải quyết policy architect và scoped write/delegation của planner bằng
   helper chỉ đọc; runtime OpenCode xác nhận rule được nạp.
-- Codex app-server đã nhận skill trong project tạm. Cần smoke test Claude Code
-  khi có CLI và kiểm tra một phiên model thực thi workflow nếu muốn xác nhận hành vi.
+- Codex app-server đã nhận skill trong project tạm. Runtime smoke Claude Code
+  đã hoàn thành qua lần thử thủ công được người dùng xác nhận ngày 2026-09-30;
+  xem compatibility để biết phạm vi bằng chứng. Một phiên model OpenCode/Codex
+  thực thi workflow vẫn chưa được ghi nhận.
 - Tải release/tag/commit tự động và cập nhật CLI nằm ngoài bản cài local hiện tại.
   Người dùng hiện chọn source version bằng checkout Git hoặc gói npm pack local.
 - Repo chưa được publish/tag; cần review bản thay đổi trước bước phát hành.
