@@ -2,6 +2,8 @@
 
 `core/` là nguồn nội dung chính. Mỗi asset chứa `definition.yaml`, hướng dẫn
 Markdown nếu cần và resource được khai báo. Không sửa file sinh trong `dist/`.
+Theo [quy trình phát triển harness](harness-development.md) khi thêm/sửa asset,
+mapping hoặc thiết kế cấu hình native riêng theo asset.
 
 ## Chạy CLI
 

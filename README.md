@@ -90,6 +90,10 @@ are build output. Add new public assets to the tables below, then run
 implementation changes. The [development guide](docs/adapter-development.md)
 has CLI and recovery details; [compatibility](docs/compatibility.md) separates
 filesystem tests from runtime checks.
+Follow the [harness development flow](docs/harness-development.md) for asset and
+adapter changes, including evidence checks and criteria for future native overrides.
+The [harness research notes](docs/harnesses/README.md) explain native concepts,
+version differences, and the checks needed before extending a mapping.
 
 The adapter CLI currently contains 16 assets: 11 skills, three agents, and two
 commands. A manual Claude Code runtime test was confirmed successful by the

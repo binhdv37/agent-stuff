@@ -2,6 +2,12 @@
 
 Cập nhật ngày 2026-09-30. Các định dạng và giới hạn dưới đây thuộc adapter hiện tại.
 
+Nghiên cứu tài liệu chính thức ngày 2026-09-30 được lưu tại
+[ghi chú harness](harnesses/README.md). Đây là bằng chứng docs, không thêm kết quả
+runtime. Adapter OpenCode hiện theo **V1**; tài liệu V2 dùng schema khác và chưa
+được ánh xạ. Trạng thái unsupported của Codex/Claude Code phản ánh adapter hiện
+tại, không phải khẳng định harness không có custom agent hoặc command.
+
 | Harness | Thành phần | Trạng thái |
 |---|---|---|
 | OpenCode 1.18.32 | 11 skill và resource, global/project | Render/install được kiểm tra; discovery project thực tế |

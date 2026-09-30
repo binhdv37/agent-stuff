@@ -31,6 +31,8 @@
     "README.md",
     "docs/compatibility.md",
     "docs/adapter-development.md",
+    "docs/harness-development.md",
+    "docs/harnesses/",
     "docs/migration.md"
   ]
 }

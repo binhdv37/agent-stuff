@@ -18,6 +18,10 @@ Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
    before changing a harness mapping. `docs/migration.md` records deliberate
    changes from the old layout. `docs/plans/core-adapter-migration.md` is the
    original design plan, not the current implementation contract.
+   For asset or harness changes, follow `docs/harness-development.md`: it defines
+   the development flow, required evidence, and boundaries for future extensions.
+   Read the relevant note indexed by `docs/harnesses/README.md`; notes distinguish
+   documented harness capabilities from implemented adapter support and versions.
 2. Check `git status --short` before editing. Trace a behavior from its core
    definition through the relevant adapter and `tool/src/` instead of editing
    generated output. Inspect the existing tests for the same behavior.
@@ -82,6 +86,14 @@ must be reported and blocked; a prompt sentence is not equivalent to permission.
 
 ## Adapter and installer boundaries
 
+Translate shared concepts in adapter code, not in per-asset overrides. Before
+changing a native mapping, read its entry and sources in `docs/compatibility.md`,
+the relevant adapter, and existing tests. Verify changed native behavior against
+current official documentation; do not infer one harness's rules from another.
+Record evidence and limits in compatibility notes and enforce mappings with tests.
+Harness-specific per-asset overrides are not implemented. Follow the extension
+criteria in `docs/harness-development.md` before introducing them.
+
 Adapters implement `tool/src/adapter.ts`, declare target directories, report
 compatibility, and return files in memory. No filesystem writes or network calls
 inside adapters. Never silently downgrade an asset or skip unsupported selection.
@@ -91,8 +103,9 @@ conflicts, file updates and recovery. Only operate on tracked paths. Preserve
 untracked files and locally modified files. Retain journals when recovery would
 clobber an external edit. Do not hand-edit generated `dist/` files.
 
-OpenCode uses singular `permission`; catch-all rules precede exceptions. Verify
-current official documentation before changing native format or permissions.
+The current OpenCode adapter targets V1 and uses singular `permission`; catch-all
+rules precede exceptions. V2 has different syntax; do not mix documentation
+versions. Verify current official documentation before changing native format or permissions.
 The bundled planner can edit only plan paths and invoke its review helper;
 the architect cannot edit or run shell commands. See `docs/compatibility.md`.
 
