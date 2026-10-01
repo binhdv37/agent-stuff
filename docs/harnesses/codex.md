@@ -5,6 +5,26 @@ không xác nhận một phiên bản binary cụ thể. Bằng chứng adapter/
 [compatibility](../compatibility.md). Không áp dụng mặc định các cơ chế local
 cho ChatGPT Work hosted hoặc Codex Cloud.
 
+## Baseline tham chiếu adapter — ghi nhận 2026-10-01
+
+Baseline này tổng hợp bằng chứng đã lưu; không phải lượt đọc docs/runtime mới.
+
+| Thuộc tính | Mốc tham chiếu |
+|---|---|
+| Adapter | `codex`, revision `1`; `adapters/codex/index.ts` |
+| Target mapping | Local Codex skill format, `.agents/skills`, global/project |
+| Binary dùng khi phát triển ban đầu | Chưa ghi nhận |
+| Ngày đọc docs đã lưu | 2026-09-30; URL docs không pin vào release |
+| Nguồn mapping | [Build skills — discovery, SKILL.md và agents/openai.yaml](https://learn.chatgpt.com/docs/build-skills); quy tắc được tóm tắt ở mục Skill và activation bên dưới |
+| Quy tắc | Dịch activation sang `policy.allow_implicit_invocation`, giữ resource và UI metadata; chưa mapping agent/command riêng |
+| Tests | `tests/core-adapter.test.ts`, `tests/lifecycle.test.ts` |
+| Runtime tham chiếu | Codex CLI 0.157.1, evidence ngày 2026-09-30 trong [compatibility](../compatibility.md#activation-smoke-ngày-2026-09-30) |
+| Chưa xác minh | Không có version range được chứng minh; runtime version trên không chứng minh phiên bản dùng lúc author adapter |
+
+Các mục custom agent, permission và guidance bên dưới là nghiên cứu nền tảng;
+không đồng nghĩa adapter revision 1 đã implement các mapping đó. Khi đổi mapping,
+thêm baseline mới và giữ mốc này để đối chiếu theo [quy tắc hồ sơ](README.md).
+
 ## Skill và activation
 
 `SKILL.md` cần `name`, `description`. Project discovery quét `.agents/skills`

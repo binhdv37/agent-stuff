@@ -2,8 +2,10 @@
 
 `core/` là nguồn nội dung chính. Mỗi asset chứa `definition.yaml`, hướng dẫn
 Markdown nếu cần và resource được khai báo. Không sửa file sinh trong `dist/`.
-Theo [quy trình phát triển harness](harness-development.md) khi thêm/sửa asset,
-mapping hoặc thiết kế cấu hình native riêng theo asset.
+Xem [concepts](concepts.md) cho định nghĩa i-skill/i-command/i-agent và
+[core development](core-development.md) cho flow author và mở rộng contract.
+Theo [quy trình mapping harness](harness-development.md) khi đổi adapter hoặc
+thiết kế cấu hình native riêng theo asset.
 
 ## Chạy CLI
 
@@ -107,6 +109,11 @@ lúc kiểm tra và ghi. Chưa kiểm chứng mất điện, network filesystem 
 thuộc host khác, recovery từ chối thay vì đoán rằng lock đã cũ.
 
 ## Kiểm chứng và đóng gói
+
+Quy định và hồ sơ từng stuff ở [testing guide](testing.md); xem
+[bảng tổng hợp](verification/README.md) cho trạng thái gần nhất. Tooling
+`npm run verification` quản lý báo cáo development trong checkout, không cài
+hoặc sửa file harness. Vòng đời file đã cài vẫn thuộc shared installer.
 
 ### Smoke activation từ checkout
 

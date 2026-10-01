@@ -1,8 +1,11 @@
-# Quy trình phát triển asset và harness
+# Phát triển mapping harness
 
 Tài liệu này là quy trình làm việc cho các session mới, cùng với `AGENTS.md`.
 Harness ở đây là Codex, Claude Code, OpenCode; scope global/project là phạm vi
 cài đặt, không quyết định ngữ nghĩa của asset.
+Concept nội bộ xem [glossary](concepts.md); flow diễn giải request, kiểm tra
+contract và author stuff xem [core development](core-development.md). Tài liệu
+này quy định phần mapping và kiểm chứng harness của flow đó.
 
 ## Nguồn kiến thức và trách nhiệm
 
@@ -26,37 +29,27 @@ cả mapping lẫn bằng chứng, không âm thầm chọn một bên.
 harness. Không tạo thêm bảng trạng thái cạnh tranh trong tài liệu mới. Một kết
 quả test file sinh ra không chứng minh model thực thi đúng hoặc harness nhận file.
 
-## Flow cho một thay đổi
+## Flow cho mapping
 
-1. Đọc `AGENTS.md`, README, tài liệu này, ghi chú trong `docs/harnesses/` và phần
-   compatibility liên quan. Kiểm tra `git status --short`; đọc asset, schema,
-   adapter và test hiện có của hành vi đó.
-2. Viết rõ kết quả mong muốn bằng ý định trung lập: loại asset, activation, role,
-   policy, resource, scope. Với skill mới, hỏi về automatic invocation theo
-   `AGENTS.md`; không hỏi lại preference đã được xác lập.
-3. Phân loại thay đổi: nội dung chung thuộc core; quy tắc dịch chung thuộc adapter;
-   thao tác filesystem thuộc installer. Nếu là yêu cầu native riêng của một asset,
-   dùng tiêu chí mở rộng bên dưới trước khi chọn cách lưu cấu hình.
-4. Với mapping native mới hoặc thay đổi, kiểm tra tài liệu chính thức của từng
-   harness bị ảnh hưởng. Ghi nguồn, ngày kiểm tra, phiên bản nếu biết và điều chưa
-   xác minh. Nếu không lấy được bằng chứng, ghi rõ phần chưa xác minh; không nâng
-   trạng thái hỗ trợ dựa trên suy đoán. Đây không phải lý do chặn sửa nội dung thuần
-   portable không đổi mapping.
-5. Triển khai từ nguồn: schema/loader nếu cần, compatibility check, adapter render,
-   rồi installer nếu vòng đời file thay đổi. Không sửa generated output. Tính năng
-   không được hỗ trợ phải được báo rõ; policy không enforce được phải bị chặn.
-   Hạn chế activation bằng prompt phải được báo limited, không coi là enforcement.
-6. Với thay đổi implementation, thêm hoặc sửa test cho hành vi quan sát được:
-   cùng ý định core được render đúng trên từng harness hỗ trợ, trường hợp unsupported
-   bị từ chối và trường hợp limited được báo. Với thay đổi quyền, kiểm tra cả quyền
-   được mở và quyền vẫn bị cấm. Chỉ thêm filesystem test khi vòng đời file thay đổi.
-7. Chạy `npm test` cho implementation, `npm run typecheck` khi cần, và
-   `npm run cli -- validate --source .` cho content. Runtime discovery là bước riêng
-   khi đổi discovery/native config; dùng home/project tạm và ghi kết quả vào
-   compatibility. Nếu chưa chạy runtime, giữ giới hạn đó trong tài liệu và báo cáo.
-8. Cập nhật README khi inventory/hành vi public thay đổi, compatibility khi mapping
-   hoặc bằng chứng thay đổi, development guide khi schema/CLI thay đổi. Báo cáo
-   kết quả, kiểm chứng và giới hạn còn lại. Publish/tag/gửi tin là hành động riêng.
+Áp dụng khi thêm/sửa native mapping hoặc điều tra regression. Flow author stuff
+và các lệnh kiểm chứng chung ở [core development](core-development.md).
+
+1. Đọc contract core, adapter/test hiện có, baseline harness và compatibility.
+   Xác định target client, phiên bản và native format cần kiểm tra.
+2. Mở tài liệu chính thức liên quan, đối chiếu baseline. Đánh giá cơ chế native
+   có giữ contract không; báo supported/limited/unsupported và phương án thay
+   thế. Thiếu bằng chứng phải ghi chưa xác minh. Policy không enforce được phải
+   bị chặn; prompt guard cho activation chỉ được báo limited.
+3. Sửa compatibility check, render và test mapping. Kiểm tra cả hành vi được
+   phép/bị cấm và trường hợp limited/unsupported. Adapter chỉ trả dữ liệu trong
+   bộ nhớ; thay đổi filesystem vẫn thuộc installer.
+4. Kiểm tra runtime discovery khi đổi native config/discovery, và hành vi thực
+   tế nếu tuyên bố enforce. Dùng context tạm; ghi kết quả và giới hạn vào
+   compatibility, cập nhật baseline theo [quy tắc hồ sơ](harnesses/README.md).
+   Giữ bằng chứng cũ; nếu chưa chạy runtime thì báo rõ.
+   Khi mapping đổi, sinh lại [bảng kiểm chứng stuff](verification/README.md)
+   để hiện hồ sơ Stale, rồi test lại các target trước khi tuyên bố được kiểm chứng
+   theo [testing guide](testing.md).
 
 ## Ví dụ: skill chỉ được gọi thủ công
 
@@ -80,9 +73,8 @@ quy tắc dưới đây là tiêu chí thiết kế khi triển khai mở rộng
 - Nếu cấu hình biểu đạt ý định có nghĩa trên nhiều harness, ưu tiên field portable
   có schema và mapping rõ trên từng adapter.
 - Nếu cấu hình là quy tắc chung để dịch ý định portable, giữ trong adapter code.
-- Nếu chỉ một asset cần một tùy chọn native của một harness, có thể bổ sung cấu
-  hình theo harness/asset dưới `adapters/<harness>/overrides/<kind>/<id>.yaml`.
-  Workflow chính vẫn ở core; không tạo bản sao instructions đầy đủ.
+- Nếu chỉ một asset cần một tùy chọn native, đánh giá cơ chế override riêng.
+  Workflow chính vẫn ở core; chưa chốt đường dẫn hoặc format override.
 - Preference cá nhân/project là nhu cầu riêng. Chỉ thêm profile khi có use case;
   không trộn preference cài đặt với bản định nghĩa asset được phân phối.
 
@@ -109,7 +101,8 @@ Mục tiêu và ví dụ trước/sau:
 Asset/harness/scope bị ảnh hưởng:
 Ý định portable và phần native riêng:
 Mapping/test/tài liệu hiện có đã đọc:
-Nguồn chính thức, ngày kiểm tra và phiên bản (nếu đổi mapping):
+Baseline adapter cũ và target client/format:
+Nguồn chính thức URL/mục, ngày đọc và phiên bản (nếu đổi mapping):
 Supported/limited/unsupported dự kiến và lý do:
 File nguồn cần sửa:
 Kiểm chứng cần chạy và runtime chưa xác minh:

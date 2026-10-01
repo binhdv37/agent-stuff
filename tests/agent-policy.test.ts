@@ -63,7 +63,7 @@ test('runtime OpenCode discovers generated agents with restricted permissions', 
   const outputs = selected.flatMap(a => opencode.render(a, catalog));
   const context = await targetContext('project', dir, dir);
   await applyInstall(await planInstall(context, outputs, '.'));
-  const env = { ...process.env,
+  const env = { ...process.env, HOME: dir, PWD: dir,
     XDG_CONFIG_HOME: path.join(dir, 'config'), XDG_DATA_HOME: path.join(dir, 'data'),
     XDG_CACHE_HOME: path.join(dir, 'cache'), XDG_STATE_HOME: path.join(dir, 'state'),
     OPENCODE_DISABLE_EXTERNAL_SKILLS: 'true' };

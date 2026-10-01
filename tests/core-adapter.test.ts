@@ -161,6 +161,8 @@ test('CLI builds and previews fixture without touching install target', async t 
   assert.match(run('validate', '--source', fixture), /Validated 7 assets/);
   assert.match(run('build', ...args, '--out', path.join(dir, 'output')), /Built 2 files/);
   assert.match(run('install', ...args, '--scope', 'project', '--project', dir, '--dry-run'), /create/);
-  await assert.rejects(readFile(path.join(dir, '.agent-stuff/installations/opencode.json')), { code: 'ENOENT' });
+  const context = await targetContext('project', dir, dir);
+  await assert.rejects(readFile(context.manifest), { code: 'ENOENT' });
+  await assert.rejects(readFile(path.join(context.target, 'skills/bdv-api-handoff/SKILL.md')), { code: 'ENOENT' });
   assert.match(run('install', ...args, '--scope', 'project', '--project', dir, '--yes', '--accept-limitations'), /install complete/);
 });

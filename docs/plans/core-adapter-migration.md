@@ -8,8 +8,9 @@ Xem [hướng dẫn hiện hành](../adapter-development.md),
 [compatibility](../compatibility.md) và [migration notes](../migration.md).
 
 Mục 1–7 là kế hoạch thiết kế ban đầu; tài liệu hiện hành ở trên ghi lại những
-quyết định và giới hạn của bản triển khai thực tế. Mục 8–10 theo dõi tiến độ hiện
-tại: `[x]` là đã hoàn thành, `[ ]` là chưa hoàn thành trong phạm vi được ghi.
+quyết định và giới hạn của bản triển khai thực tế. Mục 8–10 là snapshot tiến độ
+ngày 2026-09-30, không phải checklist đang được duy trì. `[x]` là đã hoàn thành,
+`[ ]` là chưa hoàn thành tại mốc đó. Bằng chứng mới được ghi trong compatibility.
 Quyết định ban đầu về việc giữ `prompts/` đã được thay đổi: thư mục này đã xóa;
 `skills/`, `claude/` và `opencode/` cũ cũng đã xóa sau khi xác nhận rỗng.
 

@@ -1,12 +1,25 @@
 # Tương thích adapter
 
-Cập nhật ngày 2026-09-30. Các định dạng và giới hạn dưới đây thuộc adapter hiện tại.
+Kết quả từng stuff/harness nằm ở [verification](verification/README.md), theo
+[testing guide](testing.md). Tài liệu này giữ khả năng và bằng chứng mapping
+adapter; probe hoặc discovery chung không chứng minh workflow từng asset đạt.
+
+Cập nhật tài liệu ngày 2026-10-01; bằng chứng runtime bên dưới ghi nhận ngày
+2026-09-30. Các định dạng và giới hạn thuộc adapter hiện tại.
 
 Nghiên cứu tài liệu chính thức ngày 2026-09-30 được lưu tại
 [ghi chú harness](harnesses/README.md). Đây là bằng chứng docs, không thêm kết quả
 runtime. Adapter OpenCode hiện theo **V1**; tài liệu V2 dùng schema khác và chưa
 được ánh xạ. Trạng thái unsupported của Codex/Claude Code phản ánh adapter hiện
 tại, không phải khẳng định harness không có custom agent hoặc command.
+
+Baseline tham chiếu của từng adapter được tổng hợp ngày 2026-10-01 trong ghi chú
+[Codex](harnesses/codex.md), [Claude Code](harnesses/claude-code.md) và
+[OpenCode](harnesses/opencode.md), giữ nguyên ngày đọc nguồn 2026-09-30. Baseline
+lưu adapter revision, target format, tài liệu cụ thể và các phiên bản đã ghi nhận;
+không thêm bằng chứng runtime mới. Phiên bản binary dùng lúc phát triển ban đầu
+chưa được ghi nhận. Các phiên bản runtime dưới đây không phải version range bảo
+đảm tương thích; CLI chưa phát hiện/gate phiên bản harness.
 
 | Harness | Thành phần | Trạng thái |
 |---|---|---|
@@ -23,11 +36,10 @@ Các kiểm tra trước đợt activation smoke bên dưới dùng global files
 tạm và discovery runtime project tạm. Smoke OpenCode dùng XDG config/data/cache/state
 riêng và pure mode; discovery không tự chứng minh model thực thi workflow.
 
-Claude Code đã được người dùng thử thủ công và xác nhận hoạt động ngày
-2026-09-30, nên mục runtime smoke được đánh dấu hoàn thành. Chưa ghi nhận phiên
-bản CLI, scope, skill cụ thể hoặc các bước thử; kết quả này không xác nhận riêng
-toàn bộ 11 skill, cả hai scope hay hành vi invocation policy. Kết quả runtime
-không suy rộng sang mọi phiên bản hoặc cấu hình permission do người dùng ghi đè.
+Claude Code được user xác nhận thử thủ công thành công ngày 2026-09-30, nhưng
+chưa có report activation smoke từ runner. Chưa ghi nhận phiên bản CLI, scope,
+skill hoặc các bước thử; bằng chứng này không xác nhận riêng toàn bộ 11 skill,
+cả hai scope hay invocation policy.
 
 ## Activation smoke ngày 2026-09-30
 
@@ -45,8 +57,8 @@ workflow thật. Report lưu tại [activation evidence](runtime/activation-2026
 | Claude Code | Chưa chạy tại máy này | CLI không có; người dùng xác nhận dùng môi trường khác | Runner đã chuẩn bị để người dùng chạy; chưa ghi phiên bản hoặc kết quả mới |
 
 Codex dùng client-default trong home tạm, app-server báo `gpt-6-astra`, không nạp
-user config. Cả sáu lượt model
-thành công sau khi cho process truy cập mạng ngoài sandbox của môi trường kiểm thử.
+user config. Cả sáu lượt model thành công khi process được truy cập mạng ngoài
+sandbox của môi trường kiểm thử.
 `skills/list` của binary này không trả policy; kết quả discovery không tự chứng minh
 native enforcement. Mã policy render được kiểm tra riêng; smoke chỉ xác nhận hành
 vi quan sát được với probe/prompt này, không suy rộng sang mọi prompt hay overrides.
@@ -55,15 +67,11 @@ OpenCode thử lại ngoài sandbox với DeepSeek cho kết quả inference h�
 lượt project tự nạp skill explicit-only dù có description guard, nên guard không
 bảo đảm manual-only; kết quả global khác không chứng minh có enforcement theo
 scope. Đây là các lượt độc lập, không phải so sánh scope có kiểm soát độ ngẫu nhiên.
-Chẩn đoán OpenAI xác nhận API báo hết credits; runner hiện bật log trong bộ nhớ
-để phân loại `quota`, không lưu log thô. Những lượt cũ bị chặn DNS trong sandbox
-hoặc timeout không dùng để kết luận activation. Tên DeepSeek cũ `deepseek-chat`
-không có trong danh sách API hiện tại; lượt mới dùng `deepseek-flash`.
+Các lượt trước bị quota, DNS hoặc timeout không dùng để kết luận activation;
+runner chỉ giữ category lỗi, không lưu log thô.
 Runner cũng đặt `PWD` đúng project tạm: OpenCode 1.18.33 đã chọn project từ `PWD`
 kế thừa dù process có cwd tạm. Evidence OpenCode mới thay thế kết luận scope từ
 những lượt cũ; không sửa adapter hay personal config.
-Claude giữ nguyên bằng chứng manual trước đó, không nâng kết quả đó thành bộ ba ca
-mới. Người dùng sẽ chạy runner tại môi trường Claude Code của họ.
 
 ## Agent policy
 

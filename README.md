@@ -2,14 +2,43 @@
 
 Portable agent content for OpenCode, Codex, and Claude Code.
 
+Agent-stuff develops its own reusable components, called **stuff**: `i-skill`
+(capability/workflow), `i-command` (user-invoked prompt/template), and `i-agent`
+(agent identity, role and working instructions). Core defines their content and
+portable configuration semantics; adapters translate that intent into native
+harness mechanisms. These concepts need not map one-to-one to native concepts.
+See the [glossary](docs/concepts.md) and [stuff development flow](docs/core-development.md).
+The current schema still uses `skill`, `command` and `agent`; standalone command
+templates and additional config types require explicit schema/adapter development.
+
 Write instructions once in `core/`. The TypeScript CLI validates the definitions,
 uses an adapter to generate harness files, and installs the selected assets into
 a global or project directory.
 
-The repository is for authoring and distributing agent content, not running the
-workflows itself. `core/` holds portable definitions; adapters translate them to
-each tool's format; the CLI previews and manages installation. Personal drafts
-are not part of this repository.
+The harness runs the installed workflows. Personal drafts are not part of this
+repository.
+
+## Start from a problem or idea
+
+When working with an AI Agent in this repo, use a prefix to state your intent:
+
+| Prefix | Use it for |
+|---|---|
+| `painpoint:` | An unwanted behavior or frustrating experience |
+| `idea:` | A new capability you want to explore |
+| `improve:` | Improving existing stuff |
+| `adapt:` | Mapping stuff to a harness or target version |
+| `check:` | Assessing content or behavior; defaults to no edits |
+
+```text
+painpoint: agent cứ tự commit khi t chưa cho phép.
+T muốn chỉ commit khi t yêu cầu rõ ràng. Gợi ý cách xử lý trước.
+```
+
+You do not need to choose a stuff kind first. The Agent investigates and recommends
+a solution; ask it to implement when you want changes. Prefixes are a repo prompt
+convention guided by `AGENTS.md`, not CLI commands. Ordinary prompts still work.
+See [entry points](docs/entry-points.md) for scope and examples.
 
 ## Install from a checkout
 
@@ -90,18 +119,26 @@ are build output. Add new public assets to the tables below, then run
 implementation changes. The [development guide](docs/adapter-development.md)
 has CLI and recovery details; [compatibility](docs/compatibility.md) separates
 filesystem tests from runtime checks.
-Follow the [harness development flow](docs/harness-development.md) for asset and
-adapter changes, including evidence checks and criteria for future native overrides.
+Follow the [stuff development flow](docs/core-development.md) when authoring,
+and the [mapping guide](docs/harness-development.md) when changing adapters.
 The [harness research notes](docs/harnesses/README.md) explain native concepts,
-version differences, and the checks needed before extending a mapping.
+version differences, adapter reference versions and documentation baselines,
+and the checks needed before extending a mapping. Reference records preserve
+what a mapping was based on; the CLI does not detect or gate harness versions.
 The [activation smoke runner](docs/adapter-development.md#smoke-activation-từ-checkout)
 checks discovery and optional model behavior in temporary global/project contexts;
 recorded outcomes and pending checks are in compatibility notes.
 
-The adapter CLI currently contains 16 assets: 11 skills, three agents, and two
-commands. A manual Claude Code runtime test was confirmed successful by the
-user on 2026-09-30. The package has not been published or tagged. The original
-[migration plan](docs/plans/core-adapter-migration.md) is historical context.
+The inventory below contains 16 assets: 11 skills, three agents, and two commands.
+
+## Verification
+
+See the [verification summary](docs/verification/README.md) for the latest
+per-stuff/harness results, missing coverage and stale evidence. New or revised
+stuff must pass real runtime scenarios on agreed targets before being reported
+verified. `npm test` checks implementation and record integrity; it does not
+prove every workflow works. The [testing guide](docs/testing.md) defines the
+required stages, evidence format and completion gate.
 
 ## Agents
 

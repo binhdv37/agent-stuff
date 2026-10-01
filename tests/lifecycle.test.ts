@@ -106,10 +106,8 @@ test('three adapters preserve resources and install into isolated scopes', async
     for (const scope of ['global', 'project']) {
       const context = await targetContext(scope, project, home, id);
       const files = adapter.render(skill, catalog);
-      {
-        await applyInstall(await planInstall(context, files, 'tests/fixtures'));
-        assert.equal(await readFile(path.join(context.target, `skills/${skill.definition.id}/references/handoff-template.md`), 'utf8'), skill.resources.get('references/handoff-template.md')!.toString());
-      }
+      await applyInstall(await planInstall(context, files, 'tests/fixtures'));
+      assert.equal(await readFile(path.join(context.target, `skills/${skill.definition.id}/references/handoff-template.md`), 'utf8'), skill.resources.get('references/handoff-template.md')!.toString());
     }
   }
   const codex = getAdapter('codex').render(skill, catalog);

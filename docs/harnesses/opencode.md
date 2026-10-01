@@ -4,6 +4,27 @@ Ngày đọc: **2026-09-30**. Có hai nhánh tài liệu chính thức: `/docs/`
 `/v2/docs/` cho V2. Adapter hiện tại dùng V1; bằng chứng phiên bản 1.18.x xem
 [compatibility](../compatibility.md). Không đổi native syntax theo V2 trong lượt này.
 
+## Baseline tham chiếu adapter — ghi nhận 2026-10-01
+
+Baseline này tổng hợp bằng chứng đã lưu; không phải lượt đọc docs/runtime mới.
+
+| Thuộc tính | Mốc tham chiếu |
+|---|---|
+| Adapter | `opencode`, revision `1`; `adapters/opencode/index.ts` |
+| Target mapping | Local OpenCode V1, `.opencode` project và `.config/opencode` global |
+| Binary dùng khi phát triển ban đầu | Chưa ghi nhận; các mốc runtime 1.18.32/1.18.33 được lưu riêng |
+| Ngày đọc docs đã lưu | 2026-09-30; nhánh `/docs/` V1, URL không pin vào release |
+| Nguồn mapping | [V1 Skills](https://opencode.ai/docs/skills/), [V1 Commands](https://opencode.ai/docs/commands/), [V1 Agents](https://opencode.ai/docs/agents/), [V1 Permissions](https://opencode.ai/docs/permissions/); các mục tương ứng bên dưới tóm tắt quy tắc |
+| Nguồn scoped write | [Write tool](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/write.ts), link nhánh `dev` không pin commit; tham chiếu đã lưu trong compatibility |
+| Quy tắc | Skill discovery; command inline workflow; role và singular `permission`, catch-all trước exceptions; explicit activation chỉ là prompt guard |
+| Tests | `tests/core-adapter.test.ts`, `tests/agent-policy.test.ts`, `tests/lifecycle.test.ts` |
+| Runtime tham chiếu | OpenCode 1.18.32/1.18.33, các ca và giới hạn trong [compatibility](../compatibility.md) |
+| Chưa xác minh | Không có version range được chứng minh; V2 chưa được mapping; nguồn code `dev` cần pin khi nghiên cứu lại |
+
+Phần V2 bên dưới là nghiên cứu cho mở rộng, không thuộc target của adapter
+revision 1. Khi đổi mapping, thêm baseline mới và giữ mốc này để đối chiếu theo
+[quy tắc hồ sơ](README.md).
+
 ## V1: skill và activation
 
 Discovery nhận `.opencode/skills/`, `~/.config/opencode/skills/`, cùng các location

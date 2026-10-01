@@ -4,6 +4,26 @@ Ngày đọc: **2026-09-30**. Phạm vi local Claude Code; docs có tính năng 
 bản, không mặc định binary của người dùng có mọi tính năng mới. Kết quả adapter
 và runtime xem [compatibility](../compatibility.md).
 
+## Baseline tham chiếu adapter — ghi nhận 2026-10-01
+
+Baseline này tổng hợp bằng chứng đã lưu; không phải lượt đọc docs/runtime mới.
+
+| Thuộc tính | Mốc tham chiếu |
+|---|---|
+| Adapter | `claude-code`, revision `1`; `adapters/claude-code/index.ts` |
+| Target mapping | Local Claude Code skill format, `.claude/skills`, global/project |
+| Binary dùng khi phát triển ban đầu | Chưa ghi nhận |
+| Ngày đọc docs đã lưu | 2026-09-30; URL docs không pin vào release |
+| Nguồn mapping | [Skills — discovery, invocation control và arguments](https://code.claude.com/docs/en/skills); quy tắc được tóm tắt ở mục Skill, command và activation bên dưới |
+| Quy tắc | Dịch activation sang `disable-model-invocation`, argument hint sang native frontmatter; không sinh command trùng skill; agent chưa mapping |
+| Tests | `tests/core-adapter.test.ts`, `tests/lifecycle.test.ts` |
+| Runtime tham chiếu | User xác nhận thủ công ngày 2026-09-30; chưa ghi binary version/scope/skill; xem [compatibility](../compatibility.md) |
+| Chưa xác minh | Không có version range được chứng minh; mốc tính năng v2.1.277 của guidance bên dưới không phải target version của skill adapter |
+
+Các mục agent, permission và guidance bên dưới là nghiên cứu nền tảng, không
+phải các mapping đã implement. Khi đổi mapping, thêm baseline mới và giữ mốc
+này để đối chiếu theo [quy tắc hồ sơ](README.md).
+
 ## Skill, command và activation
 
 Project skill ở `.claude/skills/<id>/SKILL.md`, user ở `~/.claude/skills/`.
