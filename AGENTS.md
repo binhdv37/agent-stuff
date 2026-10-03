@@ -51,6 +51,13 @@ problem, inspect existing stuff/contracts, and recommend a solution before
 requiring them to choose a stuff kind. Prefixes do not grant additional permission
 or require creating an asset. Ordinary prompts remain valid.
 
+## User communication
+
+After answering a user's question, proactively suggest a concrete next step
+appropriate to their goal and the current project state. Keep the suggestion
+brief and explain its purpose. If the work is complete, say so rather than
+inventing additional tasks. A suggestion does not authorize executing new work.
+
 ## Directory ownership
 
 | Directory | Purpose |
