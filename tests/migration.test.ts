@@ -8,13 +8,21 @@ import { loadCore } from '../tool/src/core/load.js';
 import { hash } from '../tool/src/installation/index.js';
 import { getAdapter } from '../tool/src/registry.js';
 
-test('migration preserves all skill instruction/resource bytes and activation modes', async () => {
+test('migration preserves baseline content except documented core revisions', async () => {
   const catalog = await loadCore('.');
   assert.equal(catalog.size, 16);
   const inventory = JSON.parse(await readFile('tests/fixtures/migration-inventory.json', 'utf8')) as { key: string; activation: string; hashes: Record<string, string> }[];
   assert.equal(inventory.length, 11);
   assert.equal(inventory.filter(a => a.activation === 'explicit').length, 9);
-  for (const expected of inventory) {
+  const revisions = JSON.parse(await readFile('tests/fixtures/content-revisions.json', 'utf8')) as
+    { key: string; reason: string; activation: string; hashes: Record<string, string> }[];
+  assert.equal(new Set(revisions.map(r => r.key)).size, revisions.length);
+  for (const revision of revisions) {
+    assert.ok(inventory.some(a => a.key === revision.key));
+    assert.ok(revision.reason.trim().length > 0);
+  }
+  for (const baseline of inventory) {
+    const expected = revisions.find(r => r.key === baseline.key) ?? baseline;
     const asset = catalog.get(expected.key)!;
     assert.equal(asset.definition.kind, 'skill');
     if (asset.definition.kind !== 'skill') throw new Error('Expected skill');

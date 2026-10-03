@@ -4,6 +4,16 @@ Kết quả từng stuff/harness nằm ở [verification](verification/README.md
 [testing guide](testing.md). Tài liệu này giữ khả năng và bằng chứng mapping
 adapter; probe hoặc discovery chung không chứng minh workflow từng asset đạt.
 
+Core `bdv-smart-commit` hiện là workflow nhẹ, explicit-only: đọc Git/file changes
+bằng tools thông thường, dùng context session để cảnh báo changes ngoài phạm vi,
+propose exact commands/message và đợi approval, rồi execute. Theo yêu cầu user,
+không còn snapshot, helper resources, mandatory recheck hay temporary storage.
+Push vẫn có read-only remote assessment và approval riêng. Mapping giữ nguyên:
+Codex policy false, Claude Code disable-model-invocation true, OpenCode description
+guard/limited. Không thêm native approval hoặc secret-scanning enforcement.
+Evidence các revision helper trước không xác nhận contract hiện tại; xem
+[verification](verification/README.md) và [revision history](migration.md).
+
 Cập nhật tài liệu ngày 2026-10-01; bằng chứng runtime bên dưới ghi nhận ngày
 2026-09-30. Các định dạng và giới hạn thuộc adapter hiện tại.
 

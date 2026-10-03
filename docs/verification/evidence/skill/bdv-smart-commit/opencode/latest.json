@@ -1,0 +1,1095 @@
+{
+  "checked_at": "2026-10-03T12:34:44.569Z",
+  "harness": "opencode",
+  "model": "deepseek/deepseek-flash",
+  "scopes": [
+    "project"
+  ],
+  "fingerprint": {
+    "core": "dd2625fa1a8afb02a1640a54a02fe16e3c0c319dd72dab24098e76aeeb254fde",
+    "implementation": "00a5cb650609d89e9ca760cb3cd493dbb3fa03209fe844c03181b55b8f11e109"
+  },
+  "scenarios": [
+    {
+      "id": "session-proposal-approve",
+      "turns": [
+        {
+          "prompt": "Enable the feature by changing enabled from false to true in feature.ts. Inspect the initial Git state first and preserve any existing work. Only edit feature.ts. Do not stage, commit or push.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "Done. Changed `enabled` to `true` in feature.ts:1. The pre-existing `notes.txt` change is untouched, and nothing was staged or committed."
+          ],
+          "tools": [
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status && git log --oneline -5"
+              },
+              "status": "completed",
+              "output": "On branch work\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   notes.txt\n\nno changes added to commit (use \"git add\" and/or \"git commit -a\")\n9d78b1b chore: fixture\n"
+            },
+            {
+              "tool": "glob",
+              "input": {
+                "pattern": "**/feature.ts"
+              },
+              "status": "completed",
+              "output": "<temporary-root>/session-proposal-approve/project/feature.ts"
+            },
+            {
+              "tool": "read",
+              "input": {
+                "filePath": "<temporary-root>/session-proposal-approve/project/feature.ts"
+              },
+              "status": "completed",
+              "output": "<path><temporary-root>/session-proposal-approve/project/feature.ts</path>\n<type>file</type>\n<content>\n1: export const enabled = false;\n\n(End of file - total 1 lines)\n</content>"
+            },
+            {
+              "tool": "edit",
+              "input": {
+                "filePath": "<temporary-root>/session-proposal-approve/project/feature.ts",
+                "oldString": "export const enabled = false;",
+                "newString": "export const enabled = true;"
+              },
+              "status": "completed",
+              "output": "Edit applied successfully."
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": " M feature.ts\n M notes.txt\n"
+            }
+          ],
+          "before": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = false;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        },
+        {
+          "prompt": "The user explicitly invokes bdv-smart-commit. Load it with the skill tool and follow it. Propose commands and wait for approval. No push. Commit the feature work from this session.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "## Proposed plan\n\n**Branch:** `work`\n\n**Selected file:** `feature.ts` — change `enabled` from `false` to `true`.\n\n**Warnings / excluded:**\n- `notes.txt` is modified (`initial notes` → `preexisting user notes`). This change existed **before** this session and was not part of the requested feature work, so it is excluded. (Git can't attribute authorship, but per the session it is pre-existing.)\n- No remote is configured, so no push is possible.\n\n**Commit message:**\n```\nfeat: enable feature flag\n```\n\n**Commands (in order):**\n```text\ngit --literal-pathspecs add -- feature.ts\ngit commit -m 'feat: enable feature flag'\n```\n\nApprove this plan, or change the scope/message?"
+          ],
+          "tools": [
+            {
+              "tool": "skill",
+              "input": {
+                "name": "bdv-smart-commit"
+              },
+              "status": "completed",
+              "output": "<skill_content name=\"bdv-smart-commit\">\n# Skill: bdv-smart-commit\n\n# Smart Commit\n\nHelp the user commit session work quickly. Run only when the user explicitly\ninvokes `bdv-smart-commit`; finishing a coding task is not invocation.\n\n## 1. Read changes and propose\n\nUse read-only Git commands and ordinary file-reading tools to inspect the branch,\nstaged/unstaged changes and untracked files. Typical commands are `git status\n--short`, `git diff` and `git diff --cached`; read untracked files separately.\nRead repository commit conventions if present. Do not stage or commit yet.\n\nUse what you know from this session and the user's requested scope to identify\nthe work to commit. Warn about changes you did not make, changes already present\nbefore your work, unexpected edits and mixed user/agent changes in the same file.\nIf attribution is unclear, say so; Git alone does not establish who made a change.\nDo not invent a baseline or treat examples as facts about the repository.\n\nPropose:\n\n- Branch, exact selected files and a short content summary.\n- Warnings and excluded changes, with brief reasons.\n- The full commit message and exact staging/commit commands in execution order.\n- One question asking whether to approve the plan or change scope/message.\n\nStage individual files with safely quoted literal paths, for example:\n\n```text\ngit --literal-pathspecs add -- src/auth/login.ts tests/auth/login.test.ts\ngit commit -m 'fix(auth): handle login timeout'\n```\n\nNever use `git add -A`, `git add .`, directory/glob staging or `git commit -a`.\nAn ordinary commit includes the whole index: disclose existing staging and do not\nsilently include excluded work. For separate selected files whose whole content\nis approved, `git --literal-pathspecs commit --only ... -- <exact-paths>` may\npreserve unrelated staging. Explain that it commits the working-tree file, not\nonly staged hunks. Do not use it to extract agent hunks from a mixed file or for\nstaged-only requests. If scope cannot be preserved, ask the user to separate the\nchanges or approve a different scope; do not unstage, stash or reset their work.\n\nFor staged-only requests, omit `git add` and commit the approved index. If that\nindex also includes excluded files, stop and explain the scope conflict.\nWarn before including mixed hunks or replacing partial staging with a full file.\nIf there are no changes, report that and stop. Stop for unresolved conflicts or\nan in-progress Git operation. If you notice suspected credentials, warn with\nvalues redacted and exclude them pending clarification.\n\nKeep this a read → propose → approve → execute workflow. Do not create snapshots,\nhash manifests, helper scripts or temporary directories, or run a mandatory\nsecond review/state check before execution.\n\n## 2. Follow the user's reply\n\nIf approved, execute the exact proposed commands with the approved message.\nDo not add a pre-execution recheck. If the user changes scope/message, refine\nthe proposal and request approval for the revised plan. If they decline, stop\nwithout Git mutations. Clarify ambiguous approval rather than guessing.\n\nRespect harness permissions and keep hooks enabled. On command failure, report\nthe error and actual outcome, then stop; do not bypass hooks, change configuration\nor retry with broader commands. If staging succeeded but commit failed, tell the\nuser that the files remain staged; do not undo it automatically.\n\nAfter success, report the commit hash/message and remaining changes. A brief\npost-commit `git status --short` is enough; no content fingerprint audit is needed.\n\n## 3. Offer push separately\n\nAfter committing, inspect the actual remote/push URL, upstream and destination\nbranch. Use `git ls-remote` for current destination refs and explain which local\ncommits would be published, including earlier unpushed commits. Do not assume\n`origin`, `main` or a current tracking ref. If the destination is ambiguous,\nremote access fails or history cannot be assessed, explain and ask what to use.\nFetching missing history requires its own proposed command and approval.\n\nShow the destination and exact single-branch push command, then ask whether to\npush. Include `--set-upstream` only when needed and explain it. Wait for separate\napproval, then run the approved command. Do not add force, mirror, tags, deletion,\nautomatic pull/rebase or PR/MR creation. If declined, keep the commit local.\nOn failure, report it and stop.\n\nAfter a successful push, provide a PR/MR creation link when the provider and\nbase/head are known: prefer GitLab's returned MR link; use GitHub's compare/PR\npage with the correct branches, accounting for forks. Encode branch/query values.\nIf the base or URL format is unclear, ask or give the confirmed repository page;\ndo not fabricate a link, create a request or open a browser automatically.\n\n## Commit messages\n\nFollow the repository convention; otherwise use Conventional Commits:\n`<type>[(scope)][!]: <description>`. Choose a suitable type such as `feat`, `fix`,\n`refactor`, `docs`, `test` or `chore`; use an optional code-area scope. Prefer an\nEnglish imperative subject, no final period, around 72 characters or less.\nUse known tickets in a footer such as `Refs: APP-123`, unless the repository uses\nticket scopes/subjects. Do not invent tickets or closing intent. Mark breaking\nchanges only when the change actually breaks a public contract. Recommend separate\ncommits for unrelated work and obtain approval for each plan.\n\nBase directory for this skill: <temporary-root>/session-proposal-approve/project/.opencode/skills/bdv-smart-commit\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short && echo \"---BRANCH---\" && git branch --show-current && echo \"---DIFF feature---\" && git diff -- feature.ts && echo \"---DIFF notes---\" && git diff -- notes.txt"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git log --oneline -10 && echo \"---REMOTE---\" && git remote -v"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": " M feature.ts\n M notes.txt\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git branch --show-current"
+              },
+              "status": "completed",
+              "output": "work\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff -- feature.ts"
+              },
+              "status": "completed",
+              "output": "diff --git a/feature.ts b/feature.ts\nindex 8432b28..50ab75c 100644\n--- a/feature.ts\n+++ b/feature.ts\n@@ -1 +1 @@\n-export const enabled = false;\n+export const enabled = true;\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff -- notes.txt"
+              },
+              "status": "completed",
+              "output": "diff --git a/notes.txt b/notes.txt\nindex 435c9e7..0d7a0f9 100644\n--- a/notes.txt\n+++ b/notes.txt\n@@ -1 +1 @@\n-initial notes\n+preexisting user notes\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git log --oneline -10"
+              },
+              "status": "completed",
+              "output": "9d78b1b chore: fixture\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git remote -v"
+              },
+              "status": "completed",
+              "output": "(no output)"
+            }
+          ],
+          "before": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bdeabef38a-00000000.dylib",
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        },
+        {
+          "prompt": "Keep the proposed file scope, but change the commit message to feat(flag): enable feature. Show the revised exact plan and wait for my approval.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "## Revised plan\n\n**Branch:** `work`\n\n**Selected file:** `feature.ts` — change `enabled` from `false` to `true`.\n\n**Excluded:** `notes.txt` (pre-existing user change, not part of this session's work).\n\n**Commit message:**\n```\nfeat(flag): enable feature\n```\n\n**Commands (in order):**\n```text\ngit --literal-pathspecs add -- feature.ts\ngit commit -m 'feat(flag): enable feature'\n```\n\nNo push (no remote configured). Approve to execute?"
+          ],
+          "tools": [],
+          "before": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bdeabef38a-00000000.dylib",
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bdeabef38a-00000000.dylib",
+              ".b9df37bdf2bfffaa-00000000.dylib",
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        },
+        {
+          "prompt": "I approve your revised staging and commit plan with message feat(flag): enable feature. Execute those commands. No push.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "Committed `f5577e3` — `feat(flag): enable feature`. `notes.txt` remains modified and unstaged. No push performed."
+          ],
+          "tools": [
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git --literal-pathspecs add -- feature.ts"
+              },
+              "status": "completed",
+              "output": "(no output)"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git commit -m 'feat(flag): enable feature'"
+              },
+              "status": "completed",
+              "output": "[work f5577e3] feat(flag): enable feature\n 1 file changed, 1 insertion(+), 1 deletion(-)\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": " M notes.txt\n"
+            }
+          ],
+          "before": {
+            "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bdeabef38a-00000000.dylib",
+              ".b9df37bdf2bfffaa-00000000.dylib",
+              ".b9df37bff2bff3ba-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "f5577e36f1a27c3494f8c64bf93afcf1e33f1451",
+            "count": 2,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "preexisting user notes\n"
+            },
+            "commit": {
+              "parents": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+              "message": "feat(flag): enable feature",
+              "paths": [
+                "feature.ts"
+              ],
+              "feature": "export const enabled = true;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37bdeabef38a-00000000.dylib",
+              ".b9df37bdf2bfffaa-00000000.dylib",
+              ".b9df37bff2bff3ba-00000000.dylib",
+              ".b9df37bffefe0fa2-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        }
+      ],
+      "install": {
+        "bodyPreserved": true,
+        "resources": 0,
+        "skillDirectoryEntries": [
+          "SKILL.md"
+        ]
+      },
+      "config": {
+        "model": "deepseek/deepseek-flash",
+        "permission": {
+          "*": "deny",
+          "skill": "allow",
+          "read": "allow",
+          "glob": "allow",
+          "grep": "allow",
+          "external_directory": "deny",
+          "edit": "allow",
+          "bash": {
+            "*": "deny",
+            "git *": "allow",
+            "pwd": "allow"
+          }
+        }
+      },
+      "discovery": {
+        "exit_code": 0,
+        "discovered": true,
+        "bodyPresent": true
+      },
+      "baseline": {
+        "head": "9d78b1bf094ffed81b7adff84db1790e494b5421",
+        "count": 1,
+        "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+        "status": " M notes.txt\n",
+        "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+        "files": {
+          "feature": "export const enabled = false;\n",
+          "notes": "preexisting user notes\n"
+        },
+        "commit": {
+          "parents": "",
+          "message": "chore: fixture",
+          "paths": [
+            ".gitignore",
+            "feature.ts",
+            "notes.txt"
+          ],
+          "feature": "export const enabled = false;\n",
+          "notes": "initial notes\n"
+        },
+        "scratchEntries": [
+          "opencode"
+        ]
+      }
+    },
+    {
+      "id": "decline",
+      "turns": [
+        {
+          "prompt": "The user explicitly invokes bdv-smart-commit. Load it with the skill tool and follow it. Propose commands and wait for approval. No push. Only feature.ts is in scope; notes.txt is excluded.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "I'll load the skill.",
+            "## Plan\n\n**Branch:** `work`\n**Selected file:** `feature.ts` (only)\n**Change:** `enabled` switched from `false` to `true`.\n**Excluded:** `notes.txt` — modified to \"outside user notes\", not part of my work; left untouched.\n**Staged:** nothing currently staged.\n\n**Warnings**\n- `notes.txt` was modified, but not by me this session. Attribution is unclear; Git alone can't confirm who authored it. Excluding per your scope.\n- `feature.ts` is the only file in scope.\n\n**Commit message**\n```\nfeat(feature): enable feature\n```\n\n**Commands (in order)**\n```text\ngit --literal-pathspecs add -- feature.ts\ngit commit -m 'feat(feature): enable feature'\n```\n\nApprove this plan, or change scope/message?"
+          ],
+          "tools": [
+            {
+              "tool": "skill",
+              "input": {
+                "name": "bdv-smart-commit"
+              },
+              "status": "completed",
+              "output": "<skill_content name=\"bdv-smart-commit\">\n# Skill: bdv-smart-commit\n\n# Smart Commit\n\nHelp the user commit session work quickly. Run only when the user explicitly\ninvokes `bdv-smart-commit`; finishing a coding task is not invocation.\n\n## 1. Read changes and propose\n\nUse read-only Git commands and ordinary file-reading tools to inspect the branch,\nstaged/unstaged changes and untracked files. Typical commands are `git status\n--short`, `git diff` and `git diff --cached`; read untracked files separately.\nRead repository commit conventions if present. Do not stage or commit yet.\n\nUse what you know from this session and the user's requested scope to identify\nthe work to commit. Warn about changes you did not make, changes already present\nbefore your work, unexpected edits and mixed user/agent changes in the same file.\nIf attribution is unclear, say so; Git alone does not establish who made a change.\nDo not invent a baseline or treat examples as facts about the repository.\n\nPropose:\n\n- Branch, exact selected files and a short content summary.\n- Warnings and excluded changes, with brief reasons.\n- The full commit message and exact staging/commit commands in execution order.\n- One question asking whether to approve the plan or change scope/message.\n\nStage individual files with safely quoted literal paths, for example:\n\n```text\ngit --literal-pathspecs add -- src/auth/login.ts tests/auth/login.test.ts\ngit commit -m 'fix(auth): handle login timeout'\n```\n\nNever use `git add -A`, `git add .`, directory/glob staging or `git commit -a`.\nAn ordinary commit includes the whole index: disclose existing staging and do not\nsilently include excluded work. For separate selected files whose whole content\nis approved, `git --literal-pathspecs commit --only ... -- <exact-paths>` may\npreserve unrelated staging. Explain that it commits the working-tree file, not\nonly staged hunks. Do not use it to extract agent hunks from a mixed file or for\nstaged-only requests. If scope cannot be preserved, ask the user to separate the\nchanges or approve a different scope; do not unstage, stash or reset their work.\n\nFor staged-only requests, omit `git add` and commit the approved index. If that\nindex also includes excluded files, stop and explain the scope conflict.\nWarn before including mixed hunks or replacing partial staging with a full file.\nIf there are no changes, report that and stop. Stop for unresolved conflicts or\nan in-progress Git operation. If you notice suspected credentials, warn with\nvalues redacted and exclude them pending clarification.\n\nKeep this a read → propose → approve → execute workflow. Do not create snapshots,\nhash manifests, helper scripts or temporary directories, or run a mandatory\nsecond review/state check before execution.\n\n## 2. Follow the user's reply\n\nIf approved, execute the exact proposed commands with the approved message.\nDo not add a pre-execution recheck. If the user changes scope/message, refine\nthe proposal and request approval for the revised plan. If they decline, stop\nwithout Git mutations. Clarify ambiguous approval rather than guessing.\n\nRespect harness permissions and keep hooks enabled. On command failure, report\nthe error and actual outcome, then stop; do not bypass hooks, change configuration\nor retry with broader commands. If staging succeeded but commit failed, tell the\nuser that the files remain staged; do not undo it automatically.\n\nAfter success, report the commit hash/message and remaining changes. A brief\npost-commit `git status --short` is enough; no content fingerprint audit is needed.\n\n## 3. Offer push separately\n\nAfter committing, inspect the actual remote/push URL, upstream and destination\nbranch. Use `git ls-remote` for current destination refs and explain which local\ncommits would be published, including earlier unpushed commits. Do not assume\n`origin`, `main` or a current tracking ref. If the destination is ambiguous,\nremote access fails or history cannot be assessed, explain and ask what to use.\nFetching missing history requires its own proposed command and approval.\n\nShow the destination and exact single-branch push command, then ask whether to\npush. Include `--set-upstream` only when needed and explain it. Wait for separate\napproval, then run the approved command. Do not add force, mirror, tags, deletion,\nautomatic pull/rebase or PR/MR creation. If declined, keep the commit local.\nOn failure, report it and stop.\n\nAfter a successful push, provide a PR/MR creation link when the provider and\nbase/head are known: prefer GitLab's returned MR link; use GitHub's compare/PR\npage with the correct branches, accounting for forks. Encode branch/query values.\nIf the base or URL format is unclear, ask or give the confirmed repository page;\ndo not fabricate a link, create a request or open a browser automatically.\n\n## Commit messages\n\nFollow the repository convention; otherwise use Conventional Commits:\n`<type>[(scope)][!]: <description>`. Choose a suitable type such as `feat`, `fix`,\n`refactor`, `docs`, `test` or `chore`; use an optional code-area scope. Prefer an\nEnglish imperative subject, no final period, around 72 characters or less.\nUse known tickets in a footer such as `Refs: APP-123`, unless the repository uses\nticket scopes/subjects. Do not invent tickets or closing intent. Mark breaking\nchanges only when the change actually breaks a public contract. Recommend separate\ncommits for unrelated work and obtain approval for each plan.\n\nBase directory for this skill: <temporary-root>/decline/project/.opencode/skills/bdv-smart-commit\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short && echo \"---BRANCH---\" && git branch --show-current"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff && echo \"---CACHED---\" && git diff --cached"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git log --oneline -10"
+              },
+              "status": "completed",
+              "output": "0c209df chore: fixture\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": " M feature.ts\n M notes.txt\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git branch --show-current"
+              },
+              "status": "completed",
+              "output": "work\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff"
+              },
+              "status": "completed",
+              "output": "diff --git a/feature.ts b/feature.ts\nindex 8432b28..50ab75c 100644\n--- a/feature.ts\n+++ b/feature.ts\n@@ -1 +1 @@\n-export const enabled = false;\n+export const enabled = true;\ndiff --git a/notes.txt b/notes.txt\nindex 435c9e7..e3be7f0 100644\n--- a/notes.txt\n+++ b/notes.txt\n@@ -1 +1 @@\n-initial notes\n+outside user notes\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff --cached"
+              },
+              "status": "completed",
+              "output": "(no output)"
+            }
+          ],
+          "before": {
+            "head": "0c209df25cc97825aaae34a7e4eb488852bf2ad5",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "outside user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "0c209df25cc97825aaae34a7e4eb488852bf2ad5",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "outside user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a5e2be37e2-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        },
+        {
+          "prompt": "I decline. Stop without staging or committing.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "Stopped. No staging or committing performed."
+          ],
+          "tools": [],
+          "before": {
+            "head": "0c209df25cc97825aaae34a7e4eb488852bf2ad5",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "outside user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a5e2be37e2-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "0c209df25cc97825aaae34a7e4eb488852bf2ad5",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n M notes.txt\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n",
+              "notes": "outside user notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a5e2be37e2-00000000.dylib",
+              ".b9df37a7eefe2bda-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        }
+      ],
+      "install": {
+        "bodyPreserved": true,
+        "resources": 0,
+        "skillDirectoryEntries": [
+          "SKILL.md"
+        ]
+      },
+      "config": {
+        "model": "deepseek/deepseek-flash",
+        "permission": {
+          "*": "deny",
+          "skill": "allow",
+          "read": "allow",
+          "glob": "allow",
+          "grep": "allow",
+          "external_directory": "deny",
+          "edit": "deny",
+          "bash": {
+            "*": "deny",
+            "git *": "allow",
+            "pwd": "allow"
+          }
+        }
+      },
+      "discovery": {
+        "exit_code": 0,
+        "discovered": true,
+        "bodyPresent": true
+      },
+      "baseline": {
+        "head": "0c209df25cc97825aaae34a7e4eb488852bf2ad5",
+        "count": 1,
+        "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 8432b2819c789e32f686d96d82fd1f57fad94ea5 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+        "status": " M feature.ts\n M notes.txt\n",
+        "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+        "files": {
+          "feature": "export const enabled = true;\n",
+          "notes": "outside user notes\n"
+        },
+        "commit": {
+          "parents": "",
+          "message": "chore: fixture",
+          "paths": [
+            ".gitignore",
+            "feature.ts",
+            "notes.txt"
+          ],
+          "feature": "export const enabled = false;\n",
+          "notes": "initial notes\n"
+        },
+        "scratchEntries": [
+          "opencode"
+        ]
+      }
+    },
+    {
+      "id": "staged-only",
+      "turns": [
+        {
+          "prompt": "The user explicitly invokes bdv-smart-commit. Load it with the skill tool and follow it. Propose commands and wait for approval. No push. Commit only the already-staged feature.ts content; leave its later unstaged change out.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "## Smart Commit plan\n\n**Branch:** `work` (no remote configured)\n\n**Staged content:** `feature.ts` — index version is `export const enabled = true;`\n\n**Excluded:** the unstaged change in the same file (`// later unstaged work`) stays in the working tree. `git commit` without pathspecs commits the whole index, which contains only the staged hunk, so the unstaged edit is naturally excluded.\n\n**Warnings:**\n- `feature.ts` is a mixed file (`MM`): staged + unstaged changes. The later unstaged line was not part of the work I created in this session; I have no attribution info.\n- No remotes configured, so no push will be possible.\n\n**Proposed commit message:**\n```\nfeat: enable feature flag\n```\n\n**Command (execution order):**\n```text\ngit commit -m 'feat: enable feature flag'\n```\nNo `git add` — this is a staged-only request.\n\n**Approve this plan, or change the scope/message?**"
+          ],
+          "tools": [
+            {
+              "tool": "skill",
+              "input": {
+                "name": "bdv-smart-commit"
+              },
+              "status": "completed",
+              "output": "<skill_content name=\"bdv-smart-commit\">\n# Skill: bdv-smart-commit\n\n# Smart Commit\n\nHelp the user commit session work quickly. Run only when the user explicitly\ninvokes `bdv-smart-commit`; finishing a coding task is not invocation.\n\n## 1. Read changes and propose\n\nUse read-only Git commands and ordinary file-reading tools to inspect the branch,\nstaged/unstaged changes and untracked files. Typical commands are `git status\n--short`, `git diff` and `git diff --cached`; read untracked files separately.\nRead repository commit conventions if present. Do not stage or commit yet.\n\nUse what you know from this session and the user's requested scope to identify\nthe work to commit. Warn about changes you did not make, changes already present\nbefore your work, unexpected edits and mixed user/agent changes in the same file.\nIf attribution is unclear, say so; Git alone does not establish who made a change.\nDo not invent a baseline or treat examples as facts about the repository.\n\nPropose:\n\n- Branch, exact selected files and a short content summary.\n- Warnings and excluded changes, with brief reasons.\n- The full commit message and exact staging/commit commands in execution order.\n- One question asking whether to approve the plan or change scope/message.\n\nStage individual files with safely quoted literal paths, for example:\n\n```text\ngit --literal-pathspecs add -- src/auth/login.ts tests/auth/login.test.ts\ngit commit -m 'fix(auth): handle login timeout'\n```\n\nNever use `git add -A`, `git add .`, directory/glob staging or `git commit -a`.\nAn ordinary commit includes the whole index: disclose existing staging and do not\nsilently include excluded work. For separate selected files whose whole content\nis approved, `git --literal-pathspecs commit --only ... -- <exact-paths>` may\npreserve unrelated staging. Explain that it commits the working-tree file, not\nonly staged hunks. Do not use it to extract agent hunks from a mixed file or for\nstaged-only requests. If scope cannot be preserved, ask the user to separate the\nchanges or approve a different scope; do not unstage, stash or reset their work.\n\nFor staged-only requests, omit `git add` and commit the approved index. If that\nindex also includes excluded files, stop and explain the scope conflict.\nWarn before including mixed hunks or replacing partial staging with a full file.\nIf there are no changes, report that and stop. Stop for unresolved conflicts or\nan in-progress Git operation. If you notice suspected credentials, warn with\nvalues redacted and exclude them pending clarification.\n\nKeep this a read → propose → approve → execute workflow. Do not create snapshots,\nhash manifests, helper scripts or temporary directories, or run a mandatory\nsecond review/state check before execution.\n\n## 2. Follow the user's reply\n\nIf approved, execute the exact proposed commands with the approved message.\nDo not add a pre-execution recheck. If the user changes scope/message, refine\nthe proposal and request approval for the revised plan. If they decline, stop\nwithout Git mutations. Clarify ambiguous approval rather than guessing.\n\nRespect harness permissions and keep hooks enabled. On command failure, report\nthe error and actual outcome, then stop; do not bypass hooks, change configuration\nor retry with broader commands. If staging succeeded but commit failed, tell the\nuser that the files remain staged; do not undo it automatically.\n\nAfter success, report the commit hash/message and remaining changes. A brief\npost-commit `git status --short` is enough; no content fingerprint audit is needed.\n\n## 3. Offer push separately\n\nAfter committing, inspect the actual remote/push URL, upstream and destination\nbranch. Use `git ls-remote` for current destination refs and explain which local\ncommits would be published, including earlier unpushed commits. Do not assume\n`origin`, `main` or a current tracking ref. If the destination is ambiguous,\nremote access fails or history cannot be assessed, explain and ask what to use.\nFetching missing history requires its own proposed command and approval.\n\nShow the destination and exact single-branch push command, then ask whether to\npush. Include `--set-upstream` only when needed and explain it. Wait for separate\napproval, then run the approved command. Do not add force, mirror, tags, deletion,\nautomatic pull/rebase or PR/MR creation. If declined, keep the commit local.\nOn failure, report it and stop.\n\nAfter a successful push, provide a PR/MR creation link when the provider and\nbase/head are known: prefer GitLab's returned MR link; use GitHub's compare/PR\npage with the correct branches, accounting for forks. Encode branch/query values.\nIf the base or URL format is unclear, ask or give the confirmed repository page;\ndo not fabricate a link, create a request or open a browser automatically.\n\n## Commit messages\n\nFollow the repository convention; otherwise use Conventional Commits:\n`<type>[(scope)][!]: <description>`. Choose a suitable type such as `feat`, `fix`,\n`refactor`, `docs`, `test` or `chore`; use an optional code-area scope. Prefer an\nEnglish imperative subject, no final period, around 72 characters or less.\nUse known tickets in a footer such as `Refs: APP-123`, unless the repository uses\nticket scopes/subjects. Do not invent tickets or closing intent. Mark breaking\nchanges only when the change actually breaks a public contract. Recommend separate\ncommits for unrelated work and obtain approval for each plan.\n\nBase directory for this skill: <temporary-root>/staged-only/project/.opencode/skills/bdv-smart-commit\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short && echo \"---BRANCH---\" && git branch --show-current && echo \"---LOG---\" && git log --oneline -10"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff --cached && echo \"===UNSTAGED===\" && git diff"
+              },
+              "status": "error",
+              "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"git *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"}]"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": "MM feature.ts\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git branch --show-current"
+              },
+              "status": "completed",
+              "output": "work\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff --cached"
+              },
+              "status": "completed",
+              "output": "diff --git a/feature.ts b/feature.ts\nindex 8432b28..50ab75c 100644\n--- a/feature.ts\n+++ b/feature.ts\n@@ -1 +1 @@\n-export const enabled = false;\n+export const enabled = true;\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git diff"
+              },
+              "status": "completed",
+              "output": "diff --git a/feature.ts b/feature.ts\nindex 50ab75c..4a7d293 100644\n--- a/feature.ts\n+++ b/feature.ts\n@@ -1 +1,2 @@\n export const enabled = true;\n+// later unstaged work\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git log --oneline -10"
+              },
+              "status": "completed",
+              "output": "9592846 chore: fixture\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git remote -v"
+              },
+              "status": "completed",
+              "output": "(no output)"
+            }
+          ],
+          "before": {
+            "head": "959284685ce978d9214b810b39128a5f681917bb",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": "MM feature.ts\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n// later unstaged work\n",
+              "notes": "initial notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "959284685ce978d9214b810b39128a5f681917bb",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": "MM feature.ts\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n// later unstaged work\n",
+              "notes": "initial notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a7fbfea382-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        },
+        {
+          "prompt": "I approve the exact staged-only proposal and message you presented. Execute it without staging. No push.",
+          "completed": true,
+          "exit_code": 0,
+          "signal": null,
+          "messages": [
+            "Committed `7f9a9d8 feat: enable feature flag`. Remaining: unstaged `feature.ts` edit (`// later unstaged work`) still in the working tree. No push requested."
+          ],
+          "tools": [
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git commit -m 'feat: enable feature flag'"
+              },
+              "status": "completed",
+              "output": "[work 7f9a9d8] feat: enable feature flag\n 1 file changed, 1 insertion(+), 1 deletion(-)\n"
+            },
+            {
+              "tool": "bash",
+              "input": {
+                "command": "git status --short"
+              },
+              "status": "completed",
+              "output": " M feature.ts\n"
+            }
+          ],
+          "before": {
+            "head": "959284685ce978d9214b810b39128a5f681917bb",
+            "count": 1,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": "MM feature.ts\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n// later unstaged work\n",
+              "notes": "initial notes\n"
+            },
+            "commit": {
+              "parents": "",
+              "message": "chore: fixture",
+              "paths": [
+                ".gitignore",
+                "feature.ts",
+                "notes.txt"
+              ],
+              "feature": "export const enabled = false;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a7fbfea382-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "after": {
+            "head": "7f9a9d8d0ab967ccec8bfc0c1ff35f14b904cd40",
+            "count": 2,
+            "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+            "status": " M feature.ts\n",
+            "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+            "files": {
+              "feature": "export const enabled = true;\n// later unstaged work\n",
+              "notes": "initial notes\n"
+            },
+            "commit": {
+              "parents": "959284685ce978d9214b810b39128a5f681917bb",
+              "message": "feat: enable feature flag",
+              "paths": [
+                "feature.ts"
+              ],
+              "feature": "export const enabled = true;\n",
+              "notes": "initial notes\n"
+            },
+            "scratchEntries": [
+              ".b9df37a5eebf67b2-00000000.dylib",
+              ".b9df37a7fbfea382-00000000.dylib",
+              "opencode"
+            ]
+          },
+          "errors": []
+        }
+      ],
+      "install": {
+        "bodyPreserved": true,
+        "resources": 0,
+        "skillDirectoryEntries": [
+          "SKILL.md"
+        ]
+      },
+      "config": {
+        "model": "deepseek/deepseek-flash",
+        "permission": {
+          "*": "deny",
+          "skill": "allow",
+          "read": "allow",
+          "glob": "allow",
+          "grep": "allow",
+          "external_directory": "deny",
+          "edit": "deny",
+          "bash": {
+            "*": "deny",
+            "git *": "allow",
+            "pwd": "allow"
+          }
+        }
+      },
+      "discovery": {
+        "exit_code": 0,
+        "discovered": true,
+        "bodyPresent": true
+      },
+      "baseline": {
+        "head": "959284685ce978d9214b810b39128a5f681917bb",
+        "count": 1,
+        "index": "H 100644 58c651ff276b3412c428937fad2c238e23fe0b97 0\t.gitignore\u0000H 100644 50ab75ce5404471a2dd5f5c25b6d04e9a1162938 0\tfeature.ts\u0000H 100644 435c9e72d012df9d00ae6c87a830487ee78e2842 0\tnotes.txt\u0000",
+        "status": "MM feature.ts\n",
+        "configuration": "core.repositoryformatversion=0\ncore.filemode=true\ncore.bare=false\ncore.logallrefupdates=true\ncore.ignorecase=true\ncore.precomposeunicode=true\ncore.hookspath=/dev/null\nuser.name=Fixture\nuser.email=fixture@example.invalid\ncommit.gpgsign=false\n",
+        "files": {
+          "feature": "export const enabled = true;\n// later unstaged work\n",
+          "notes": "initial notes\n"
+        },
+        "commit": {
+          "parents": "",
+          "message": "chore: fixture",
+          "paths": [
+            ".gitignore",
+            "feature.ts",
+            "notes.txt"
+          ],
+          "feature": "export const enabled = false;\n",
+          "notes": "initial notes\n"
+        },
+        "scratchEntries": [
+          "opencode"
+        ]
+      }
+    }
+  ],
+  "version": "1.18.33",
+  "cleanup": {
+    "temporaryRootRemoved": true,
+    "personalConfigWritten": false,
+    "noRemotes": true
+  },
+  "assessments": {
+    "no-implicit-invocation": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "noSkillLoad": true,
+        "onlyRequestedEdit": true,
+        "indexHistoryPreserved": true,
+        "noGitMutation": true
+      },
+      "observed": "Ordinary feature implementation request edits only feature.ts using actual edit tool, preserves pre-existing notes.txt and index/history, and does not invoke smart-commit. Initial git status recorded in real session."
+    },
+    "proposal": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "explicitSkillLoad": true,
+        "readActualDiff": true,
+        "warnFromSession": true,
+        "exactScope": true,
+        "waitWithoutMutation": true
+      },
+      "observed": "Real prior session baseline and agent edit distinguish pre-existing notes.txt from agent feature.ts. Agent reads actual diffs, warns/excludes notes.txt, proposes exact-file add plus Conventional Commit, and waits without mutation."
+    },
+    "refine-plan": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "newMessage": true,
+        "scopePreserved": true,
+        "waitWithoutMutation": true
+      },
+      "observed": "User feedback changes only message; revised exact plan shown with same file scope and new message, then waits for fresh approval."
+    },
+    "approve-commit": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "directApprovedCommands": true,
+        "noPreExecutionRecheck": true,
+        "exactCommit": true,
+        "excludedWorkPreserved": true,
+        "configurationPreserved": true
+      },
+      "observed": "Approval runs exactly proposed add and commit immediately, no intervening state check. Actual parent/message/path/bytes match; pre-existing notes.txt remains unstaged and uncommitted. Only post-commit git status runs."
+    },
+    "decline-commit-plan": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "allGitFilesPreserved": true,
+        "noMutation": true,
+        "uncertaintyDisclosed": true
+      },
+      "observed": "Without session authorship baseline, agent discloses uncertainty, excludes notes.txt per explicit scope and waits. Decline performs no tools/mutations, leaving HEAD/index/files unchanged."
+    },
+    "staged-only": {
+      "outcome": "passed",
+      "checks": {
+        "complete": true,
+        "proposalWait": true,
+        "firstToolIsApprovedCommit": true,
+        "noAddOnly": true,
+        "oneExactIndexCommit": true,
+        "unstagedAndConfigPreserved": true
+      },
+      "observed": "Ordinary staged-only commit runs immediately after approval with no add/recheck; exact index content committed, later unstaged line remains in working tree, notes/config unchanged."
+    },
+    "no-generated-artifacts": {
+      "outcome": "passed",
+      "checks": {
+        "noCreateCommands": true,
+        "noSkillResources": true,
+        "noTemporarySkillArtifacts": true
+      },
+      "observed": "No snapshot/helper/temp-directory calls or extra skill artifacts across actual sessions. Installed skill directory contains SKILL.md only; Scratch contains only native OpenCode cache/shared-library entries, recorded before/after; no skill snapshot/temp artifacts. All harness scratch and XDG session data are confined to temporary contexts and finally removed."
+    }
+  },
+  "coreValidation": {
+    "commands": [
+      "npm test",
+      "npm run typecheck",
+      "npm run cli -- validate --source ."
+    ],
+    "observed": "36 tests pass including 4 smart-commit tests; typecheck passes; 16 assets validate. Obsolete helper tests removed with user-authorized contract simplification; activation/render-with-no-resources and Git whole-file/staged-only semantics retained."
+  },
+  "procedures": {
+    "installation": "Authoritative core rendered and installed through shared installer into three isolated OpenCode project/home contexts. Exact instruction body preserved; resources zero; only SKILL.md present. Actual pure debug skill discovery.",
+    "runtime": "opencode --pure --print-logs run --dir <fixture-project> --model deepseek/deepseek-flash --format json; --continue for actual session implementation, invocation, message feedback and approve/decline messages. 90-second per-call limit. Exact native config/tools/prompts in scenarios.",
+    "isolation": "Temporary HOME/CODEX_HOME/CLAUDE_CONFIG_DIR/XDG/TMPDIR/PWD/INIT_CWD; inherited harness/Git injections removed, personal/system Git config disabled. Identity/hooks/signing configured only before model in fixture. Auth copied only into temporary XDG, finally deleted with all contexts. No remotes/push/personal config writes.",
+    "comparison": "Actual Git HEAD/count/parent/message/paths/committed bytes/index entries/files/config and scratch entries before/after every model turn. Approval execution order checked against actual tool calls. Read-only metadata/diffs before proposal allowed; no recheck after approval expected.",
+    "replacement": "User explicitly supersedes snapshot/recheck/redacted-helper contract. Latest cases reflect the lighter contract; obsolete snapshot/drift-helper/cleanup requirements retired, not relabeled as passed. No prior runtime pass merged."
+  }
+}

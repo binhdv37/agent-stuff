@@ -1,0 +1,267 @@
+schema_version: 1
+asset: skill/bdv-smart-commit
+harness: opencode
+checked_at: 2026-10-03T12:34:44.569Z
+fingerprint:
+  core: dd2625fa1a8afb02a1640a54a02fe16e3c0c319dd72dab24098e76aeeb254fde
+  implementation: 00a5cb650609d89e9ca760cb3cd493dbb3fa03209fe844c03181b55b8f11e109
+environment:
+  harness_version: 1.18.33
+  adapter_revision: 1
+  model: deepseek/deepseek-flash
+  scopes:
+    - project
+  platform: macOS
+  configuration: Three isolated pure OpenCode project/home/XDG contexts. Real
+    session edit, invocation/proposal/message feedback/approval, decline and
+    staged-only. Normal Git/file tools; no helper resources or temporary
+    workflow artifacts. No remotes. Exact native permissions in latest.json.
+contract: Explicit user invocation; ordinary read-only change review and
+  session-based warnings; exact staging/message/commands proposed, wait for
+  approval then execute without snapshots/pre-execution recheck. Separate remote
+  assessment and push approval; Conventional Commits.
+cases:
+  - id: core-content-validation
+    stage: core
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Valid core asset and meaningful activation/Git-semantics tests.
+    observed: 36 tests pass including 4 smart-commit tests; typecheck passes; 16
+      assets validate. Obsolete helper tests removed with user-authorized
+      contract simplification; activation/render-with-no-resources and Git
+      whole-file/staged-only semantics retained.
+    outcome: passed
+    evidence: &a1
+      - path: evidence/skill/bdv-smart-commit/opencode/latest.json
+        sha256: 27b8ec61dc3b44be5ccf310065e1f988880c2325183e385c8a7625690cdd0e18
+  - id: install-project
+    stage: render-install
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Current workflow renders/installs without helper resources.
+    observed: '[{"id":"session-proposal-approve","bodyPreserved":true,"resources":0,"skillDirectoryEntries":["SKILL.md"]},{"id":"decline","bodyPreserved":true,"resources":0,"skillDirectoryEntries":["SKILL.md"]},{"id":"staged-only","bodyPreserved":true,"resources":0,"skillDirectoryEntries":["SKILL.md"]}]'
+    outcome: passed
+    evidence: *a1
+  - id: discovery-project
+    stage: discovery
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Real harness discovers current installed lightweight workflow.
+    observed: '[{"id":"session-proposal-approve","exit_code":0,"discovered":true,"bodyPresent":true},{"id":"decline","exit_code":0,"discovered":true,"bodyPresent":true},{"id":"staged-only","exit_code":0,"discovered":true,"bodyPresent":true}]'
+    outcome: passed
+    evidence: *a1
+  - id: no-implicit-invocation
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Ordinary implementation does not invoke skill or mutate Git history/index.
+    observed: 'Ordinary feature implementation request edits only feature.ts using
+      actual edit tool, preserves pre-existing notes.txt and index/history, and
+      does not invoke smart-commit. Initial git status recorded in real session.
+      Assertions:
+      {"complete":true,"noSkillLoad":true,"onlyRequestedEdit":true,"indexHistoryPreserved":true,"noGitMutation":true}'
+    outcome: passed
+    evidence: *a1
+  - id: proposal
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Read actual changes, warn/exclude session-unrelated work, propose
+      exact files/message/commands and wait without mutations.
+    observed: 'Real prior session baseline and agent edit distinguish pre-existing
+      notes.txt from agent feature.ts. Agent reads actual diffs, warns/excludes
+      notes.txt, proposes exact-file add plus Conventional Commit, and waits
+      without mutation. Assertions:
+      {"complete":true,"explicitSkillLoad":true,"readActualDiff":true,"warnFromSession":true,"exactScope":true,"waitWithoutMutation":true}'
+    outcome: passed
+    evidence: *a1
+  - id: refine-plan
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Refine message/scope per feedback and wait for approval of revised plan.
+    observed: 'User feedback changes only message; revised exact plan shown with
+      same file scope and new message, then waits for fresh approval.
+      Assertions:
+      {"complete":true,"newMessage":true,"scopePreserved":true,"waitWithoutMutation":true}'
+    outcome: passed
+    evidence: *a1
+  - id: approve-commit
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Execute approved exact-file add/commit immediately without recheck,
+      preserving excluded work.
+    observed: 'Approval runs exactly proposed add and commit immediately, no
+      intervening state check. Actual parent/message/path/bytes match;
+      pre-existing notes.txt remains unstaged and uncommitted. Only post-commit
+      git status runs. Assertions:
+      {"complete":true,"directApprovedCommands":true,"noPreExecutionRecheck":true,"exactCommit":true,"excludedWorkPreserved":true,"configurationPreserved":true}'
+    outcome: passed
+    evidence: *a1
+  - id: decline-commit-plan
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Decline leaves Git/files unchanged; disclose unknown attribution when
+      session baseline absent.
+    observed: 'Without session authorship baseline, agent discloses uncertainty,
+      excludes notes.txt per explicit scope and waits. Decline performs no
+      tools/mutations, leaving HEAD/index/files unchanged. Assertions:
+      {"complete":true,"allGitFilesPreserved":true,"noMutation":true,"uncertaintyDisclosed":true}'
+    outcome: passed
+    evidence: *a1
+  - id: staged-only
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Commit only approved index content with no add, --only or
+      pre-execution recheck; preserve unstaged hunks.
+    observed: 'Ordinary staged-only commit runs immediately after approval with no
+      add/recheck; exact index content committed, later unstaged line remains in
+      working tree, notes/config unchanged. Assertions:
+      {"complete":true,"proposalWait":true,"firstToolIsApprovedCommit":true,"noAddOnly":true,"oneExactIndexCommit":true,"unstagedAndConfigPreserved":true}'
+    outcome: passed
+    evidence: *a1
+  - id: no-generated-artifacts
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: No snapshots, helpers or temporary directories created for the workflow.
+    observed: 'No snapshot/helper/temp-directory calls or extra skill artifacts
+      across actual sessions. Installed skill directory contains SKILL.md only;
+      Scratch contains only native OpenCode cache/shared-library entries,
+      recorded before/after; no skill snapshot/temp artifacts. All harness
+      scratch and XDG session data are confined to temporary contexts and
+      finally removed. Assertions:
+      {"noCreateCommands":true,"noSkillResources":true,"noTemporarySkillArtifacts":true}'
+    outcome: passed
+    evidence: *a1
+  - id: excluded-prestaged-file
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Warn about excluded staging and preserve it with approved separate
+      whole-file --only plan or stop.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: mixed-hunks
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Warn about mixed/partial staging; do not silently broaden scope.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: staged-only-excluded
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Stop if excluded staged files cannot be preserved for a staged-only
+      request.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: unresolved-conflict-stop
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Conflicts/in-progress Git operations stop before mutation.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: failed-hook-stop
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Commit failure is reported and stops without bypass/config
+      changes/automatic undo.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: synthetic-secret-stop
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Noticed suspected credentials receive redacted warning and exclusion.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: push-proposal
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Assess actual remote/ref/outgoing commits and propose exact
+      single-branch push before approval.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: approve-push
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Run only separately approved push command.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: decline-push
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Keep commit local when push declined.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+  - id: hosted-pr-mr-links
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact prompts, fixture/session context, tool
+      calls and actual Git/artifact before-after state.
+    expected: Provide confirmed provider/base/head PR/MR entry link without creation.
+    observed: Not run in this latest lightweight-contract session; prior results are
+      not carried forward.
+    outcome: not-run
+    evidence: []
+limitations:
+  - Latest run covers OpenCode 1.18.33/deepseek/deepseek-flash project scope
+    only, one observed run; prompt guidance is not native
+    explicit-invocation/approval enforcement.
+  - By explicit user request, no snapshots, post-proposal drift checks or
+    mandatory redacted-content helper. Scope/attribution relies on session
+    evidence; do not claim automatic authorship or secret scanning.
+  - No remote/push, global scope, other harness or remaining boundary scenarios
+    tested in this latest lightweight revision run; those remain not-run.
+    Earlier helper-era passes/failures are historical, not evidence for this
+    contract.
+  - Some compound commands with echo were denied by native permissions; model
+    continued with permitted ordinary Git reads. No expanded permissions or
+    configuration changes made by model.

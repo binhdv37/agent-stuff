@@ -162,7 +162,8 @@ OpenCode commands share the instructions of the corresponding core skill.
 
 ## Skills
 
-Reusable workflows. Most skills require an explicit request; `bdv-grill-me` and `bdv-smart-commit` may activate from matching requests.
+Reusable workflows. All skills require explicit invocation except `bdv-grill-me`,
+which may activate from matching requests.
 
 | Skill | What It Does | Say This to Trigger |
 |-------|-------------|-------------------|
@@ -175,5 +176,5 @@ Reusable workflows. Most skills require an explicit request; `bdv-grill-me` and 
 | **bdv-ielts-speaking-coach** | Interactive IELTS Speaking practice with scoring | "IELTS speaking", "practice IELTS" |
 | **bdv-interview-coach** | Mock technical interview with model answers | "interview", "mock interview" |
 | **bdv-product-brief** | Turns vague ideas into structured product briefs | "I have an idea for..." |
-| **bdv-smart-commit** | Stages changes, generates a Conventional Commit, commits | "commit", "commit this" |
+| **bdv-smart-commit** | Reads changes, warns about edits outside session work, proposes exact-file staging + a Conventional Commit for approval, then offers separately approved push and a PR/MR link | Explicitly invoke `bdv-smart-commit` |
 | **bdv-teach** | Creates a stateful learning workspace with lessons, trusted resources, and learning records | "teach me <topic>", "help me learn <topic>" |

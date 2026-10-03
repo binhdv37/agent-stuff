@@ -1,10 +1,9 @@
 schema_version: 1
 kind: skill
 id: bdv-smart-commit
-description: With approval before staging and committing, stage all changes,
-  generate a Conventional Commit message from the diff, and commit. Use when the
-  user says "commit", "commit this", "commit my changes", "commit for me", or
-  wants a clean git commit without manual staging or message writing.
-activation: matching-request
+description: Review changes and warn about uncertain or unrelated edits; propose
+  exact file staging commands and a Conventional Commit for user approval,
+  execute the approved commands, then offer a separately approved push and a
+  pull or merge request link. Invoke explicitly as bdv-smart-commit.
+activation: explicit
 instructions: instructions.md
-resources: []

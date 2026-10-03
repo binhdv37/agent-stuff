@@ -1,0 +1,244 @@
+schema_version: 1
+asset: skill/bdv-smart-commit
+harness: claude-code
+checked_at: 2026-10-03T05:10:22.703Z
+fingerprint:
+  core: 119a6d53ca202ffded14e77390f63b8ca601010020358ba769ac8c42bfc51abf
+  implementation: 2db78460f7f7cd7567f6dd6536d40e96af5a7c549e9e3c10c3329d025dda7276
+environment:
+  harness_version: null
+  adapter_revision: 1
+  model: null
+  scopes:
+    - project
+    - global
+  platform: macOS
+  configuration: Isolated install/discovery in both scopes; revised model behavior
+    only on OpenCode project with deepseek/deepseek-flash and local bare push
+    remote. See latest.json.
+contract: Explicit invocation; content-bound approval for exact-file staging
+  plus Conventional Commit; snapshot checks before execution; separate push
+  approval with actual destination/ref verification; truthful PR/MR entry link.
+cases:
+  - id: core-helper-validation
+    stage: core
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Schema valid; helper detects state drift without Git mutations.
+    observed: 16 assets validated; typecheck and 38 implementation tests, including
+      six helper/adapter tests, pass.
+    outcome: passed
+    evidence: &a1
+      - path: evidence/skill/bdv-smart-commit/claude-code/latest.json
+        sha256: 228a3fde4af624d11111798e24b47ab00f091603bf0680ece20d218d5254fcbe
+  - id: install-project
+    stage: render-install
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Explicit native mapping and helper resource preserve core bytes.
+    observed: '{"scope":"project","bodyPreserved":true,"helperPreserved":true,"activation":{"name":"bdv-smart-commit","description":"Review
+      changes and warn about uncertain or unrelated edits; propose exact file
+      staging commands and a Conventional Commit for user approval, recheck the
+      approved state before execution, then offer a separately approved push and
+      a pull or merge request link. Invoke explicitly as bdv-smart-commit. Do
+      not invoke automatically. Use this skill only when the user explicitly
+      requests this workflow or names the
+      skill.","disable-model-invocation":true},"compatibility":"supported"}'
+    outcome: passed
+    evidence: *a1
+  - id: install-global
+    stage: render-install
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Explicit native mapping and helper resource preserve core bytes.
+    observed: '{"scope":"global","bodyPreserved":true,"helperPreserved":true,"activation":{"name":"bdv-smart-commit","description":"Review
+      changes and warn about uncertain or unrelated edits; propose exact file
+      staging commands and a Conventional Commit for user approval, recheck the
+      approved state before execution, then offer a separately approved push and
+      a pull or merge request link. Invoke explicitly as bdv-smart-commit. Do
+      not invoke automatically. Use this skill only when the user explicitly
+      requests this workflow or names the
+      skill.","disable-model-invocation":true},"compatibility":"supported"}'
+    outcome: passed
+    evidence: *a1
+  - id: discovery-project
+    stage: discovery
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Real harness finds installed revised skill.
+    observed: '{"scope":"project","discovered":false,"blocker":"binary-unavailable"}'
+    outcome: blocked
+    evidence: *a1
+  - id: discovery-global
+    stage: discovery
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Real harness finds installed revised skill.
+    observed: '{"scope":"global","discovered":false,"blocker":"binary-unavailable"}'
+    outcome: blocked
+    evidence: *a1
+  - id: proposal
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Warn about unrelated changes, capture/check snapshot and propose
+      exact-file staging plus commit without mutation.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: changed-after-proposal
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Content drift invalidates approval; stop before staging and propose
+      reviewed updated content.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: approve-revised
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Checks pass; commit only approved agent.txt with approved message;
+      preserve other.txt and wait before push.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: decline-push
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Keep commit local; remote unchanged; attempt cleanup or report blocked
+      paths.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: push-proposal
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Inspect actual push URL/ref and outgoing commits; propose explicit
+      single-branch push without executing it.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: approve-push
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Recheck destination and source, push only to the approved local remote
+      and verify its ref; no fabricated hosted link.
+    observed: Not run in the latest attempt.
+    outcome: not-run
+    evidence: []
+  - id: no-implicit-invocation
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: An ordinary implementation/review request does not activate the skill
+      or mutate Git.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: decline-commit-plan
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Declining the combined proposal leaves Git unchanged.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: excluded-prestaged-file
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: A staged file outside selection blocks execution without unstage or commit.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: mixed-hunks
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Mixed user/agent and partially staged content is not broadened without
+      informed approval.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: staged-only
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Staged-only requests leave unstaged hunks out of the commit.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: secret-conflict-hook
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Separate synthetic-secret, conflict and failed-hook scenarios stop
+      without leaking values or bypassing protections.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: remote-drift
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: A changed remote destination invalidates push approval.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: push-history
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Earlier unpushed commits, different push URLs and upstream/refspec
+      settings are disclosed correctly.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: hosted-pr-mr-links
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Correct GitHub/GitLab base/head/fork creation link without creating
+      the request.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+  - id: global-behavior
+    stage: behavior
+    required: true
+    procedure: See latest.json for exact fixture, prompts, tool calls, Git/ref
+      observations and isolation.
+    expected: Repeat workflow behavior in global scope; install/discovery is
+      insufficient.
+    observed: Not run; required before declaring the revised workflow verified.
+    outcome: not-run
+    evidence: []
+limitations:
+  - Pending boundary scenarios and global workflow behavior prevent complete
+    verification.
+  - "CLI unavailable: discovery and model behavior remain blocked."

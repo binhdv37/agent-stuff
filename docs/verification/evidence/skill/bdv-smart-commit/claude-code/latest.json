@@ -1,0 +1,61 @@
+{
+  "checked_at": "2026-10-03T05:10:22.703Z",
+  "harness": "claude-code",
+  "procedures": {
+    "core": "npm run cli -- validate --source .; npm run typecheck; npm test (38 tests including six helper/adapter tests).",
+    "installation": "loadCore; adapter.render; shared targetContext/planInstall/applyInstall, with separate temporary HOME/project per harness/scope. Compare authoritative body/helper bytes and activation metadata.",
+    "discovery": "Claude CLI unavailable.",
+    "behavior": "Fresh opencode --pure --print-logs run --format json; actual follow-up user messages via --continue, 60 second limit per turn. Inject different agent.txt content between proposal and approval. Observe actual Git HEAD, index, worktree and bare-remote refs after every turn.",
+    "fixture": "Temporary branch work; initial agent.txt/other.txt and ignore rules for installations/runtime config. Fixture-only identity/hooks/signing configured before the model. Local bare publish remote seeded with the initial commit. agent.txt changed; other.txt has an unrelated pre-existing edit.",
+    "isolation": "Temporary HOME/CODEX_HOME/CLAUDE_CONFIG_DIR/XDG/TMPDIR; Git personal/system config disabled. Auth copy only in temporary OpenCode home. Pure mode and deny-by-default tools with read/skill, Git inspection/add/commit/push and exact helper invocation enabled; external_directory denied. No remote network push or raw stderr retained.",
+    "cleanup": "Model cleanup command denied by runtime; model reported remaining paths. Runner finally removed entire test context, including local bare remote."
+  },
+  "version": null,
+  "model": null,
+  "fingerprint": {
+    "core": "119a6d53ca202ffded14e77390f63b8ca601010020358ba769ac8c42bfc51abf",
+    "implementation": "2db78460f7f7cd7567f6dd6536d40e96af5a7c549e9e3c10c3329d025dda7276"
+  },
+  "install": [
+    {
+      "scope": "project",
+      "bodyPreserved": true,
+      "helperPreserved": true,
+      "activation": {
+        "name": "bdv-smart-commit",
+        "description": "Review changes and warn about uncertain or unrelated edits; propose exact file staging commands and a Conventional Commit for user approval, recheck the approved state before execution, then offer a separately approved push and a pull or merge request link. Invoke explicitly as bdv-smart-commit. Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.",
+        "disable-model-invocation": true
+      },
+      "compatibility": "supported"
+    },
+    {
+      "scope": "global",
+      "bodyPreserved": true,
+      "helperPreserved": true,
+      "activation": {
+        "name": "bdv-smart-commit",
+        "description": "Review changes and warn about uncertain or unrelated edits; propose exact file staging commands and a Conventional Commit for user approval, recheck the approved state before execution, then offer a separately approved push and a pull or merge request link. Invoke explicitly as bdv-smart-commit. Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.",
+        "disable-model-invocation": true
+      },
+      "compatibility": "supported"
+    }
+  ],
+  "discovery": [
+    {
+      "scope": "project",
+      "discovered": false,
+      "blocker": "binary-unavailable"
+    },
+    {
+      "scope": "global",
+      "discovered": false,
+      "blocker": "binary-unavailable"
+    }
+  ],
+  "behavior": [],
+  "cleanup": {
+    "temporaryRootRemoved": true,
+    "personalConfigWritten": false,
+    "remoteWasLocalFixtureOnly": true
+  }
+}

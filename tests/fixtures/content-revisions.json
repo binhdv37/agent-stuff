@@ -1,0 +1,10 @@
+[
+  {
+    "key": "skill/bdv-smart-commit",
+    "reason": "2026-10-03: user-authorized smart-commit rewrite; latest user direction simplifies to session-based read/propose/approval/execution, removes snapshots, pre-execution rechecks and both helper resources; retains explicit activation, exact-path staging and separate push approval. See docs/migration.md.",
+    "activation": "explicit",
+    "hashes": {
+      "instructions.md": "3ba1379ad810564fca6aef0e8eda4f579b52122a02ea37466fd4a8d8d88428cf"
+    }
+  }
+]
