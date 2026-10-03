@@ -53,6 +53,10 @@ gỡ khỏi repo theo quyết định sau migration.
 
 ## Revision core ngày 2026-10-03: smart-commit
 
+Wording được rút gọn theo yêu cầu user, giữ contract duyệt commit/push riêng;
+ưu tiên push dạng ngắn khi xác định đúng đích. Bằng chứng runtime trước lần
+rút gọn giữ nguyên fingerprint và được đánh dấu stale, không coi là test mới.
+
 Theo yêu cầu user, viết lại `bdv-smart-commit`: đổi matching-request sang explicit,
 duyệt một proposal gồm nội dung/message/commands cho staging và commit; chỉ stage
 file cụ thể; kiểm tra lại trạng thái trước staging và commit; cảnh báo attribution
