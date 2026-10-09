@@ -45,6 +45,7 @@
     "docs/harness-development.md",
     "docs/harnesses/",
     "docs/runtime/",
+    "docs/plans/core-module-boundary.md",
     "docs/migration.md"
   ]
 }

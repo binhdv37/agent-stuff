@@ -120,3 +120,8 @@ official docs trong lượt refactor này; ngày đọc nguồn vẫn 2026-09-30
 bằng chứng runtime mới. Test `tests/adapter-contract.test.ts` so 67 output hashes
 của catalog trên ba adapter với commit 55f0a81; output byte không đổi. Revision 1
 được giữ để đối chiếu; giới hạn và trạng thái hiện tại xem compatibility.
+
+Kiểm tra đóng vòng cùng ngày: OpenCode 1.18.35 cài/discover probe qua debug skill
+trong cả global/project tạm, explicit và matching-request. Xem
+[report](../runtime/core-module-boundary-2026-10-09.md); explicit vẫn limited,
+không có model behavior mới và không thay documentation baseline/native mapping.

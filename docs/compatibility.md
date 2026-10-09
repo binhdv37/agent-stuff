@@ -12,6 +12,11 @@ render, không phải evidence workflow runtime. Schema JSON có mô tả field 
 nguồn với validator; concept/format thuộc core/docs. Fingerprint theo source mới;
 evidence cũ không được cập nhật hash để coi là lượt test mới.
 
+[Lượt kiểm chứng đóng vòng ngày 2026-10-09](runtime/core-module-boundary-2026-10-09.md)
+đã cài/discover probe trong global/project tạm trên Codex 0.162.0 và OpenCode
+1.18.35, cả explicit và matching-request. Claude discovery blocked vì thiếu CLI.
+Đây là probe tooling, không có model runs mới hoặc kết quả workflow per-stuff.
+
 Audit metadata hiện báo limited thay vì bỏ im lặng. Đây là giới hạn implementation
 adapter, không khẳng định harness không có capability tương ứng:
 

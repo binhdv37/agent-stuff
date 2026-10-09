@@ -1,13 +1,13 @@
 # Tách core thành module độc lập
 
-Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–4; bước 5 chưa đóng vòng.
+Ngày: 2026-10-09. Trạng thái: hoàn thành cả 5 bước; giới hạn runtime được ghi riêng.
 
 ## Mục tiêu và phạm vi đã thống nhất
 
 Giữ luồng core → adapter → installer, đồng thời làm core tự mô tả và có public
 interface để consumer sử dụng như thư viện bên thứ ba. Giảm việc phải ghép nhiều
-tài liệu với code để hiểu contract. Đây là plan cho thay đổi mới, không thay thế
-contract implementation hiện tại cho đến khi từng bước được triển khai.
+tài liệu với code để hiểu contract. Plan đã triển khai xong. Contract hiện tại nằm ở core/docs và API core;
+tài liệu này giữ các quyết định, checklist và checkpoint của refactor.
 
 Sáu quyết định đã chốt:
 
@@ -98,23 +98,23 @@ Gợi ý layout là `core/src/` và `core/docs/`, giữ nguyên ba thư mục ca
 
 ### 5. Kiểm chứng, rút gọn docs và đóng vòng
 
-- [ ] Test core qua public API: schema/docs đầy đủ, default/ràng buộc, nguồn core
+- [x] Test core qua public API: schema/docs đầy đủ, default/ràng buộc, nguồn core
       độc lập, resource/reference/path sai bị từ chối và consumer mẫu tối thiểu.
-- [ ] Test adapter: contract mismatch, supported/limited/unsupported, issue theo
+- [x] Test adapter: contract mismatch, supported/limited/unsupported, issue theo
       field, policy không enforce được và render không vượt bước kiểm tra.
-- [ ] Test installer: hiển thị/accept giới hạn, unsupported/mismatch không ghi
+- [x] Test installer: hiển thị/accept giới hạn, unsupported/mismatch không ghi
       file; lifecycle hiện có và output native không regression.
-- [ ] Chạy `npm run typecheck`, `npm test`, build và validate content. Smoke gói
+- [x] Chạy `npm run typecheck`, `npm test`, build và validate content. Smoke gói
       npm trong context tạm để kiểm tra API/docs/catalog và CLI được đóng gói đủ.
-- [ ] Cập nhật fingerprint tooling theo source mới, giữ evidence cũ trung thực;
+- [x] Cập nhật fingerprint tooling theo source mới, giữ evidence cũ trung thực;
       sinh summary bằng `npm run verification -- report`. Không đổi fingerprint
       hồ sơ cũ để giả làm lượt kiểm chứng mới.
-- [ ] Kiểm tra discovery/render-install trên OpenCode, Codex, Claude Code ở
+- [x] Kiểm tra discovery/render-install trên OpenCode, Codex, Claude Code ở
       global/project tạm khi binary có sẵn; thiếu điều kiện ghi rõ blocker.
       Đây là refactor tooling, không tự nhận tất cả stuff đã verified runtime.
       Nếu phát sinh đổi workflow hoặc mapping: chọn target/scenario trước,
       kiểm chứng runtime và gate từng stuff/harness theo `docs/testing.md`.
-- [ ] README và docs dẫn đến contract core mới; bỏ phần trùng lặp/lỗi thời.
+- [x] README và docs dẫn đến contract core mới; bỏ phần trùng lặp/lỗi thời.
       Không hand-edit verification summary hoặc generated dist.
 
 ## Tiêu chí hoàn thành
@@ -125,75 +125,48 @@ field hành vi, và chặn contract không hiểu. CLI báo giới hạn cụ th
 cài, giữ hành vi và bảo vệ file hiện có. Checks implementation đạt; giới hạn
 runtime và evidence stale được báo đúng, không suy diễn từ unit test.
 
-## Tiếp tục ở phiên sau
+## Checkpoint cuối — 2026-10-09
 
-- Đã commit: bước 1 `112057a` (public API); bước 2 `cf838eb` (core độc lập);
-  bước 3 `55f0a81` (core tự mô tả). Bước 4 hiện chưa commit.
-- Bước 3 đã làm: schema.ts khai báo validator + description + x-core-category cùng
-  chỗ; getContract lấy schema/field meanings từ nguồn đó, không còn map viết riêng.
-  Contract API hiện là 3; YAML/schema_version, default và nội dung stuff không đổi.
-- Docs canonical ở core/docs: concepts.md, format.md, README.md (API), fields.md
-  (generated). getDocs đọc các file của module theo import.meta.url; fields được
-  sinh từ contract. Build copy docs vào dist/core/docs. Docs/errors implementation
-  ở core/src/docs.ts và errors.ts; thiếu docs báo DOCS_UNAVAILABLE với cause.
-- docs/concepts.md cũ là trang trỏ để giữ link; README, AGENTS và development docs
-  dẫn đến core docs. Giảm phần format trùng lặp trong AGENTS, giữ hướng dẫn authoring,
-  native mapping và installer ngoài core. Không sửa workflow hoặc mapping.
-- scripts/core-docs.mjs / npm run core:docs sinh field reference; npm test kiểm tra
-  --check để từ chối bảng stale. Khi sửa schema: build → core:docs → test.
-- Fingerprint bao phủ docs/errors implementation và canonical concept/format/API
-  Markdown, ngoài schema/catalog/path/contract/index đã chuyển. Không cập nhật
-  hash evidence cũ; summary được sinh bằng verification report và không đổi.
-- Checks ngày 2026-10-09: typecheck đạt; npm test 43/43 đạt; field reference check,
-  verification validate/report check đạt; CLI validate đạt 16 assets. Test core
-  độc lập đọc đủ topics và báo lỗi khi thiếu docs. Không tuyên bố tất cả workflow
-  đã verified runtime, không tạo record giả; không có blocker bước 3.
-- Smoke tarball trong /private/tmp đạt: schema annotation, cả bốn topics, docs
-  Markdown và link nội bộ, catalog 16 assets, declaration/consumer TypeScript
-  strict và CLI default source. Dependency dùng từ checkout qua symlink, chưa
-  kiểm chứng fresh dependency install từ registry. Gói chưa publish.
-- Bước 4 đã làm: public adapter entrypoint adapters/index.ts; types/render helper
-  đã chuyển khỏi tool. adapters/runtime.ts cung cấp defineAdapter: guard chung
-  trước check/render, kể cả detached render; contract version, definition schema,
-  kind và vocabulary field phải đúng expected. Unknown field bị chặn. Guard
-  vocabulary không thay trách nhiệm tăng contract version khi đổi type/default/
-  ngữ nghĩa. Adapter chỉ import public core, không import tool, không ghi file.
-- Adapter revision 2 hỗ trợ contract 3. mappedFields khai báo field thực sự dùng;
-  field hiện diện chưa mapping: metadata limited, nội dung/hành vi/policy blocked.
-  Issue gồm field/status/reason/effect; native check tổng hợp giới hạn tổ hợp policy.
-  CLI trình bày từng issue, --yes không vượt giới hạn; --accept-limitations không
-  vượt unsupported. --compatible-only vẫn được bỏ asset unsupported nhưng không
-  vượt mismatch contract toàn module. Manifest ghi revision thực, vẫn đọc revision 1.
-- Output native giữ nguyên: 67 file được so byte hash với baseline chụp từ commit
-  55f0a81 trong tests/fixtures/adapter-render-baseline.json. Đây là render regression,
-  không phải runtime evidence. Không sửa stuff hoặc migration inventory.
-- Docs cập nhật: adapters/README.md, README/AGENTS, adapter/harness development,
-  compatibility và harness baselines. Các metadata từng bị bỏ im lặng giờ reported
-  limited (Codex argument_hint; Claude display_name/short_description; OpenCode
-  display_name/short_description/argument_hint khi hiện diện). Không suy diễn đây
-  là hạn chế capability của harness, chưa thay native mapping để bổ sung chúng.
-- Checks bước 4 ngày 2026-10-09: typecheck đạt; npm test 51/51 đạt, gồm độc lập
-  core+adapter không cần tool, mismatch cả scopes không ghi file, unknown/unmapped
-  behavior, policy blockers, metadata acceptance và manifest cũ. Có OpenCode agent
-  discovery test hiện có; không tạo hồ sơ per-asset runtime mới hoặc nhận verified.
-  Build, CLI validate 16 assets, core docs check và verification validate/report
-  check đạt. Fingerprint chuyển sang adapter module mới; giữ evidence hashes cũ,
-  summary được sinh bằng verification report.
-- Smoke tarball bước 4 trong /private/tmp/agent-stuff-step4-pack.2gd2ns đạt: core
-  topics/catalog 16 assets, adapter API/report/render, declarations và consumer
-  TypeScript strict (--types node), adapter README, CLI default source/dry-run.
-  Module tool adapter/registry/render cũ không còn trong tarball. Dependency dùng
-  symlink checkout; chưa kiểm chứng fresh registry install. Gói chưa publish.
-- Bước kế tiếp: bước 5. Đọc AGENTS.md và git status; rà checklist trên cơ sở tests
-  đã có, bổ sung chỉ phần thiếu. Kiểm tra discovery/render-install global/project
-  tạm trên từng binary hiện có và ghi blocker thiếu điều kiện; rút gọn docs còn
-  trùng lặp, đóng plan. Không chạy lại toàn bộ checks nếu không có thay đổi hoặc
-  nghi vấn mới. Bước 4 không có blocker implementation; kiểm chứng workflow runtime
-  đầy đủ vẫn ngoài kết quả tests/refactor và evidence cũ có thể stale.
-- Sau mỗi bước: cập nhật checkbox, ghi file thay đổi, checks/kết quả, blocker và
-  hành động tiếp theo tại mục này. Một bước chỉ đánh dấu xong khi đạt đầu ra.
-- Không cần hỏi lại sáu quyết định; chỉ làm rõ khi phát hiện phương án buộc phải
-  thay đổi ngữ nghĩa đã chốt. Không mở rộng sang đổi workflow/publish trong plan này.
+| Bước | Commit / trạng thái |
+|---|---|
+| 1. Public contract | `112057a` |
+| 2. Core độc lập | `cf838eb` |
+| 3. Core tự mô tả | `55f0a81` |
+| 4. Adapter độc lập và compatibility | `af1eebb` |
+| 5. Kiểm chứng và đóng vòng | Hoàn thành; commit chứa checkpoint này |
 
-Prompt tiếp tục: “Đọc docs/plans/core-module-boundary.md và tiếp tục triển khai
-từ bước chưa hoàn thành đầu tiên, giữ nguyên sáu quyết định đã chốt.”
+- Core public entrypoint: core/src/index.ts. Canonical docs: core/docs/README.md,
+  concepts.md, format.md, fields.md. Schema/description/category cùng nguồn;
+  field reference sinh bằng npm run core:docs. Contract 3, YAML schema 1.
+- Adapter public entrypoint: adapters/index.ts; interface/factory/native helpers
+  thuộc adapters. Revision 2 hỗ trợ contract 3; check/render chung guard version,
+  kind và field vocabulary. Không import tool hoặc nội bộ core. Guard không so
+  toàn bộ kiểu/default; thay ngữ nghĩa phải tăng version contract.
+- Compatibility issue gồm field/status/reason/effect. Unmapped metadata limited,
+  unknown hoặc unmapped behavior/content/policy blocked. CLI trình bày và xin
+  acceptance; --yes không vượt limited, --accept-limitations không vượt unsupported.
+  Manifest revision thực và legacy revision 1 đều được hỗ trợ.
+- 16 assets giữ nguyên content/migration baseline. 67 native output hashes khớp
+  baseline 55f0a81; không thay mapping hoặc publish. Fingerprint tooling theo
+  module mới; evidence cũ giữ nguyên, summary sinh bằng verification report.
+- Tests đã đủ checklist core/adapter/installer; không thêm test trùng implementation.
+  Typecheck, build, 51/51 tests, validate 16 assets, generated docs, verification
+  integrity/summary và tarball API/docs/consumer/CLI đều đạt. Tarball dependencies
+  dùng symlink checkout, chưa kiểm tra fresh registry install.
+- Smoke mới: Codex 0.162.0, OpenCode 1.18.35 cài/discover probe đạt cả global/project,
+  explicit/matching-request. Claude filesystem render/install đạt; discovery
+  blocked vì thiếu CLI. Không có model runs mới hoặc per-stuff workflow Passed.
+  [Report và artifact](../runtime/core-module-boundary-2026-10-09.md) giữ kết quả,
+  môi trường, fingerprint và blocker. Đây là giới hạn runtime, không phải công
+  việc implementation còn thiếu; checklist smoke hoàn tất với blocker đã ghi.
+- Docs đã rà đường dẫn module cũ, bỏ trạng thái API tương lai và README in-progress;
+  docs/concepts.md giữ trang trỏ để không phá link. Historical plan/baseline và
+  evidence revision 1 giữ nguyên, không sửa thành revision mới.
+
+Refactor hoàn tất trong phạm vi đã chốt; không cần bước implementation tiếp theo.
+Nếu tiếp tục kiểm chứng workflow, chọn stuff/harness/scenario theo docs/testing.md,
+ưu tiên giải quyết Claude CLI/auth nếu muốn phủ target đó. Không suy diễn từ smoke
+hoặc làm mới fingerprint evidence cũ để lấy Passed.
+
+Prompt tiếp tục: “Đọc checkpoint docs/plans/core-module-boundary.md và git status;
+refactor đã xong. Xác định target workflow cần kiểm chứng trước khi mở công việc mới.”

@@ -112,7 +112,7 @@ fingerprint:
   implementation: <hash từ fingerprint>
 environment:
   harness_version: null
-  adapter_revision: 1
+  adapter_revision: 2
   model: null
   scopes: [project]
   platform: macOS

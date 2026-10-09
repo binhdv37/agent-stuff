@@ -76,8 +76,8 @@ với entrypoint, không dựa vào cwd hoặc tài liệu ở tool.
 ## Phiên bản và tương thích
 
 Tăng contract version khi đổi API public, schema, default, ngữ nghĩa hoặc ràng
-buộc. Sửa chính tả/diễn đạt không đổi nghĩa thì không cần tăng. Trước mắt adapter
-sẽ khai báo danh sách phiên bản hiểu được; bản không hiểu phải bị chặn trước
+buộc. Sửa chính tả/diễn đạt không đổi nghĩa thì không cần tăng. Adapter
+khai báo danh sách phiên bản hiểu được; bản không hiểu bị chặn trước
 render. Version check và báo cáo issue theo field thuộc trách nhiệm adapter;
 core không kiểm tra harness hoặc thực thi policy native.
 Version 2 bổ sung validator, path helper và selection public để consumer bỏ

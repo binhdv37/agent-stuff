@@ -21,8 +21,10 @@ repository.
 
 Core is an independent module with a [public contract API](core/docs/README.md)
 for schema, field meanings, docs, catalog loading and selection. It depends on
-Node.js, yaml and zod, with no tool/adapter imports. The staged
-[module refactor](docs/plans/core-module-boundary.md) is still in progress.
+Node.js, yaml and zod, with no tool/adapter imports. The
+[module refactor](docs/plans/core-module-boundary.md) is complete; its
+[validation record](docs/runtime/core-module-boundary-2026-10-09.md) documents
+checks and runtime limits.
 The independent [adapter module](adapters/README.md) checks core contract versions
 and reports field-specific limitations before rendering or installation.
 

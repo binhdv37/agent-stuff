@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-09T16:21:42.725Z",
+  "source": "<checkout>",
+  "runModels": false,
+  "results": [
+    {
+      "harness": "codex",
+      "version": "codex-cli 0.162.0",
+      "scope": "project",
+      "activation": "explicit",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": true,
+        "policy": {
+          "allow_implicit_invocation": false
+        }
+      },
+      "discovery": {
+        "discovered": true,
+        "enabled": true,
+        "policy": null,
+        "errors": 0
+      }
+    },
+    {
+      "harness": "codex",
+      "version": "codex-cli 0.162.0",
+      "scope": "project",
+      "activation": "matching-request",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": false,
+        "policy": {
+          "allow_implicit_invocation": true
+        }
+      },
+      "discovery": {
+        "discovered": true,
+        "enabled": true,
+        "policy": null,
+        "errors": 0
+      }
+    },
+    {
+      "harness": "codex",
+      "version": "codex-cli 0.162.0",
+      "scope": "global",
+      "activation": "explicit",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": true,
+        "policy": {
+          "allow_implicit_invocation": false
+        }
+      },
+      "discovery": {
+        "discovered": true,
+        "enabled": true,
+        "policy": null,
+        "errors": 0
+      }
+    },
+    {
+      "harness": "codex",
+      "version": "codex-cli 0.162.0",
+      "scope": "global",
+      "activation": "matching-request",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": false,
+        "policy": {
+          "allow_implicit_invocation": true
+        }
+      },
+      "discovery": {
+        "discovered": true,
+        "enabled": true,
+        "policy": null,
+        "errors": 0
+      }
+    },
+    {
+      "harness": "claude-code",
+      "skipped": true,
+      "reason": "binary-unavailable"
+    },
+    {
+      "harness": "opencode",
+      "version": "1.18.35",
+      "scope": "project",
+      "activation": "explicit",
+      "compatibility": "limited",
+      "rendered": {
+        "explicitGuard": true
+      },
+      "discovery": {
+        "discovered": true,
+        "bodyPresent": true
+      }
+    },
+    {
+      "harness": "opencode",
+      "version": "1.18.35",
+      "scope": "project",
+      "activation": "matching-request",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": false
+      },
+      "discovery": {
+        "discovered": true,
+        "bodyPresent": true
+      }
+    },
+    {
+      "harness": "opencode",
+      "version": "1.18.35",
+      "scope": "global",
+      "activation": "explicit",
+      "compatibility": "limited",
+      "rendered": {
+        "explicitGuard": true
+      },
+      "discovery": {
+        "discovered": true,
+        "bodyPresent": true
+      }
+    },
+    {
+      "harness": "opencode",
+      "version": "1.18.35",
+      "scope": "global",
+      "activation": "matching-request",
+      "compatibility": "supported",
+      "rendered": {
+        "explicitGuard": false
+      },
+      "discovery": {
+        "discovered": true,
+        "bodyPresent": true
+      }
+    }
+  ],
+  "sourceCommit": "af1eebb",
+  "contractVersion": 3,
+  "platform": "darwin",
+  "nodeVersion": "v22.21.1",
+  "runnerSha256": "57307fc70c3325d60ed26b5d9aa9447eae19077717f5135b9e611a033cb09b3b",
+  "scope": "Synthetic probe render-install/discovery only; no per-asset workflow/model verification.",
+  "implementation": {
+    "codex": {
+      "adapterRevision": 2,
+      "fingerprint": "18d2cc2cecb784ce2362a776662c30632b17b32ec589c63eace02385c24b048a"
+    },
+    "opencode": {
+      "adapterRevision": 2,
+      "fingerprint": "849fab410e9e0489cb09395b8711f464007a8c8d48e55bea231245d2b68deb78"
+    },
+    "claude-code": {
+      "adapterRevision": 2,
+      "fingerprint": "cabccbb16e11ce4177e435afab483e33af0edd8317fe0a9722247247e259c848"
+    }
+  }
+}
