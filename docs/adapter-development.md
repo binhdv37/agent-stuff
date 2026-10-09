@@ -2,7 +2,7 @@
 
 `core/` là nguồn nội dung chính. Mỗi asset chứa `definition.yaml`, hướng dẫn
 Markdown nếu cần và resource được khai báo. Không sửa file sinh trong `dist/`.
-Xem [concepts](concepts.md) cho định nghĩa i-skill/i-command/i-agent và
+Xem [concepts](../core/docs/concepts.md) cho định nghĩa i-skill/i-command/i-agent và
 [core development](core-development.md) cho flow author và mở rộng contract.
 Theo [quy trình mapping harness](harness-development.md) khi đổi adapter hoặc
 thiết kế cấu hình native riêng theo asset.
@@ -64,7 +64,7 @@ Command v1 tham chiếu skill. OpenCode inline workflow cùng wrapper đối s�
 có resource hoặc cú pháp interpolation native bị chặn trong đường command này.
 Codex/Claude Code dùng skill tương ứng; không sinh command riêng trong adapter.
 
-Policy agent có mặc định deny, role primary/delegated và write_paths tương đối.
+Contract policy nằm trong [field reference core](../core/docs/fields.md).
 OpenCode hỗ trợ policy cơ bản và scoped write vào thư mục plan. Khi hạn chế ghi,
 shell phải deny; delegation chỉ được mở đến agent phụ chỉ đọc được khai báo trong
 `delegation_targets`. Chọn planner tự thêm helper vào selection.

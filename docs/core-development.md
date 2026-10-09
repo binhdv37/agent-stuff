@@ -1,6 +1,7 @@
 # Flow phát triển stuff
 
-Đọc [concepts](concepts.md) trước khi dùng flow này. Dùng
+Đọc [concepts](../core/docs/concepts.md), [format](../core/docs/format.md) và
+[fields](../core/docs/fields.md) trước khi dùng flow này. Dùng
 [harness development](harness-development.md) khi làm mapping, native config và
 bằng chứng adapter; [adapter development](adapter-development.md) mô tả CLI.
 

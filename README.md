@@ -7,7 +7,8 @@ Agent-stuff develops its own reusable components, called **stuff**: `i-skill`
 (agent identity, role and working instructions). Core defines their content and
 portable configuration semantics; adapters translate that intent into native
 harness mechanisms. These concepts need not map one-to-one to native concepts.
-See the [glossary](docs/concepts.md) and [stuff development flow](docs/core-development.md).
+See the [glossary](core/docs/concepts.md), [format](core/docs/format.md),
+[field reference](core/docs/fields.md) and [stuff development flow](docs/core-development.md).
 The current schema still uses `skill`, `command` and `agent`; standalone command
 templates and additional config types require explicit schema/adapter development.
 

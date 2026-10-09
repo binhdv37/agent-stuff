@@ -1,6 +1,6 @@
 # Tách core thành module độc lập
 
-Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–2; bước 3 chưa triển khai.
+Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–3; bước 4 chưa triển khai.
 
 ## Mục tiêu và phạm vi đã thống nhất
 
@@ -70,11 +70,11 @@ Gợi ý layout là `core/src/` và `core/docs/`, giữ nguyên ba thư mục ca
 
 ### 3. Làm core tự mô tả
 
-- [ ] Bổ sung mô tả field tại nguồn khai báo; xuất schema máy đọc được và tài liệu
+- [x] Bổ sung mô tả field tại nguồn khai báo; xuất schema máy đọc được và tài liệu
       tham chiếu, gồm kiểu/default/required/enum và ngữ nghĩa.
-- [ ] Đưa concept/format/ngữ nghĩa dùng chung vào docs thuộc core; API đọc được
+- [x] Đưa concept/format/ngữ nghĩa dùng chung vào docs thuộc core; API đọc được
       các docs này trong checkout và artifact đã đóng gói.
-- [ ] Gộp hoặc thay phần tài liệu trùng lặp bằng link; giữ hướng dẫn authoring,
+- [x] Gộp hoặc thay phần tài liệu trùng lặp bằng link; giữ hướng dẫn authoring,
       native mapping và installer ở đúng nơi. Không tạo thêm bản author song song.
 
 Đầu ra: người viết adapter hiểu core từ public API và docs của core.
@@ -127,38 +127,35 @@ runtime và evidence stale được báo đúng, không suy diễn từ unit tes
 
 ## Tiếp tục ở phiên sau
 
-- Đã làm: bước 1 có public entrypoint `core/src/index.ts`, contract version 1,
-  `getContract()`, `getDocs(topic)` và `loadCatalog(coreRoot)` chạy được.
-  Field meanings/rules ở `core/src/contract.ts`; bảng field được tạo qua API,
-  type/default/required/enum lấy từ validator hiện có. Hướng dẫn ở
-  `core/docs/README.md`; README root có link đến API.
-- Bước 2 đã chuyển schema/catalog/paths vào core/src, xóa tool/src/core và bridge.
-  CLI, verification, installer, render, tests và smoke runner import entrypoint
-  public. CLI/verification resolve source checkout thành core root tại biên gọi.
-  Core chỉ phụ thuộc Node.js/yaml/zod; test chạy độc lập không có tool/adapters đạt.
-- Contract API hiện là 2 do bổ sung selectAssets, definitionSchema, relativePath,
-  inside và assertNoSymlinks public. YAML vẫn schema_version 1; ngữ nghĩa/default
-  giữ nguyên. Validator Zod được expose tường minh, schema JSON vẫn qua getContract.
-- Fingerprint chuyển sang core/src/index/contract/schema/catalog/paths; test
-  xác nhận đổi từng file làm đổi implementation fingerprint, không đổi content hash.
-- Build đã include core/src và emit declarations cho consumer TypeScript;
-  package files include dist/core. scripts/build.mjs
-  dọn bốn thư mục output TypeScript trước compile, giữ các preview dist khác.
-  Smoke tarball trong /private/tmp đạt: API/docs/catalog/declarations, consumer
-  TypeScript strict qua entrypoint compile, CLI default source, 16 assets và
-  không có output tool/src/core cũ. Dùng dependency đang cài của
-  checkout qua symlink; không kiểm chứng fresh install dependency từ registry.
-- Checks ngày 2026-10-09: `npm run typecheck` đạt; `npm test` 42/42 đạt (bao gồm
-  public core độc lập và fingerprint code đã chuyển); validate source đạt 16 assets.
-  `npm run verification -- report` và report check đạt; summary không đổi.
-  Không sửa content hoặc native mapping, không tạo evidence workflow mới và
-  không tuyên bố tất cả stuff đã verified runtime. Không có blocker bước 2.
-- Chưa làm: bước 3–5, đặc biệt gom mô tả với validator, gộp docs concept,
-  version check trong adapter và báo cáo issue theo field. Interface/render helper
-  adapter vẫn thuộc tool; di chuyển ở bước 4. Native mapping chưa đổi.
-- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan này; bắt đầu bước 3
-  bằng gom schema và field meanings thành một nguồn, expose docs đầy đủ và thay
-  nội dung concept trùng lặp bằng link. Kiểm tra thay đổi mới trước khi tiếp tục.
+- Đã commit: bước 1 `112057a` (public API); bước 2 `cf838eb` (core độc lập).
+- Bước 3 đã làm: schema.ts khai báo validator + description + x-core-category cùng
+  chỗ; getContract lấy schema/field meanings từ nguồn đó, không còn map viết riêng.
+  Contract API hiện là 3; YAML/schema_version, default và nội dung stuff không đổi.
+- Docs canonical ở core/docs: concepts.md, format.md, README.md (API), fields.md
+  (generated). getDocs đọc các file của module theo import.meta.url; fields được
+  sinh từ contract. Build copy docs vào dist/core/docs. Docs/errors implementation
+  ở core/src/docs.ts và errors.ts; thiếu docs báo DOCS_UNAVAILABLE với cause.
+- docs/concepts.md cũ là trang trỏ để giữ link; README, AGENTS và development docs
+  dẫn đến core docs. Giảm phần format trùng lặp trong AGENTS, giữ hướng dẫn authoring,
+  native mapping và installer ngoài core. Không sửa workflow hoặc mapping.
+- scripts/core-docs.mjs / npm run core:docs sinh field reference; npm test kiểm tra
+  --check để từ chối bảng stale. Khi sửa schema: build → core:docs → test.
+- Fingerprint bao phủ docs/errors implementation và canonical concept/format/API
+  Markdown, ngoài schema/catalog/path/contract/index đã chuyển. Không cập nhật
+  hash evidence cũ; summary được sinh bằng verification report và không đổi.
+- Checks ngày 2026-10-09: typecheck đạt; npm test 43/43 đạt; field reference check,
+  verification validate/report check đạt; CLI validate đạt 16 assets. Test core
+  độc lập đọc đủ topics và báo lỗi khi thiếu docs. Không tuyên bố tất cả workflow
+  đã verified runtime, không tạo record giả; không có blocker bước 3.
+- Smoke tarball trong /private/tmp đạt: schema annotation, cả bốn topics, docs
+  Markdown và link nội bộ, catalog 16 assets, declaration/consumer TypeScript
+  strict và CLI default source. Dependency dùng từ checkout qua symlink, chưa
+  kiểm chứng fresh dependency install từ registry. Gói chưa publish.
+- Chưa làm: bước 4–5. Interface/helper render adapter vẫn thuộc tool, chưa có
+  contract-version gate hoặc compatibility issue theo field.
+- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan; bắt đầu bước 4 bằng
+  tách interface/helper adapter, chặn mismatch contract trước check/render và
+  nối báo cáo chi tiết vào installer. Kiểm tra thay đổi mới trước khi tiếp tục.
 - Sau mỗi bước: cập nhật checkbox, ghi file thay đổi, checks/kết quả, blocker và
   hành động tiếp theo tại mục này. Một bước chỉ đánh dấu xong khi đạt đầu ra.
 - Không cần hỏi lại sáu quyết định; chỉ làm rõ khi phát hiện phương án buộc phải

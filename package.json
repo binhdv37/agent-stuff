@@ -9,7 +9,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/*.test.js && npm run verification -- validate && npm run verification -- report --check",
+    "core:docs": "node scripts/core-docs.mjs",
+    "test": "npm run build && node --test dist/tests/*.test.js && npm run core:docs -- --check && npm run verification -- validate && npm run verification -- report --check",
     "verification": "node dist/tool/src/verification/cli.js",
     "cli": "node dist/tool/src/cli.js",
     "prepack": "npm run build"

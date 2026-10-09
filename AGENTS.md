@@ -6,7 +6,7 @@ Portable agent content plus a TypeScript adapter CLI. `core/` is the source of
 truth. Adapters render harness-specific files; the installer manages file changes.
 
 Agent-stuff defines its own internal stuff concepts: i-skill, i-command and
-i-agent. Read `docs/concepts.md` for their meanings and current schema names.
+i-agent. Read `core/docs/concepts.md` for their meanings and current schema names.
 Core owns both the core value and the semantics of portable configuration.
 Native concepts with similar names are not automatically equivalent.
 
@@ -19,7 +19,7 @@ Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
 ## Start here in a new session
 
 1. Read this file, then `README.md` for user-facing behavior. Consult
-   `docs/concepts.md` and `docs/core-development.md` before developing stuff.
+   `core/docs/concepts.md`, `core/docs/format.md` and `docs/core-development.md` before developing stuff.
    Consult `docs/adapter-development.md` for the schema/CLI and `docs/compatibility.md`
    before changing a harness mapping. `docs/migration.md` records deliberate
    changes from the old layout. `docs/plans/core-adapter-migration.md` is the
@@ -88,28 +88,15 @@ inventing additional tasks. A suggestion does not authorize executing new work.
 
 ## Core format
 
-Each asset has `definition.yaml` with `schema_version: 1`, `kind`, `id`, and
-`description`. Skills and agents also reference `instructions.md`. List every
-resource in `resources`; paths must stay within the asset directory. Root-level
-resource documents are supported. See `core/src/schema.ts` for the exact schema;
-consumers use the public `core/src/index.ts` entrypoint, documented in `core/docs/README.md`.
+Core owns [format](core/docs/format.md), [field meanings/defaults/rules](core/docs/fields.md)
+and the [public API](core/docs/README.md). Consumers import `core/src/index.ts`;
+schema and field metadata are authored together in `core/src/schema.ts`.
+After changing them, build and run `npm run core:docs`; do not hand-edit fields.md.
 
-Skills declare `activation: explicit | matching-request`. Optional metadata:
-`display_name`, `short_description`, `argument_hint`. Adapters generate native
-invocation flags and the explicit-invocation description guard; do not add
-harness config files to core. Keep workflow instructions harness-independent.
-
-Commands reference `workflow: skill/<id>` and may declare `argument_hint`.
-Maintain the actual workflow once in its skill. Native placeholders such as
-`$ARGUMENTS` belong in adapter wrappers.
-
-Agents declare `role: primary | delegated` and `policy`. The two user-facing
-agents are primary; `bdv-plan-reviewer` is the planner's read-only delegated
-helper.
-Policies use `allow | ask | deny`, defaulting to deny, with optional
-project-relative `write_paths` and explicit `delegation_targets`. A delegated
-target must deny edits, shell access and further delegation. Unsupported policy
-must be reported and blocked; a prompt sentence is not equivalent to permission.
+Keep workflows harness-independent, resources declared and paths inside the asset.
+Commands reuse a skill workflow; maintain its instructions once. Native placeholders
+and invocation flags belong in adapters. Preserve agent role and enforceable policy;
+unsupported policy must be blocked, never replaced with a prompt sentence.
 
 ## Adapter and installer boundaries
 

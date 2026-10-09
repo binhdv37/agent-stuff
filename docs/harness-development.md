@@ -3,7 +3,7 @@
 Tài liệu này là quy trình làm việc cho các session mới, cùng với `AGENTS.md`.
 Harness ở đây là Codex, Claude Code, OpenCode; scope global/project là phạm vi
 cài đặt, không quyết định ngữ nghĩa của asset.
-Concept nội bộ xem [glossary](concepts.md); flow diễn giải request, kiểm tra
+Concept nội bộ xem [glossary](../core/docs/concepts.md); flow diễn giải request, kiểm tra
 contract và author stuff xem [core development](core-development.md). Tài liệu
 này quy định phần mapping và kiểm chứng harness của flow đó.
 

@@ -64,6 +64,8 @@ const implementationFiles = [
   'tool/src/adapter.ts', 'tool/src/render.ts', 'tool/src/registry.ts', 'tool/src/cli.ts',
   'core/src/index.ts', 'core/src/contract.ts', 'core/src/schema.ts',
   'core/src/catalog.ts', 'core/src/paths.ts',
+  'core/src/docs.ts', 'core/src/errors.ts',
+  'core/docs/README.md', 'core/docs/concepts.md', 'core/docs/format.md',
   'tool/src/installation/index.ts', 'package-lock.json',
 ];
 

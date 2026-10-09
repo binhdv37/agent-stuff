@@ -142,12 +142,16 @@ test('fingerprints cover the public core entrypoint and every moved implementati
   const source = await temporary(t);
   const catalog = await loadCatalog(path.join(source, 'core'));
   let previous = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
-  for (const name of ['index', 'contract', 'schema', 'catalog', 'paths']) {
-    const file = path.join(source, `core/src/${name}.ts`);
+  const files = [
+    ...['index', 'contract', 'schema', 'catalog', 'paths', 'docs', 'errors'].map(name => `core/src/${name}.ts`),
+    ...['README', 'concepts', 'format'].map(name => `core/docs/${name}.md`),
+  ];
+  for (const relative of files) {
+    const file = path.join(source, relative);
     await writeFile(file, (await readFile(file, 'utf8')) + '\n// fingerprint change\n');
     const current = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
-    assert.notEqual(current.implementation, previous.implementation, name);
-    assert.equal(current.core, previous.core, name);
+    assert.notEqual(current.implementation, previous.implementation, relative);
+    assert.equal(current.core, previous.core, relative);
     previous = current;
   }
 });

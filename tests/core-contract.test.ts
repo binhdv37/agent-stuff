@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, realpath, rm, writeFile, symlink } from 'node:fs/promises';
+import { cp, mkdtemp, realpath, rm, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -8,7 +8,7 @@ import { getContract, getDocs, loadCatalog, CoreError, definitionSchema, type Do
 
 test('public contract covers every schema field including nested policy, without extra fields', () => {
   const contract = getContract();
-  assert.equal(contract.contractVersion, 2);
+  assert.equal(contract.contractVersion, 3);
   assert.equal(contract.definitionSchemaVersion, 1);
   assert.doesNotThrow(() => JSON.stringify(contract));
   for (const validator of definitionSchema.options) {
@@ -24,10 +24,24 @@ test('public contract covers every schema field including nested policy, without
   const skill = contract.kinds.skill.schema;
   assert.equal(skill.additionalProperties, false);
   assert.equal(skill.properties!.activation!.default, 'explicit');
+  assert.equal(skill.properties!.activation!.description, contract.kinds.skill.fields.activation!.description);
+  assert.equal(skill.properties!.activation!['x-core-category'], 'behavior');
   assert.ok(!skill.required!.includes('activation'));
   const policy = contract.kinds.agent.schema.properties!.policy!;
   assert.equal(policy.additionalProperties, false);
   assert.equal(policy.properties!.workspace_write!.default, 'deny');
+  assert.equal(policy.properties!.workspace_write!.description, contract.kinds.agent.fields['policy.workspace_write']!.description);
+  assert.equal(policy.properties!.workspace_write!['x-core-category'], 'enforcement');
+});
+
+test('public docs read the canonical module files and generated field reference', async () => {
+  for (const [topic, file] of [['concepts', 'concepts.md'], ['format', 'format.md'], ['api', 'README.md']] as const) {
+    assert.equal(getDocs(topic), await readFile(`core/docs/${file}`, 'utf8'));
+  }
+  assert.equal(getDocs('fields'), await readFile('core/docs/fields.md', 'utf8'));
+  assert.match(getDocs('concepts'), /### i-command/);
+  assert.match(getDocs('format'), /definition.yaml/);
+  assert.match(getDocs('api'), /DOCS_UNAVAILABLE/);
 });
 
 test('public snapshots cannot mutate later contract/docs results', () => {
@@ -91,10 +105,16 @@ test('compiled core runs independently with only its own files and declared depe
   const api = await import(pathToFileURL(path.join(directory, 'library/src/index.js')).href);
   const catalog = await api.loadCatalog(path.join(directory, 'catalog'));
   assert.equal(catalog.size, 16);
-  assert.equal(api.getContract().contractVersion, 2);
+  assert.equal(api.getContract().contractVersion, 3);
   assert.match(api.getDocs('concepts'), /i-agent/);
+  assert.match(api.getDocs('format'), /definition.yaml/);
+  assert.match(api.getDocs('api'), /Contract API/);
+  assert.equal(api.getDocs('fields'), await readFile(path.join(directory, 'library/docs/fields.md'), 'utf8'));
   assert.deepEqual(api.selectAssets(catalog, ['agent/experimental-plan']).map((asset: { key: string }) => asset.key),
     ['agent/bdv-plan-reviewer', 'agent/experimental-plan']);
   assert.equal(api.relativePath.safeParse('../outside').success, false);
   assert.throws(() => api.inside(directory, '../outside'));
+  await rm(path.join(directory, 'library/docs/concepts.md'));
+  assert.throws(() => api.getDocs('concepts'), (error: unknown) =>
+    error instanceof api.CoreError && (error as CoreError).code === 'DOCS_UNAVAILABLE');
 });

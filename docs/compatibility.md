@@ -6,7 +6,8 @@ adapter; probe hoặc discovery chung không chứng minh workflow từng asset 
 
 Refactor module ngày 2026-10-09 chuyển schema/loader/path checks vào core và
 consumer dùng public entrypoint. Native mapping và adapter revision giữ nguyên;
-contract API hiện là 2, chưa có version gate trong adapter. Fingerprint đã theo
+contract API hiện là 3, chưa có version gate trong adapter. Schema JSON có mô tả
+field cùng nguồn với validator; concept/format thuộc core/docs. Fingerprint đã theo
 source core mới; evidence cũ không được cập nhật hash để coi là lượt test mới.
 
 Core `bdv-smart-commit` hiện là workflow nhẹ, explicit-only: đọc Git/file changes
