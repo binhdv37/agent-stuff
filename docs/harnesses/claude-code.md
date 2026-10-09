@@ -90,3 +90,15 @@ nhận guidance đã load; import đúng format không tự chứng minh runtime
 - Với agent, thử main-thread launch và delegated launch riêng; xác minh quyền,
   parent mode, delegation target và việc preload skill.
 - Không suy rộng kết quả local file sang plugin packaging.
+
+## Revision 2 — refactor và diagnostic ngày 2026-10-09
+
+Adapter revision 2 dùng public core contract 3, definition schema 1; interface và
+render helpers thuộc adapters, không import tool. Guard từ chối contract/version
+hoặc vocabulary field lệch trước check/render. display_name/short_description chưa được mapping và giờ báo limited; argument_hint vẫn được render như cũ.
+
+Native format và target giữ nguyên baseline revision 1 ở trên. Không mở lại
+official docs trong lượt refactor này; ngày đọc nguồn vẫn 2026-09-30, không thêm
+bằng chứng runtime mới. Test `tests/adapter-contract.test.ts` so 67 output hashes
+của catalog trên ba adapter với commit 55f0a81; output byte không đổi. Revision 1
+được giữ để đối chiếu; giới hạn và trạng thái hiện tại xem compatibility.

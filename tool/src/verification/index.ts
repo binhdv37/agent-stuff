@@ -3,9 +3,9 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { adapterIds, type AdapterId } from '../adapter.js';
+import { adapterIds, type AdapterId } from '../../../adapters/index.js';
 import { loadCatalog, selectAssets, assertNoSymlinks, inside, relativePath, type Asset } from '../../../core/src/index.js';
-import { getAdapter } from '../registry.js';
+import { getAdapter } from '../../../adapters/index.js';
 
 const nonempty = z.string().trim().min(1);
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
@@ -61,7 +61,7 @@ export function statusOf(record: Record): Status {
 }
 
 const implementationFiles = [
-  'tool/src/adapter.ts', 'tool/src/render.ts', 'tool/src/registry.ts', 'tool/src/cli.ts',
+  'adapters/types.ts', 'adapters/render.ts', 'adapters/runtime.ts', 'adapters/index.ts', 'tool/src/cli.ts',
   'core/src/index.ts', 'core/src/contract.ts', 'core/src/schema.ts',
   'core/src/catalog.ts', 'core/src/paths.ts',
   'core/src/docs.ts', 'core/src/errors.ts',
@@ -154,7 +154,7 @@ export async function inspect(source: string, verificationRoot = path.join(sourc
       const adapter = getAdapter(harness);
       const compatibility = adapter.check(asset, catalog);
       const saved = records.get(`${asset.key}:${harness}`);
-      const issues = compatibility.status === 'supported' ? [] : [compatibility.reason];
+      const issues = compatibility.issues.map(i => `${i.field}: ${i.reason} Effect: ${i.effect}`);
       let stale = false;
       if (saved) {
         const current = await fingerprint(source, catalog, asset.key, harness);

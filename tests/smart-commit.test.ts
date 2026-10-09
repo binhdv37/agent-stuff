@@ -6,7 +6,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
 import { loadCatalog } from '../core/src/index.js';
-import { getAdapter } from '../tool/src/registry.js';
+import { getAdapter } from '../adapters/index.js';
 
 async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   const temporary = await mkdtemp(path.join(tmpdir(), 'agent-stuff-smart-commit-test-'));

@@ -1,6 +1,6 @@
 # Tách core thành module độc lập
 
-Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–3; bước 4 chưa triển khai.
+Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–4; bước 5 chưa đóng vòng.
 
 ## Mục tiêu và phạm vi đã thống nhất
 
@@ -81,17 +81,17 @@ Gợi ý layout là `core/src/` và `core/docs/`, giữ nguyên ba thư mục ca
 
 ### 4. Tách adapter và bổ sung compatibility
 
-- [ ] Đưa interface/helper render thuộc adapter ra khỏi installer/tool implementation;
+- [x] Đưa interface/helper render thuộc adapter ra khỏi installer/tool implementation;
       adapter tiếp tục trả file trong bộ nhớ, không ghi filesystem hay gọi network.
-- [ ] Khai báo version contract hỗ trợ và kiểm tra trước `check`/`render`;
+- [x] Khai báo version contract hỗ trợ và kiểm tra trước `check`/`render`;
       mismatch báo expected/actual, chặn cả đường gọi render trực tiếp.
-- [ ] Báo cáo compatibility có status tổng thể và issue theo field/contract:
+- [x] Báo cáo compatibility có status tổng thể và issue theo field/contract:
       đường dẫn field, nguyên nhân, hệ quả, mức độ. Cần xét cả tổ hợp field.
-- [ ] `supported`: toàn bộ yêu cầu được bảo toàn; `limited`: sai khác có thể
+- [x] `supported`: toàn bộ yêu cầu được bảo toàn; `limited`: sai khác có thể
       chấp nhận và được công khai; `unsupported`: không giữ yêu cầu bắt buộc.
-- [ ] Field mới ảnh hưởng hành vi chưa hiểu phải chặn. Metadata hiển thị bị mất
+- [x] Field mới ảnh hưởng hành vi chưa hiểu phải chặn. Metadata hiển thị bị mất
       có thể limited; không tự coi mọi field optional là bỏ qua được.
-- [ ] Installer trình bày báo cáo và dùng cơ chế `--accept-limitations` hiện có;
+- [x] Installer trình bày báo cáo và dùng cơ chế `--accept-limitations` hiện có;
       `--yes` không vượt compatibility, conflict hoặc quyền bắt buộc.
 
 Đầu ra: biết rõ lý do cài đầy đủ/có giới hạn/bị chặn, giữ mapping native hiện có.
@@ -127,7 +127,8 @@ runtime và evidence stale được báo đúng, không suy diễn từ unit tes
 
 ## Tiếp tục ở phiên sau
 
-- Đã commit: bước 1 `112057a` (public API); bước 2 `cf838eb` (core độc lập).
+- Đã commit: bước 1 `112057a` (public API); bước 2 `cf838eb` (core độc lập);
+  bước 3 `55f0a81` (core tự mô tả). Bước 4 hiện chưa commit.
 - Bước 3 đã làm: schema.ts khai báo validator + description + x-core-category cùng
   chỗ; getContract lấy schema/field meanings từ nguồn đó, không còn map viết riêng.
   Contract API hiện là 3; YAML/schema_version, default và nội dung stuff không đổi.
@@ -151,11 +152,44 @@ runtime và evidence stale được báo đúng, không suy diễn từ unit tes
   Markdown và link nội bộ, catalog 16 assets, declaration/consumer TypeScript
   strict và CLI default source. Dependency dùng từ checkout qua symlink, chưa
   kiểm chứng fresh dependency install từ registry. Gói chưa publish.
-- Chưa làm: bước 4–5. Interface/helper render adapter vẫn thuộc tool, chưa có
-  contract-version gate hoặc compatibility issue theo field.
-- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan; bắt đầu bước 4 bằng
-  tách interface/helper adapter, chặn mismatch contract trước check/render và
-  nối báo cáo chi tiết vào installer. Kiểm tra thay đổi mới trước khi tiếp tục.
+- Bước 4 đã làm: public adapter entrypoint adapters/index.ts; types/render helper
+  đã chuyển khỏi tool. adapters/runtime.ts cung cấp defineAdapter: guard chung
+  trước check/render, kể cả detached render; contract version, definition schema,
+  kind và vocabulary field phải đúng expected. Unknown field bị chặn. Guard
+  vocabulary không thay trách nhiệm tăng contract version khi đổi type/default/
+  ngữ nghĩa. Adapter chỉ import public core, không import tool, không ghi file.
+- Adapter revision 2 hỗ trợ contract 3. mappedFields khai báo field thực sự dùng;
+  field hiện diện chưa mapping: metadata limited, nội dung/hành vi/policy blocked.
+  Issue gồm field/status/reason/effect; native check tổng hợp giới hạn tổ hợp policy.
+  CLI trình bày từng issue, --yes không vượt giới hạn; --accept-limitations không
+  vượt unsupported. --compatible-only vẫn được bỏ asset unsupported nhưng không
+  vượt mismatch contract toàn module. Manifest ghi revision thực, vẫn đọc revision 1.
+- Output native giữ nguyên: 67 file được so byte hash với baseline chụp từ commit
+  55f0a81 trong tests/fixtures/adapter-render-baseline.json. Đây là render regression,
+  không phải runtime evidence. Không sửa stuff hoặc migration inventory.
+- Docs cập nhật: adapters/README.md, README/AGENTS, adapter/harness development,
+  compatibility và harness baselines. Các metadata từng bị bỏ im lặng giờ reported
+  limited (Codex argument_hint; Claude display_name/short_description; OpenCode
+  display_name/short_description/argument_hint khi hiện diện). Không suy diễn đây
+  là hạn chế capability của harness, chưa thay native mapping để bổ sung chúng.
+- Checks bước 4 ngày 2026-10-09: typecheck đạt; npm test 51/51 đạt, gồm độc lập
+  core+adapter không cần tool, mismatch cả scopes không ghi file, unknown/unmapped
+  behavior, policy blockers, metadata acceptance và manifest cũ. Có OpenCode agent
+  discovery test hiện có; không tạo hồ sơ per-asset runtime mới hoặc nhận verified.
+  Build, CLI validate 16 assets, core docs check và verification validate/report
+  check đạt. Fingerprint chuyển sang adapter module mới; giữ evidence hashes cũ,
+  summary được sinh bằng verification report.
+- Smoke tarball bước 4 trong /private/tmp/agent-stuff-step4-pack.2gd2ns đạt: core
+  topics/catalog 16 assets, adapter API/report/render, declarations và consumer
+  TypeScript strict (--types node), adapter README, CLI default source/dry-run.
+  Module tool adapter/registry/render cũ không còn trong tarball. Dependency dùng
+  symlink checkout; chưa kiểm chứng fresh registry install. Gói chưa publish.
+- Bước kế tiếp: bước 5. Đọc AGENTS.md và git status; rà checklist trên cơ sở tests
+  đã có, bổ sung chỉ phần thiếu. Kiểm tra discovery/render-install global/project
+  tạm trên từng binary hiện có và ghi blocker thiếu điều kiện; rút gọn docs còn
+  trùng lặp, đóng plan. Không chạy lại toàn bộ checks nếu không có thay đổi hoặc
+  nghi vấn mới. Bước 4 không có blocker implementation; kiểm chứng workflow runtime
+  đầy đủ vẫn ngoài kết quả tests/refactor và evidence cũ có thể stale.
 - Sau mỗi bước: cập nhật checkbox, ghi file thay đổi, checks/kết quả, blocker và
   hành động tiếp theo tại mục này. Một bước chỉ đánh dấu xong khi đạt đầu ra.
 - Không cần hỏi lại sáu quyết định; chỉ làm rõ khi phát hiện phương án buộc phải

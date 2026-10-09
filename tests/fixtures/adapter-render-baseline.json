@@ -1,0 +1,408 @@
+{
+  "source_commit": "55f0a81",
+  "purpose": "Native render regression baseline only; no runtime evidence",
+  "outputs": [
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/SKILL.md",
+      "sha256": "b43c5ca1406c5f47e038c67d57eff9d47a6fb70a7c43a5e9319af1d70821f31a"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/references/handoff-template.md",
+      "sha256": "5928cab6c10bd7adbdeaaef04db7881ebb4e54e78f394bfee26f5c22eb0c877b"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-brainstorm-first",
+      "path": "skills/bdv-brainstorm-first/SKILL.md",
+      "sha256": "28a1c5467c0b4621e33559c8b60e34c38fe6b23f04df67b9b520114e33a76f8a"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-change-report",
+      "path": "skills/bdv-change-report/SKILL.md",
+      "sha256": "f10ff09d861e3cb70bc463d1785c5b233468dfb7c4d1983308acd231d7b3b141"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-explain-code",
+      "path": "skills/bdv-explain-code/SKILL.md",
+      "sha256": "794ed387425792b195fac3a56f73ca9771bc2f543cd7e38eea9f8ee257d2e554"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-grill-me",
+      "path": "skills/bdv-grill-me/SKILL.md",
+      "sha256": "4b760151cbc7a6f806c1d62b587fd8d4cffa0f5ad7fd9be97153ed4979d514bb"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-handoff",
+      "path": "skills/bdv-handoff/SKILL.md",
+      "sha256": "69d093b4458cec405eac735dbbadd6eb3200da2c90b29a82d96eae3d22b92b2c"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-ielts-speaking-coach",
+      "path": "skills/bdv-ielts-speaking-coach/SKILL.md",
+      "sha256": "069cb4d3964215c71c08af3fa01c5773b0bdf9d44f6512e60806df8159c20688"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-interview-coach",
+      "path": "skills/bdv-interview-coach/SKILL.md",
+      "sha256": "a5345466be399c0562c51bfeba7fec3c0cec7a8e6649944ab5377e87955f958d"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/SKILL.md",
+      "sha256": "4c60ed44ba68bb8a6c9d868b5828fa952afa971080b2920203d94047b52ed303"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/assets/product-brief.md",
+      "sha256": "4748b282b6bbde6fa47781497d9f6d933986371340cd3e8c10e5094374f0475e"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-smart-commit",
+      "path": "skills/bdv-smart-commit/SKILL.md",
+      "sha256": "32fab6bff5c2362bd3808f37c4341b2179205c121f833c28c22835fefad3e4e3"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/SKILL.md",
+      "sha256": "aeb096f368e9f4a132eafe1be4aa7144f915abddc5d9cc8a75d7982f54e6c181"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/GLOSSARY-FORMAT.md",
+      "sha256": "d177def491519d97873291f2e860d8f1d60ead78feecb82eee022177958069c6"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/LEARNING-RECORD-FORMAT.md",
+      "sha256": "855f81017625256584bbf62bd5edb9b0c86605c4cc1139c56acc36b802595d17"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/MISSION-FORMAT.md",
+      "sha256": "8da6d3ac84eb2eb19f17c260b6acf01c560d3ac7a4501c415eea0e985602f4d7"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/RESOURCES-FORMAT.md",
+      "sha256": "2bc634a64b0d0daa10904f9222e7aa0d361420dfacabbf092fbe3a72222edc08"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "agent/bdv-plan-reviewer",
+      "path": "agents/bdv-plan-reviewer.md",
+      "sha256": "a4ba0fc601356a71c9f2910dda50d782ff9587688ddb0158b9d830afe52a1cd5"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "agent/experimental-plan",
+      "path": "agents/experimental-plan.md",
+      "sha256": "e1fc60a94935170e6a6dbc9dad2f8fdfe66b87d77565eccf3c81153aabd5c57b"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "agent/solution-architect",
+      "path": "agents/solution-architect.md",
+      "sha256": "9c283269cac75d2ed836a9f29a21165c78bd9556f578282d588e50338fb48053"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "command/bdv-change-report",
+      "path": "commands/bdv-change-report.md",
+      "sha256": "021cba1ca68e9a1935deca720a233b26058ef6a05e040102a42de5bfec3501fb"
+    },
+    {
+      "adapter": "opencode",
+      "asset": "command/bdv-explain-code",
+      "path": "commands/bdv-explain-code.md",
+      "sha256": "cfb4e03d222ebbd58b14ffffb25508c38f10de2b9cbea214e256ce2aa0930a4c"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/SKILL.md",
+      "sha256": "b43c5ca1406c5f47e038c67d57eff9d47a6fb70a7c43a5e9319af1d70821f31a"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/references/handoff-template.md",
+      "sha256": "5928cab6c10bd7adbdeaaef04db7881ebb4e54e78f394bfee26f5c22eb0c877b"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-brainstorm-first",
+      "path": "skills/bdv-brainstorm-first/SKILL.md",
+      "sha256": "28a1c5467c0b4621e33559c8b60e34c38fe6b23f04df67b9b520114e33a76f8a"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-brainstorm-first",
+      "path": "skills/bdv-brainstorm-first/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-change-report",
+      "path": "skills/bdv-change-report/SKILL.md",
+      "sha256": "f10ff09d861e3cb70bc463d1785c5b233468dfb7c4d1983308acd231d7b3b141"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-change-report",
+      "path": "skills/bdv-change-report/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-explain-code",
+      "path": "skills/bdv-explain-code/SKILL.md",
+      "sha256": "794ed387425792b195fac3a56f73ca9771bc2f543cd7e38eea9f8ee257d2e554"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-explain-code",
+      "path": "skills/bdv-explain-code/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-grill-me",
+      "path": "skills/bdv-grill-me/SKILL.md",
+      "sha256": "4b760151cbc7a6f806c1d62b587fd8d4cffa0f5ad7fd9be97153ed4979d514bb"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-grill-me",
+      "path": "skills/bdv-grill-me/agents/openai.yaml",
+      "sha256": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-handoff",
+      "path": "skills/bdv-handoff/SKILL.md",
+      "sha256": "69d093b4458cec405eac735dbbadd6eb3200da2c90b29a82d96eae3d22b92b2c"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-handoff",
+      "path": "skills/bdv-handoff/agents/openai.yaml",
+      "sha256": "cfb665cec3d01888efc9bab6895713be14a7a76a394090ee66d5a1ef09eeb042"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-ielts-speaking-coach",
+      "path": "skills/bdv-ielts-speaking-coach/SKILL.md",
+      "sha256": "069cb4d3964215c71c08af3fa01c5773b0bdf9d44f6512e60806df8159c20688"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-ielts-speaking-coach",
+      "path": "skills/bdv-ielts-speaking-coach/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-interview-coach",
+      "path": "skills/bdv-interview-coach/SKILL.md",
+      "sha256": "a5345466be399c0562c51bfeba7fec3c0cec7a8e6649944ab5377e87955f958d"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-interview-coach",
+      "path": "skills/bdv-interview-coach/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/SKILL.md",
+      "sha256": "4c60ed44ba68bb8a6c9d868b5828fa952afa971080b2920203d94047b52ed303"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/assets/product-brief.md",
+      "sha256": "4748b282b6bbde6fa47781497d9f6d933986371340cd3e8c10e5094374f0475e"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-smart-commit",
+      "path": "skills/bdv-smart-commit/SKILL.md",
+      "sha256": "32fab6bff5c2362bd3808f37c4341b2179205c121f833c28c22835fefad3e4e3"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-smart-commit",
+      "path": "skills/bdv-smart-commit/agents/openai.yaml",
+      "sha256": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/SKILL.md",
+      "sha256": "aeb096f368e9f4a132eafe1be4aa7144f915abddc5d9cc8a75d7982f54e6c181"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/GLOSSARY-FORMAT.md",
+      "sha256": "d177def491519d97873291f2e860d8f1d60ead78feecb82eee022177958069c6"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/LEARNING-RECORD-FORMAT.md",
+      "sha256": "855f81017625256584bbf62bd5edb9b0c86605c4cc1139c56acc36b802595d17"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/MISSION-FORMAT.md",
+      "sha256": "8da6d3ac84eb2eb19f17c260b6acf01c560d3ac7a4501c415eea0e985602f4d7"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/RESOURCES-FORMAT.md",
+      "sha256": "2bc634a64b0d0daa10904f9222e7aa0d361420dfacabbf092fbe3a72222edc08"
+    },
+    {
+      "adapter": "codex",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/agents/openai.yaml",
+      "sha256": "84c64723a599325f0b7146c8e722315c8c7328a5b01cae64e8d339ca216889be"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/SKILL.md",
+      "sha256": "863ef9086ab3e9fd595eb39689e0ab643413443f065038500b42a73e384e8aed"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-api-handoff",
+      "path": "skills/bdv-api-handoff/references/handoff-template.md",
+      "sha256": "5928cab6c10bd7adbdeaaef04db7881ebb4e54e78f394bfee26f5c22eb0c877b"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-brainstorm-first",
+      "path": "skills/bdv-brainstorm-first/SKILL.md",
+      "sha256": "505aef6e68361e48cd27e74495a8d60e9df020bcde52c83298bcd47925293c15"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-change-report",
+      "path": "skills/bdv-change-report/SKILL.md",
+      "sha256": "ee9a53072ad01bd7aa1418347386d977a6a1716231c9235e125b72f32b4ca872"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-explain-code",
+      "path": "skills/bdv-explain-code/SKILL.md",
+      "sha256": "77072de0a8bf4579b0ac373a7d66c0abaf6b7908a70ecece1c10f1fb63a30487"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-grill-me",
+      "path": "skills/bdv-grill-me/SKILL.md",
+      "sha256": "b16fbeac82f24b09a09145aebef53f43e4fb3c25ac8a4982d820810c19064ef3"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-handoff",
+      "path": "skills/bdv-handoff/SKILL.md",
+      "sha256": "05b33f20d2e8322480ea71c14c3ba36a96b6fb14a69305603d31dc4f79392303"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-ielts-speaking-coach",
+      "path": "skills/bdv-ielts-speaking-coach/SKILL.md",
+      "sha256": "08378318187950ce64e133f49cfcaca5346be0af1703140fd600c863bc680a48"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-interview-coach",
+      "path": "skills/bdv-interview-coach/SKILL.md",
+      "sha256": "6722963e8dd84041857e4cb7390e7c71682013e3a29208a1292c801febfd644b"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/SKILL.md",
+      "sha256": "c89a4a9745a5b6f2e372f745791424f46461a07d79d9b0404b4ad8d39ae14884"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-product-brief",
+      "path": "skills/bdv-product-brief/assets/product-brief.md",
+      "sha256": "4748b282b6bbde6fa47781497d9f6d933986371340cd3e8c10e5094374f0475e"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-smart-commit",
+      "path": "skills/bdv-smart-commit/SKILL.md",
+      "sha256": "df055d3bf39b2e6f2beb1421010e2e15eb34572ad5ad8f0e6ae36cc637731bf3"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/SKILL.md",
+      "sha256": "9a1430da4359794641cc59745bdc89531397bba05cfd417a8db9e598516b7429"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/GLOSSARY-FORMAT.md",
+      "sha256": "d177def491519d97873291f2e860d8f1d60ead78feecb82eee022177958069c6"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/LEARNING-RECORD-FORMAT.md",
+      "sha256": "855f81017625256584bbf62bd5edb9b0c86605c4cc1139c56acc36b802595d17"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/MISSION-FORMAT.md",
+      "sha256": "8da6d3ac84eb2eb19f17c260b6acf01c560d3ac7a4501c415eea0e985602f4d7"
+    },
+    {
+      "adapter": "claude-code",
+      "asset": "skill/bdv-teach",
+      "path": "skills/bdv-teach/RESOURCES-FORMAT.md",
+      "sha256": "2bc634a64b0d0daa10904f9222e7aa0d361420dfacabbf092fbe3a72222edc08"
+    }
+  ]
+}

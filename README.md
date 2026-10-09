@@ -22,8 +22,9 @@ repository.
 Core is an independent module with a [public contract API](core/docs/README.md)
 for schema, field meanings, docs, catalog loading and selection. It depends on
 Node.js, yaml and zod, with no tool/adapter imports. The staged
-[module refactor](docs/plans/core-module-boundary.md) is still in progress;
-adapter contract-version checks are not implemented yet.
+[module refactor](docs/plans/core-module-boundary.md) is still in progress.
+The independent [adapter module](adapters/README.md) checks core contract versions
+and reports field-specific limitations before rendering or installation.
 
 ## Start from a problem or idea
 
@@ -81,9 +82,11 @@ npm run cli -- update --agent codex --scope global --dry-run
 npm run cli -- uninstall --agent codex --scope global --dry-run
 ```
 
-OpenCode explicit-only skills require `--accept-limitations` when applying in
-non-interactive mode: the explicit invocation rule is expressed in instructions,
-without native enforcement by this adapter. `--yes` does not bypass conflicts.
+Assets reported as limited require `--accept-limitations` when applying in
+non-interactive mode. OpenCode explicit invocation is expressed in instructions;
+unmapped display names/descriptions or argument hints are also reported per field.
+`--yes` does not accept limitations or bypass conflicts. Contract mismatches block
+rendering even with `--compatible-only`.
 
 The CLI defaults to the core bundled with it. Use `--source /path/to/checkout` to
 work with another checkout. Update defaults to the source recorded at installation.
@@ -102,7 +105,7 @@ remove managed files that have local edits.
 | `core/agents/` | Portable role and policy definitions |
 | `core/commands/` | Entry points referencing a skill workflow |
 | `core/src/`, `core/docs/` | Public contract, schema, catalog loader, path checks and API docs |
-| `adapters/` | Harness-specific rendering and compatibility decisions |
+| `adapters/` | Public interface, contract guards, native rendering and compatibility decisions |
 | `tool/src/` | CLI, adapter coordination, installation, recovery and verification |
 | `tests/` | Fixtures, migration checks, and filesystem lifecycle tests |
 
@@ -116,6 +119,9 @@ remove managed files that have local edits.
 
 See [compatibility](docs/compatibility.md) for runtime checks and policy limits;
 [migration notes](docs/migration.md) list intentional changes from the old layout.
+Metadata omitted by an adapter makes the selected asset limited: Codex currently
+omits argument hints; Claude Code omits display_name/short_description; OpenCode
+omits those UI fields and argument hints. Native output is unchanged by this audit.
 
 ## Working on this repository
 

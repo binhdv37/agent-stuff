@@ -6,6 +6,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stringify } from 'yaml';
 import { loadCatalog } from '../core/src/index.js';
+import { getAdapter } from '../adapters/index.js';
 import { fingerprint, inspect, recordSchema, report, sha256, statusOf, type Record } from '../tool/src/verification/index.js';
 
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
@@ -29,7 +30,7 @@ async function recordAt(source: string): Promise<Record> {
     schema_version: 1, asset: 'skill/bdv-api-handoff', harness: 'codex',
     checked_at: '2026-10-01T01:00:00Z',
     fingerprint: await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex'),
-    environment: { harness_version: 'test-binary', adapter_revision: 1, model: 'test-model',
+    environment: { harness_version: 'test-binary', adapter_revision: getAdapter('codex').version, model: 'test-model',
       scopes: ['project'], platform: 'test-platform', configuration: 'Isolated test fixture; no real model run' },
     contract: 'Test the verification ledger itself', limitations: [],
     cases: ['core', 'render-install', 'discovery', 'behavior'].map((stage, index) => ({

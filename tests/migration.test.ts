@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { loadCatalog } from '../core/src/index.js';
 import { hash } from '../tool/src/installation/index.js';
-import { getAdapter } from '../tool/src/registry.js';
+import { getAdapter } from '../adapters/index.js';
 
 test('migration preserves baseline content except documented core revisions', async () => {
   const catalog = await loadCatalog(path.join('.', 'core'));

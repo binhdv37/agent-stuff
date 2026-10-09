@@ -8,8 +8,8 @@ import { pathToFileURL } from 'node:url';
 import { parse } from 'yaml';
 import { applyInstall, planInstall, planUninstall, targetContext, recoverInstall, readManifest } from '../tool/src/installation/index.js';
 import { loadCatalog } from '../core/src/index.js';
-import { getAdapter } from '../tool/src/registry.js';
-import { adapterIds, type OutputFile } from '../tool/src/adapter.js';
+import { getAdapter } from '../adapters/index.js';
+import { adapterIds, type OutputFile } from '../adapters/index.js';
 
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
   const dir = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-lifecycle-')));

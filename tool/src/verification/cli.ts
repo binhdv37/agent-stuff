@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { readFile, writeFile, mkdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
-import { adapterIds, type AdapterId } from '../adapter.js';
+import { adapterIds, type AdapterId } from '../../../adapters/index.js';
 import { assertNoSymlinks, loadCatalog } from '../../../core/src/index.js';
 import { fingerprint, inspect, report } from './index.js';
 

@@ -8,7 +8,7 @@ import { randomBytes } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { parse } from 'yaml';
 import { loadCatalog } from '../dist/core/src/index.js';
-import { getAdapter } from '../dist/tool/src/registry.js';
+import { getAdapter } from '../dist/adapters/index.js';
 import { targetContext, planInstall, applyInstall } from '../dist/tool/src/installation/index.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

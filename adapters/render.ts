@@ -1,6 +1,6 @@
 import { stringify } from 'yaml';
-import type { Asset } from '../../core/src/index.js';
-import type { OutputFile } from './adapter.js';
+import type { Asset } from '../core/src/index.js';
+import type { OutputFile } from './types.js';
 export const explicitGuard = 'Do not invoke automatically. Use this skill only when the user explicitly requests this workflow or names the skill.';
 export function description(asset: Asset): string {
   const d = asset.definition;

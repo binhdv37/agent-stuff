@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { loadCatalog, selectAssets, definitionSchema } from '../core/src/index.js';
 import { opencode } from '../adapters/opencode/index.js';
 import { applyInstall, planInstall, targetContext, validateOutputs } from '../tool/src/installation/index.js';
-import type { OutputFile } from '../tool/src/adapter.js';
+import type { OutputFile } from '../adapters/index.js';
 
 const fixture = path.resolve('tests/fixtures');
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {

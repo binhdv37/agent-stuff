@@ -12,7 +12,7 @@ này quy định phần mapping và kiểm chứng harness của flow đó.
 | Câu hỏi | Nguồn cần đọc hoặc sửa |
 |---|---|
 | Asset muốn làm gì, được kích hoạt và cấp quyền thế nào? | `core/` và public API `core/src/index.ts` |
-| Harness biểu diễn ý định đó thế nào? | `adapters/<harness>/index.ts` và `tool/src/render.ts` |
+| Harness biểu diễn ý định đó thế nào? | `adapters/<harness>/index.ts` và `adapters/render.ts` |
 | Mapping đã được xác minh đến đâu? | `docs/compatibility.md`, gồm nguồn chính thức và giới hạn runtime |
 | Luật nền tảng và khác biệt phiên bản của từng harness? | `docs/harnesses/README.md` và ghi chú harness liên quan; mở lại nguồn khi đổi mapping |
 | Mapping được giữ đúng qua các lần sửa thế nào? | `tests/core-adapter.test.ts`, `tests/agent-policy.test.ts` |

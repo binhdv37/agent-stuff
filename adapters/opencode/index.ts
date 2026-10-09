@@ -1,43 +1,51 @@
-import type { Adapter, Compatibility, OutputFile } from '../../tool/src/adapter.js';
+import type { Compatibility, OutputFile } from '../types.js';
+import { defineAdapter, compatibility, issue } from '../runtime.js';
 
-import { description, markdown } from '../../tool/src/render.js';
+import { description, markdown } from '../render.js';
 
-export const opencode: Adapter = {
-  id: 'opencode', version: 1, directories: { global: '.config/opencode', project: '.opencode' },
+export const opencode = defineAdapter({
+  id: 'opencode', version: 2, supportedContractVersions: [3], directories: { global: '.config/opencode', project: '.opencode' },
+  mappedFields: {
+    skill: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources', 'activation'],
+    command: ['schema_version', 'kind', 'id', 'description', 'workflow'],
+    agent: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources', 'role', 'policy',
+      'policy.workspace_read', 'policy.workspace_write', 'policy.shell', 'policy.questions',
+      'policy.delegation', 'policy.delegation_targets', 'policy.write_paths'],
+  },
   check(asset, catalog): Compatibility {
     const d = asset.definition;
-    const result = (status: Compatibility['status'], reason: string): Compatibility => ({ asset: asset.key, status, reason });
+    const issues = [];
     if (d.kind === 'agent') {
-      if (asset.resources.size) return result('unsupported', 'Agent resources are not mapped yet.');
+      if (asset.resources.size) issues.push(issue('resources', 'unsupported', 'Agent resources are not mapped yet.', 'Supporting files would be missing from this agent installation.'));
       if (d.policy.workspace_write !== 'allow' && d.policy.shell !== 'deny') {
-        return result('unsupported', 'Restricted writes require shell access to be denied.');
+        issues.push(issue('policy.shell', 'unsupported', 'Restricted writes require shell access to be denied.', 'Shell access could bypass workspace_write/write_paths restrictions.'));
       }
-      if (d.policy.delegation !== 'deny' && d.policy.delegation !== 'allow') return result('unsupported', 'Ask-on-delegation has no restricted target mapping.');
-      if (d.policy.delegation === 'allow' && !d.policy.delegation_targets.length) return result('unsupported', 'Delegation requires explicit read-only targets.');
+      if (d.policy.delegation !== 'deny' && d.policy.delegation !== 'allow') issues.push(issue('policy.delegation', 'unsupported', 'Ask-on-delegation has no restricted target mapping.', 'The requested delegation permission cannot be preserved.'));
+      if (d.policy.delegation === 'allow' && !d.policy.delegation_targets.length) issues.push(issue('policy.delegation_targets', 'unsupported', 'Delegation requires explicit read-only targets.', 'An unrestricted delegation permission would violate the core contract.'));
       for (const key of d.policy.delegation_targets) {
         const target = catalog.get(key);
         if (!target || target.definition.kind !== 'agent' || target.definition.role !== 'delegated' ||
             target.definition.policy.workspace_write !== 'deny' || target.definition.policy.write_paths.length ||
             target.definition.policy.shell !== 'deny' || target.definition.policy.delegation !== 'deny') {
-          return result('unsupported', `Delegate ${key} must be a read-only agent without shell or delegation.`);
+          issues.push(issue('policy.delegation_targets', 'unsupported', `Delegate ${key} must be a read-only agent without shell or delegation.`, 'Unsafe or missing helper targets block rendering.'));
         }
       }
-      return result('supported', 'Native role and deny-by-default tool permissions.');
+      return compatibility(asset, 'Native role and deny-by-default tool permissions.', issues);
     }
     if (d.kind === 'command') {
       const workflow = catalog.get(d.workflow);
-      if (!workflow) return result('unsupported', `Missing workflow: ${d.workflow}`);
-      if (workflow.resources.size) return result('unsupported', 'Commands referencing workflows with resources are not supported in this increment.');
-      if (/!`|\$ARGUMENTS|\$[1-9]/.test(workflow.body)) return result('unsupported', 'Workflow contains native command interpolation syntax.');
-      return result('supported', 'Native command with inline workflow and free-form arguments.');
+      if (!workflow) issues.push(issue('workflow', 'unsupported', `Missing workflow: ${d.workflow}`, 'The command has no authoritative workflow to render.'));
+      else {
+        if (workflow.resources.size) issues.push(issue('workflow.resources', 'unsupported', 'Commands referencing workflows with resources are not supported in this increment.', 'The inline command does not preserve supporting workflow files.'));
+        if (/!`|\$ARGUMENTS|\$[1-9]/.test(workflow.body)) issues.push(issue('workflow.instructions', 'unsupported', 'Workflow contains native command interpolation syntax.', 'The command could interpret workflow text as native interpolation.'));
+      }
+      return compatibility(asset, 'Native command with inline workflow and free-form arguments.', issues);
     }
-    if (description(asset).length > 1024) return result('unsupported', 'Rendered skill description exceeds 1024 characters.');
-    return d.activation === 'explicit'
-      ? result('limited', 'Explicit invocation is a textual instruction; OpenCode ignores disable-model-invocation. No permission config is modified.')
-      : result('supported', 'Native skill discovery.');
+    if (description(asset).length > 1024) issues.push(issue('description', 'unsupported', 'Rendered skill description exceeds 1024 characters.', 'The generated description violates the adapter native format baseline.'));
+    if (d.activation === 'explicit') issues.push(issue('activation', 'limited', 'Explicit invocation is a textual instruction in this adapter.', 'The model may still select the skill automatically; no native invocation enforcement is installed.'));
+    return compatibility(asset, 'Native skill discovery.', issues);
   },
   render(asset, catalog): OutputFile[] {
-    if (this.check(asset, catalog).status === 'unsupported') throw new Error(`Cannot render ${asset.key}: ${this.check(asset, catalog).reason}`);
     const d = asset.definition;
     if (d.kind === 'skill') {
       return [
@@ -67,4 +75,4 @@ export const opencode: Adapter = {
     }
     throw new Error(`Unsupported asset: ${asset.key}`);
   },
-};
+});

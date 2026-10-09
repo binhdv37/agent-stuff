@@ -44,7 +44,7 @@ Nguồn: [Build skills](https://learn.chatgpt.com/docs/build-skills).
 
 Hệ quả cho repo: `activation` thuộc core; adapter dịch policy chung cho mọi skill.
 Không dùng override theo asset chỉ để đổi tên tham số activation. Mapping nằm ở
-`adapters/codex/index.ts`; resource được giữ qua `tool/src/render.ts`.
+`adapters/codex/index.ts`; resource được giữ qua `adapters/render.ts`.
 
 ## Custom agent và delegation
 
@@ -99,3 +99,15 @@ cho Codex. Khi cần, phải xác minh nguồn CLI cụ thể thay vì suy rộn
 - So sánh explicit invocation với request chỉ khớp description.
 - Với custom agent, thử boundary thực tế dưới parent overrides và trust settings.
 - Xác minh lại permission profiles beta trước khi dùng cho policy core.
+
+## Revision 2 — refactor và diagnostic ngày 2026-10-09
+
+Adapter revision 2 dùng public core contract 3, definition schema 1; interface và
+render helpers thuộc adapters, không import tool. Guard từ chối contract/version
+hoặc vocabulary field lệch trước check/render. argument_hint chưa được mapping và giờ báo limited; display_name/short_description vẫn được render như cũ.
+
+Native format và target giữ nguyên baseline revision 1 ở trên. Không mở lại
+official docs trong lượt refactor này; ngày đọc nguồn vẫn 2026-09-30, không thêm
+bằng chứng runtime mới. Test `tests/adapter-contract.test.ts` so 67 output hashes
+của catalog trên ba adapter với commit 55f0a81; output byte không đổi. Revision 1
+được giữ để đối chiếu; giới hạn và trạng thái hiện tại xem compatibility.

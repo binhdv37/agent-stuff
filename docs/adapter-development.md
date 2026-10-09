@@ -49,14 +49,18 @@ không dùng flag này cho update vì không được âm thầm bỏ qua asset 
 - `core/src/index.ts`: entrypoint public cho schema/docs/catalog/selection/path helpers.
 - `core/src/schema.ts`: schema nghiêm ngặt và policy trung lập; không import trực tiếp từ consumer.
 - `core/src/catalog.ts`: đọc nội dung, giữ byte resource, kiểm tra tham chiếu.
-- `tool/src/adapter.ts`: contract, trạng thái compatibility, file đầu ra trong bộ nhớ.
-- `tool/src/registry.ts`: danh sách adapter tích hợp.
+- `adapters/index.ts`: entrypoint public và registry adapter.
+- `adapters/types.ts`, `adapters/runtime.ts`: interface, contract guard và issue theo field.
+- `adapters/render.ts`: helper native metadata và file đầu ra trong bộ nhớ.
 - `adapters/`: native metadata, wrapper command và target directory.
 - `tool/src/installation/index.ts`: plan, state, transaction và recovery.
 - `tool/src/cli.ts`: tương tác và dispatch.
 
 Core không phụ thuộc tool hoặc adapter. `loadCatalog` nhận core root; CLI và
 verification resolve `--source` checkout thành `<source>/core` tại biên gọi.
+Adapter không import tool; [API adapter](../adapters/README.md) mô tả version gate,
+mapped fields, report và trách nhiệm chấp nhận limited. Native output không đổi
+ở revision 2; metadata chưa mapping giờ được báo limited thay vì bỏ im lặng.
 Build dọn các thư mục output TypeScript trong dist trước khi compile để file
 của module đã chuyển/xóa không lọt vào npm pack; giữ các thư mục preview khác.
 

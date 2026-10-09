@@ -116,8 +116,10 @@ baselines when updating mappings and record missing historical versions honestly
 Harness-specific per-asset overrides are not implemented. Follow the extension
 criteria in `docs/harness-development.md` before introducing them.
 
-Adapters implement `tool/src/adapter.ts`, declare target directories, report
-compatibility, and return files in memory. No filesystem writes or network calls
+Adapters implement the interface in `adapters/types.ts` through `defineAdapter`;
+consumers import `adapters/index.ts`. Declare contract versions and mapped fields,
+report compatibility issues and effects, and return files in memory.
+No filesystem writes or network calls
 inside adapters. Never silently downgrade an asset or skip unsupported selection.
 
 The shared installer owns global/project resolution, manifests, previews,

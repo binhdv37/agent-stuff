@@ -6,8 +6,16 @@ import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
-import { adapters, getAdapter } from './registry.js';
+import { adapters, getAdapter, type Compatibility } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
+
+function printCompatibility(result: Compatibility): void {
+  console.log(`${result.status}: ${result.asset}${result.issues.length ? '' : `: ${result.reason}`}`);
+  for (const issue of result.issues) {
+    console.log(`  ${issue.field} [${issue.status}]: ${issue.reason}`);
+    console.log(`    Effect: ${issue.effect}`);
+  }
+}
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
@@ -73,13 +81,13 @@ async function main(): Promise<void> {
         const compatible = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
         for (const a of selected) {
           const c = adapter.check(a, catalog);
-          console.log(`${a.key}: ${c.status} — ${c.reason}`);
+          printCompatibility(c);
         }
         const answer = await ask('Assets (comma-separated kind/id; Enter selects all compatible assets): ');
         selected = answer ? selectAssets(catalog, answer.split(',').map(s => s.trim())) : compatible;
       }
       const compatibility = selected.map(a => adapter.check(a, catalog));
-      for (const c of compatibility) console.log(`${c.status}: ${c.asset}: ${c.reason}`);
+      for (const c of compatibility) printCompatibility(c);
       if (values['compatible-only']) {
         if (command === 'update') throw new Error('Update cannot skip incompatible installed assets; select them explicitly');
         selected = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');

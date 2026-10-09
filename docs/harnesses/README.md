@@ -56,9 +56,9 @@ Khi harness cập nhật hoặc có regression, lấy client/version và config 
 và các ràng buộc liên quan. Ghi kết quả mới vào compatibility, giữ bằng chứng cũ
 với phạm vi của nó. Không tự nâng target từ V1 sang V2.
 
-Đây là yêu cầu tài liệu cho quá trình phát triển. Interface adapter hiện chỉ có
-revision số; CLI/manifest chưa phát hiện phiên bản binary hay kiểm tra version
-range của harness. Nếu cần chức năng đó, phải thiết kế và triển khai riêng.
+Đây là yêu cầu tài liệu cho quá trình phát triển. Interface adapter có revision
+và supportedContractVersions cho core. Đây không phải harness version range;
+CLI/manifest chưa phát hiện phiên bản binary hay gate phiên bản harness.
 
 ### Mẫu baseline
 

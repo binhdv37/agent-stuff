@@ -3,15 +3,15 @@ import { lstat, mkdir, readFile, rename, unlink, open, realpath, link } from 'no
 import { hostname } from 'node:os';
 import path from 'node:path';
 import { z } from 'zod';
-import { adapterIds, type AdapterId, type OutputFile } from '../adapter.js';
-import { getAdapter } from '../registry.js';
+import { adapterIds, type AdapterId, type OutputFile } from '../../../adapters/index.js';
+import { getAdapter } from '../../../adapters/index.js';
 import { relativePath, inside, assertNoSymlinks } from '../../../core/src/index.js';
 
 export const hash = (content: Buffer | string): string => createHash('sha256').update(content).digest('hex');
 const assetKey = z.string().regex(/^(skill|agent|command)\/[a-z0-9]+(-[a-z0-9]+)*$/);
 const recordSchema = z.strictObject({ asset: assetKey, path: relativePath, hash: z.string().regex(/^[a-f0-9]{64}$/) });
 const manifestSchema = z.strictObject({
-  schema_version: z.literal(1), adapter: z.enum(adapterIds), adapter_version: z.literal(1),
+  schema_version: z.literal(1), adapter: z.enum(adapterIds), adapter_version: z.number().int().positive(),
   source: z.string(), content_digest: z.string(), target: z.string(), files: z.array(recordSchema),
 });
 export type Manifest = z.infer<typeof manifestSchema>;
@@ -100,7 +100,7 @@ export async function planInstall(context: Context, files: OutputFile[], source:
   }
   for (const file of files) records.set(file.path, { asset: file.asset, path: file.path, hash: hash(file.content) });
   const all = [...records.values()].sort((a, b) => a.path.localeCompare(b.path));
-  const nextManifest: Manifest = { schema_version: 1, adapter: context.adapter, adapter_version: 1,
+  const nextManifest: Manifest = { schema_version: 1, adapter: context.adapter, adapter_version: getAdapter(context.adapter).version,
     source: path.resolve(source), content_digest: hash(JSON.stringify(all)), target: context.target, files: all };
   // Validate collisions against assets outside this selection as well.
   parseManifest(encodedManifest(nextManifest), context);

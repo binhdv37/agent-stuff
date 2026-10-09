@@ -5,10 +5,28 @@ Kết quả từng stuff/harness nằm ở [verification](verification/README.md
 adapter; probe hoặc discovery chung không chứng minh workflow từng asset đạt.
 
 Refactor module ngày 2026-10-09 chuyển schema/loader/path checks vào core và
-consumer dùng public entrypoint. Native mapping và adapter revision giữ nguyên;
-contract API hiện là 3, chưa có version gate trong adapter. Schema JSON có mô tả
-field cùng nguồn với validator; concept/format thuộc core/docs. Fingerprint đã theo
-source core mới; evidence cũ không được cập nhật hash để coi là lượt test mới.
+interface/render/registry vào adapters. Adapter revision 2 gate contract API 3,
+definition schema 1 và vocabulary kind/field đã pin trước check/render. Native
+output giữ nguyên: 67 output hashes khớp baseline trước refactor; đây là test
+render, không phải evidence workflow runtime. Schema JSON có mô tả field cùng
+nguồn với validator; concept/format thuộc core/docs. Fingerprint theo source mới;
+evidence cũ không được cập nhật hash để coi là lượt test mới.
+
+Audit metadata hiện báo limited thay vì bỏ im lặng. Đây là giới hạn implementation
+adapter, không khẳng định harness không có capability tương ứng:
+
+| Adapter revision 2 | Field chưa mapping | Hệ quả |
+|---|---|---|
+| Codex | argument_hint | Hint bị bỏ; metadata UI và invocation policy vẫn được render |
+| Claude Code | display_name, short_description | UI metadata bị bỏ; argument_hint và invocation policy vẫn được render |
+| OpenCode | display_name, short_description, argument_hint | UI/input hint bị bỏ ở skill/agent/command; wrapper đối số command giữ nguyên |
+
+Field chỉ tạo issue khi đã khai báo. Các skill handoff/teach hiện limited trên
+Codex/Claude Code; command OpenCode có hint cũng limited. Explicit activation
+OpenCode vẫn limited riêng. CLI hiển thị field/reason/effect và yêu cầu chấp nhận
+trước apply; --yes/--compatible-only không vượt mismatch contract. Manifest lưu
+revision adapter thực tế và vẫn đọc revision 1. Native target vẫn theo baseline
+docs đã lưu, không có lượt đọc official docs mới vì không đổi native format.
 
 Core `bdv-smart-commit` hiện là workflow nhẹ, explicit-only: đọc Git/file changes
 bằng tools thông thường, dùng context session để cảnh báo changes ngoài phạm vi,

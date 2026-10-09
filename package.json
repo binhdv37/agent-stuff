@@ -30,6 +30,7 @@
     "dist/core/",
     "dist/tool/",
     "dist/adapters/",
+    "adapters/README.md",
     "core/",
     "scripts/check-activation.mjs",
     "README.md",
