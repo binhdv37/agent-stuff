@@ -10,5 +10,5 @@
     "rootDir": ".",
     "skipLibCheck": true
   },
-  "include": ["tool/**/*.ts", "adapters/**/*.ts", "tests/**/*.ts"]
+  "include": ["core/src/**/*.ts", "tool/**/*.ts", "adapters/**/*.ts", "tests/**/*.ts"]
 }

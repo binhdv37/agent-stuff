@@ -1,6 +1,6 @@
 # Tách core thành module độc lập
 
-Ngày: 2026-10-09. Trạng thái: đã chốt hướng kiến trúc; chưa triển khai.
+Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1; bước 2 chưa triển khai.
 
 ## Mục tiêu và phạm vi đã thống nhất
 
@@ -42,16 +42,16 @@ Sáu quyết định đã chốt:
 
 ### 1. Chốt public contract tối thiểu trên code hiện có
 
-- [ ] Lập danh sách field từng kind, mặc định, ngữ nghĩa và ràng buộc kết hợp.
-- [ ] Phân biệt metadata hiển thị, hướng dẫn hành vi và ràng buộc bắt buộc.
+- [x] Lập danh sách field từng kind, mặc định, ngữ nghĩa và ràng buộc kết hợp.
+- [x] Phân biệt metadata hiển thị, hướng dẫn hành vi và ràng buộc bắt buộc.
       Không coi toàn bộ field hành vi là có thể bỏ qua theo best effort.
-- [ ] Xác định kết quả API, type public, lỗi validation và nguồn mặc định.
+- [x] Xác định kết quả API, type public, lỗi validation và nguồn mặc định.
       Core loader nhận đường dẫn core root; CLI giữ tương thích `--source`
       checkout bằng cách resolve tại biên gọi, không buộc thư viện cần repo CLI.
-- [ ] Chọn version contract API riêng với `schema_version` của YAML và revision
+- [x] Chọn version contract API riêng với `schema_version` của YAML và revision
       adapter. Ban đầu kiểm tra phiên bản contract hỗ trợ tường minh; mỗi thay
       đổi contract public phải cập nhật version, không dựa vào so sánh hash schema.
-- [ ] Xác định topic docs và entrypoint public duy nhất.
+- [x] Xác định topic docs và entrypoint public duy nhất.
 
 Đầu ra: contract nhỏ chạy được, không chỉ tài liệu mô tả API tương lai.
 Gợi ý layout là `core/src/` và `core/docs/`, giữ nguyên ba thư mục catalog.
@@ -127,10 +127,27 @@ runtime và evidence stale được báo đúng, không suy diễn từ unit tes
 
 ## Tiếp tục ở phiên sau
 
-- Đã làm: thống nhất sáu quyết định, khảo sát source chính và lưu plan.
-- Chưa làm: mọi checkbox implementation/verification phía trên.
-- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan này; bắt đầu bước 1
-  bằng bảng field và public contract. Kiểm tra thay đổi mới trước khi dùng hiện trạng.
+- Đã làm: bước 1 có public entrypoint `core/src/index.ts`, contract version 1,
+  `getContract()`, `getDocs(topic)` và `loadCatalog(coreRoot)` chạy được.
+  Field meanings/rules ở `core/src/contract.ts`; bảng field được tạo qua API,
+  type/default/required/enum lấy từ validator hiện có. Hướng dẫn ở
+  `core/docs/README.md`; README root có link đến API.
+- Bridge tạm: `loadCatalogRoot` trong `tool/src/core/load.ts` nhận core root;
+  `loadCore(source)` vẫn resolve checkout/core như cũ. API mới dùng bridge và
+  schema tool; chưa đạt module standalone về dependency. Metadata chưa được
+  gom với validator; việc đó thuộc bước 3.
+- Build đã include core/src, package files đã include dist/core. Chưa kiểm tra
+  tarball phân phối; smoke packaging nằm trong các bước tiếp theo.
+- Checks ngày 2026-10-09: `npm run typecheck` đạt; `npm test` 40/40 đạt (bao gồm
+  4 test public contract mới); `npm run cli -- validate --source .` đạt 16 assets.
+  `npm run verification -- report` và report check đạt; summary không đổi.
+  Không sửa content hoặc native mapping, không tạo evidence workflow mới và
+  không tuyên bố tất cả stuff đã verified runtime. Không có blocker bước 1.
+- Chưa làm: bước 2–5, đặc biệt bỏ dependency tool, version check trong adapter
+  và báo cáo issue theo field. Adapter/CLI hiện chưa dùng contract API mới.
+- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan này; bắt đầu bước 2
+  bằng di chuyển schema/loader/path/dependency selection vào core, cập nhật
+  consumer/fingerprints và loại bridge. Kiểm tra thay đổi mới trước khi tiếp tục.
 - Sau mỗi bước: cập nhật checkbox, ghi file thay đổi, checks/kết quả, blocker và
   hành động tiếp theo tại mục này. Một bước chỉ đánh dấu xong khi đạt đầu ra.
 - Không cần hỏi lại sáu quyết định; chỉ làm rõ khi phát hiện phương án buộc phải

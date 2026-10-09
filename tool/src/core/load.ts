@@ -5,7 +5,12 @@ import { definitionSchema, type Asset } from './schema.js';
 import { assertNoSymlinks, inside } from './paths.js';
 
 export async function loadCore(source: string): Promise<Map<string, Asset>> {
-  const root = await realpath(path.join(source, 'core'));
+  return loadCatalogRoot(path.join(source, 'core'));
+}
+
+// Transitional bridge for the public core API; ownership moves to core in step 2.
+export async function loadCatalogRoot(coreRoot: string): Promise<Map<string, Asset>> {
+  const root = await realpath(coreRoot);
   const assets = new Map<string, Asset>();
   for (const kind of ['skill', 'agent', 'command'] as const) {
     const directory = path.join(root, `${kind}s`);

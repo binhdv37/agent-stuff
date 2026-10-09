@@ -18,6 +18,11 @@ a global or project directory.
 The harness runs the installed workflows. Personal drafts are not part of this
 repository.
 
+Core exposes an initial [public contract API](core/docs/README.md) for schema,
+field meanings, docs and catalog loading. Its schema/loader still live in the
+tool during the staged [module refactor](docs/plans/core-module-boundary.md);
+adapter contract-version checks are not implemented yet.
+
 ## Start from a problem or idea
 
 When working with an AI Agent in this repo, use a prefix to state your intent:
