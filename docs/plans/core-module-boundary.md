@@ -1,6 +1,6 @@
 # Tách core thành module độc lập
 
-Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1; bước 2 chưa triển khai.
+Ngày: 2026-10-09. Trạng thái: hoàn thành bước 1–2; bước 3 chưa triển khai.
 
 ## Mục tiêu và phạm vi đã thống nhất
 
@@ -25,7 +25,7 @@ Sáu quyết định đã chốt:
 6. Tách module trong cùng repo trước. Giữ nội dung, ID, YAML schema v1 và ngữ
    nghĩa stuff hiện có. Chưa publish package, tách repo hoặc đổi native mapping.
 
-## Hiện trạng đã kiểm tra
+## Hiện trạng trước refactor (baseline)
 
 - `core/` có 11 skills, 3 agents, 2 commands; chứa nội dung nhưng chưa có API.
 - `tool/src/core/schema.ts` giữ Zod schema strict và các type `Definition`, `Asset`.
@@ -59,12 +59,12 @@ Gợi ý layout là `core/src/` và `core/docs/`, giữ nguyên ba thư mục ca
 
 ### 2. Di chuyển phần sở hữu core, giữ nguyên hành vi
 
-- [ ] Đưa schema, loader, kiểm tra path tài nguyên và dependency selection vào core.
-- [ ] Expose type/API qua entrypoint; consumer không import file nội bộ.
-- [ ] Đảm bảo core đọc/validate được mà không import `tool/` hay `adapters/`.
-- [ ] Cập nhật CLI, tests, tsconfig, build/pack và verification fingerprints.
+- [x] Đưa schema, loader, kiểm tra path tài nguyên và dependency selection vào core.
+- [x] Expose type/API qua entrypoint; consumer không import file nội bộ.
+- [x] Đảm bảo core đọc/validate được mà không import `tool/` hay `adapters/`.
+- [x] Cập nhật CLI, tests, tsconfig, build/pack và verification fingerprints.
       Giữ các kiểm tra chống symlink, path escape và byte resource hiện có.
-- [ ] Giữ nguyên definition/instructions/resources và migration hashes.
+- [x] Giữ nguyên definition/instructions/resources và migration hashes.
 
 Đầu ra: tách module thật, CLI vẫn dùng được catalog và source option cũ.
 
@@ -132,22 +132,33 @@ runtime và evidence stale được báo đúng, không suy diễn từ unit tes
   Field meanings/rules ở `core/src/contract.ts`; bảng field được tạo qua API,
   type/default/required/enum lấy từ validator hiện có. Hướng dẫn ở
   `core/docs/README.md`; README root có link đến API.
-- Bridge tạm: `loadCatalogRoot` trong `tool/src/core/load.ts` nhận core root;
-  `loadCore(source)` vẫn resolve checkout/core như cũ. API mới dùng bridge và
-  schema tool; chưa đạt module standalone về dependency. Metadata chưa được
-  gom với validator; việc đó thuộc bước 3.
-- Build đã include core/src, package files đã include dist/core. Chưa kiểm tra
-  tarball phân phối; smoke packaging nằm trong các bước tiếp theo.
-- Checks ngày 2026-10-09: `npm run typecheck` đạt; `npm test` 40/40 đạt (bao gồm
-  4 test public contract mới); `npm run cli -- validate --source .` đạt 16 assets.
+- Bước 2 đã chuyển schema/catalog/paths vào core/src, xóa tool/src/core và bridge.
+  CLI, verification, installer, render, tests và smoke runner import entrypoint
+  public. CLI/verification resolve source checkout thành core root tại biên gọi.
+  Core chỉ phụ thuộc Node.js/yaml/zod; test chạy độc lập không có tool/adapters đạt.
+- Contract API hiện là 2 do bổ sung selectAssets, definitionSchema, relativePath,
+  inside và assertNoSymlinks public. YAML vẫn schema_version 1; ngữ nghĩa/default
+  giữ nguyên. Validator Zod được expose tường minh, schema JSON vẫn qua getContract.
+- Fingerprint chuyển sang core/src/index/contract/schema/catalog/paths; test
+  xác nhận đổi từng file làm đổi implementation fingerprint, không đổi content hash.
+- Build đã include core/src và emit declarations cho consumer TypeScript;
+  package files include dist/core. scripts/build.mjs
+  dọn bốn thư mục output TypeScript trước compile, giữ các preview dist khác.
+  Smoke tarball trong /private/tmp đạt: API/docs/catalog/declarations, consumer
+  TypeScript strict qua entrypoint compile, CLI default source, 16 assets và
+  không có output tool/src/core cũ. Dùng dependency đang cài của
+  checkout qua symlink; không kiểm chứng fresh install dependency từ registry.
+- Checks ngày 2026-10-09: `npm run typecheck` đạt; `npm test` 42/42 đạt (bao gồm
+  public core độc lập và fingerprint code đã chuyển); validate source đạt 16 assets.
   `npm run verification -- report` và report check đạt; summary không đổi.
   Không sửa content hoặc native mapping, không tạo evidence workflow mới và
-  không tuyên bố tất cả stuff đã verified runtime. Không có blocker bước 1.
-- Chưa làm: bước 2–5, đặc biệt bỏ dependency tool, version check trong adapter
-  và báo cáo issue theo field. Adapter/CLI hiện chưa dùng contract API mới.
-- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan này; bắt đầu bước 2
-  bằng di chuyển schema/loader/path/dependency selection vào core, cập nhật
-  consumer/fingerprints và loại bridge. Kiểm tra thay đổi mới trước khi tiếp tục.
+  không tuyên bố tất cả stuff đã verified runtime. Không có blocker bước 2.
+- Chưa làm: bước 3–5, đặc biệt gom mô tả với validator, gộp docs concept,
+  version check trong adapter và báo cáo issue theo field. Interface/render helper
+  adapter vẫn thuộc tool; di chuyển ở bước 4. Native mapping chưa đổi.
+- Bước kế tiếp: đọc AGENTS.md, kiểm tra git status, đọc plan này; bắt đầu bước 3
+  bằng gom schema và field meanings thành một nguồn, expose docs đầy đủ và thay
+  nội dung concept trùng lặp bằng link. Kiểm tra thay đổi mới trước khi tiếp tục.
 - Sau mỗi bước: cập nhật checkbox, ghi file thay đổi, checks/kết quả, blocker và
   hành động tiếp theo tại mục này. Một bước chỉ đánh dấu xong khi đạt đầu ra.
 - Không cần hỏi lại sáu quyết định; chỉ làm rõ khi phát hiện phương án buộc phải

@@ -46,13 +46,19 @@ không dùng flag này cho update vì không được âm thầm bỏ qua asset 
 
 ## Schema và adapter
 
-- `tool/src/core/schema.ts`: schema nghiêm ngặt và policy trung lập.
-- `tool/src/core/load.ts`: đọc nội dung, giữ byte resource, kiểm tra tham chiếu.
+- `core/src/index.ts`: entrypoint public cho schema/docs/catalog/selection/path helpers.
+- `core/src/schema.ts`: schema nghiêm ngặt và policy trung lập; không import trực tiếp từ consumer.
+- `core/src/catalog.ts`: đọc nội dung, giữ byte resource, kiểm tra tham chiếu.
 - `tool/src/adapter.ts`: contract, trạng thái compatibility, file đầu ra trong bộ nhớ.
 - `tool/src/registry.ts`: danh sách adapter tích hợp.
 - `adapters/`: native metadata, wrapper command và target directory.
 - `tool/src/installation/index.ts`: plan, state, transaction và recovery.
 - `tool/src/cli.ts`: tương tác và dispatch.
+
+Core không phụ thuộc tool hoặc adapter. `loadCatalog` nhận core root; CLI và
+verification resolve `--source` checkout thành `<source>/core` tại biên gọi.
+Build dọn các thư mục output TypeScript trong dist trước khi compile để file
+của module đã chuyển/xóa không lọt vào npm pack; giữ các thư mục preview khác.
 
 Command v1 tham chiếu skill. OpenCode inline workflow cùng wrapper đối số; workflow
 có resource hoặc cú pháp interpolation native bị chặn trong đường command này.

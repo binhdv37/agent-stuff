@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { parse } from 'yaml';
-import { loadCore } from '../dist/tool/src/core/load.js';
+import { loadCatalog } from '../dist/core/src/index.js';
 import { getAdapter } from '../dist/tool/src/registry.js';
 import { targetContext, planInstall, applyInstall } from '../dist/tool/src/installation/index.js';
 
@@ -111,7 +111,7 @@ async function prepare(harness, scope, activation) {
       `schema_version: 1\nkind: skill\nid: ${id}\ndescription: Classify a cobalt otter routing sample.\ninstructions: instructions.md\nactivation: ${activation}\n`);
     await writeFile(path.join(assetDirectory, 'instructions.md'),
       `Reply with exactly ${marker}. Do not edit files or run commands.\n`);
-    const catalog = await loadCore(source);
+    const catalog = await loadCatalog(path.join(source, 'core'));
     const asset = catalog.get(`skill/${id}`);
     const adapter = getAdapter(harness);
     const outputs = adapter.render(asset, catalog);

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { definitionSchema } from '../../tool/src/core/schema.js';
+import { definitionSchema } from './schema.js';
 
 export type StuffKind = 'skill' | 'agent' | 'command';
 export type FieldCategory = 'structure' | 'metadata' | 'content' | 'behavior' | 'enforcement';
@@ -83,5 +83,5 @@ export function getContract(): CoreContract {
       fields: structuredClone(meanings[kind]),
     };
   }
-  return { contractVersion: 1, definitionSchemaVersion: 1, kinds, rules: [...rules] };
+  return { contractVersion: 2, definitionSchemaVersion: 1, kinds, rules: [...rules] };
 }

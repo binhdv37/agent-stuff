@@ -65,8 +65,9 @@ inventing additional tasks. A suggestion does not authorize executing new work.
 | `core/skills/` | Portable workflows and their resources |
 | `core/agents/` | Role, instructions, and portable policy |
 | `core/commands/` | Entry points referencing skill workflows |
+| `core/src/`, `core/docs/` | Public contract, schema, loader, resource path checks and API docs |
 | `adapters/` | OpenCode, Codex, and Claude Code rendering |
-| `tool/src/` | Schema, loader, CLI, installation state, recovery |
+| `tool/src/` | CLI, adapter coordination, installation state, recovery and verification |
 | `tests/fixtures/` | Frozen test inputs and migration hashes; not authoring copies |
 | `docs/` | Authoring, compatibility, and migration notes |
 
@@ -90,7 +91,8 @@ inventing additional tasks. A suggestion does not authorize executing new work.
 Each asset has `definition.yaml` with `schema_version: 1`, `kind`, `id`, and
 `description`. Skills and agents also reference `instructions.md`. List every
 resource in `resources`; paths must stay within the asset directory. Root-level
-resource documents are supported. See `tool/src/core/schema.ts` for the exact schema.
+resource documents are supported. See `core/src/schema.ts` for the exact schema;
+consumers use the public `core/src/index.ts` entrypoint, documented in `core/docs/README.md`.
 
 Skills declare `activation: explicit | matching-request`. Optional metadata:
 `display_name`, `short_description`, `argument_hint`. Adapters generate native

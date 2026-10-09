@@ -2,8 +2,7 @@ import { parseArgs } from 'node:util';
 import { readFile, writeFile, mkdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { adapterIds, type AdapterId } from '../adapter.js';
-import { assertNoSymlinks } from '../core/paths.js';
-import { loadCore } from '../core/load.js';
+import { assertNoSymlinks, loadCatalog } from '../../../core/src/index.js';
 import { fingerprint, inspect, report } from './index.js';
 
 async function main(): Promise<void> {
@@ -23,7 +22,7 @@ async function main(): Promise<void> {
     if (!values.asset || !values.harness || !adapterIds.includes(values.harness as AdapterId)) throw new Error('Specify --asset kind/id and --harness opencode|codex|claude-code');
   }
   if (command === 'fingerprint') {
-    console.log(JSON.stringify(await fingerprint(source, await loadCore(source), values.asset!, values.harness as AdapterId), null, 2));
+    console.log(JSON.stringify(await fingerprint(source, await loadCatalog(path.join(source, 'core')), values.asset!, values.harness as AdapterId), null, 2));
     return;
   }
   const rows = await inspect(source);

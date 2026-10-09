@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { cp, mkdtemp, realpath, rm, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { getContract, getDocs, loadCatalog, CoreError, type DocsTopic } from '../core/src/index.js';
-import { definitionSchema } from '../tool/src/core/schema.js';
+import { pathToFileURL } from 'node:url';
+import { getContract, getDocs, loadCatalog, CoreError, definitionSchema, type DocsTopic } from '../core/src/index.js';
 
 test('public contract covers every schema field including nested policy, without extra fields', () => {
   const contract = getContract();
-  assert.equal(contract.contractVersion, 1);
+  assert.equal(contract.contractVersion, 2);
   assert.equal(contract.definitionSchemaVersion, 1);
   assert.doesNotThrow(() => JSON.stringify(contract));
   for (const validator of definitionSchema.options) {
@@ -79,4 +79,22 @@ test('public loader preserves strict validation and resource path protection', a
   await rm(resource);
   await symlink(path.join(directory, 'skills/bdv-teach/MISSION-FORMAT.md'), resource);
   await assert.rejects(loadCatalog(directory), /Symlink not allowed/);
+});
+
+test('compiled core runs independently with only its own files and declared dependencies', async t => {
+  const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-independent-core-')));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await writeFile(path.join(directory, 'package.json'), '{"type":"module"}\n');
+  await cp('dist/core', path.join(directory, 'library'), { recursive: true });
+  await cp('core', path.join(directory, 'catalog'), { recursive: true });
+  await symlink(path.resolve('node_modules'), path.join(directory, 'node_modules'));
+  const api = await import(pathToFileURL(path.join(directory, 'library/src/index.js')).href);
+  const catalog = await api.loadCatalog(path.join(directory, 'catalog'));
+  assert.equal(catalog.size, 16);
+  assert.equal(api.getContract().contractVersion, 2);
+  assert.match(api.getDocs('concepts'), /i-agent/);
+  assert.deepEqual(api.selectAssets(catalog, ['agent/experimental-plan']).map((asset: { key: string }) => asset.key),
+    ['agent/bdv-plan-reviewer', 'agent/experimental-plan']);
+  assert.equal(api.relativePath.safeParse('../outside').success, false);
+  assert.throws(() => api.inside(directory, '../outside'));
 });

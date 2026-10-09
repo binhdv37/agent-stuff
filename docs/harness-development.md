@@ -11,7 +11,7 @@ này quy định phần mapping và kiểm chứng harness của flow đó.
 
 | Câu hỏi | Nguồn cần đọc hoặc sửa |
 |---|---|
-| Asset muốn làm gì, được kích hoạt và cấp quyền thế nào? | `core/` và `tool/src/core/schema.ts` |
+| Asset muốn làm gì, được kích hoạt và cấp quyền thế nào? | `core/` và public API `core/src/index.ts` |
 | Harness biểu diễn ý định đó thế nào? | `adapters/<harness>/index.ts` và `tool/src/render.ts` |
 | Mapping đã được xác minh đến đâu? | `docs/compatibility.md`, gồm nguồn chính thức và giới hạn runtime |
 | Luật nền tảng và khác biệt phiên bản của từng harness? | `docs/harnesses/README.md` và ghi chú harness liên quan; mở lại nguồn khi đổi mapping |
@@ -55,7 +55,7 @@ và các lệnh kiểm chứng chung ở [core development](core-development.md)
 
 Điểm xuất phát là `activation: explicit` trong core. Session mới lần theo:
 
-- `tool/src/core/schema.ts`: ý định portable và các giá trị hợp lệ.
+- `core/src/index.ts`: public schema/contract; implementation tại `core/src/schema.ts`.
 - Adapter của từng harness: cách dịch ý định đó ra cấu hình native hoặc báo limited.
 - `tests/core-adapter.test.ts`: kiểm tra mapping và compatibility.
 - `docs/compatibility.md`: nguồn định dạng và mức kiểm chứng thực tế.

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
-import { loadCore, selectAssets } from '../tool/src/core/load.js';
+import { loadCatalog, selectAssets } from '../core/src/index.js';
 import { opencode } from '../adapters/opencode/index.js';
 import { applyInstall, planInstall, targetContext } from '../tool/src/installation/index.js';
 
@@ -16,7 +16,7 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
 }
 
 test('planner selection includes its restricted delegate and both bundled primary agents render', async () => {
-  const catalog = await loadCore('.');
+  const catalog = await loadCatalog(path.join('.', 'core'));
   assert.deepEqual(selectAssets(catalog, ['agent/experimental-plan']).map(a => a.key),
     ['agent/bdv-plan-reviewer', 'agent/experimental-plan']);
   for (const id of ['experimental-plan', 'solution-architect']) {
@@ -49,16 +49,16 @@ test('agent dependency validation refuses a delegate that can edit or use shell'
   const definition = path.join(dir, 'core/agents/bdv-plan-reviewer/definition.yaml');
   const original = await readFile(definition, 'utf8');
   await writeFile(definition, original.replace('workspace_write: deny', 'workspace_write: allow'));
-  await assert.rejects(loadCore(dir), /delegate agent\/bdv-plan-reviewer must be read-only/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/bdv-plan-reviewer must be read-only/);
   await writeFile(definition, original.replace('shell: deny', 'shell: ask'));
-  await assert.rejects(loadCore(dir), /delegate agent\/bdv-plan-reviewer must be read-only/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/bdv-plan-reviewer must be read-only/);
 });
 
 test('runtime OpenCode discovers generated agents with restricted permissions', async t => {
   try { execFileSync('opencode', ['--version'], { stdio: 'ignore' }); }
   catch { t.skip('OpenCode binary is unavailable'); return; }
   const dir = await temporary(t);
-  const catalog = await loadCore('.');
+  const catalog = await loadCatalog(path.join('.', 'core'));
   const selected = selectAssets(catalog, ['agent/experimental-plan', 'agent/solution-architect']);
   const outputs = selected.flatMap(a => opencode.render(a, catalog));
   const context = await targetContext('project', dir, dir);

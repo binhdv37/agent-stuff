@@ -4,6 +4,11 @@ Kết quả từng stuff/harness nằm ở [verification](verification/README.md
 [testing guide](testing.md). Tài liệu này giữ khả năng và bằng chứng mapping
 adapter; probe hoặc discovery chung không chứng minh workflow từng asset đạt.
 
+Refactor module ngày 2026-10-09 chuyển schema/loader/path checks vào core và
+consumer dùng public entrypoint. Native mapping và adapter revision giữ nguyên;
+contract API hiện là 2, chưa có version gate trong adapter. Fingerprint đã theo
+source core mới; evidence cũ không được cập nhật hash để coi là lượt test mới.
+
 Core `bdv-smart-commit` hiện là workflow nhẹ, explicit-only: đọc Git/file changes
 bằng tools thông thường, dùng context session để cảnh báo changes ngoài phạm vi,
 propose exact commands/message và đợi approval, rồi execute. Theo yêu cầu user,

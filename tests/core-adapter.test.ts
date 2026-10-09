@@ -4,8 +4,7 @@ import { mkdtemp, realpath, mkdir, readFile, writeFile, cp, symlink, rm } from '
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { loadCore, selectAssets } from '../tool/src/core/load.js';
-import { definitionSchema } from '../tool/src/core/schema.js';
+import { loadCatalog, selectAssets, definitionSchema } from '../core/src/index.js';
 import { opencode } from '../adapters/opencode/index.js';
 import { applyInstall, planInstall, targetContext, validateOutputs } from '../tool/src/installation/index.js';
 import type { OutputFile } from '../tool/src/adapter.js';
@@ -19,7 +18,7 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
 const file = (content = 'initial'): OutputFile => ({ asset: 'skill/example', path: 'skills/example/SKILL.md', content: Buffer.from(content) });
 
 test('loads representative assets and preserves instruction and resource bytes', async () => {
-  const catalog = await loadCore(fixture);
+  const catalog = await loadCatalog(path.join(fixture, 'core'));
   assert.equal(catalog.size, 7);
   for (const asset of catalog.values()) {
     if (asset.definition.kind !== 'skill') continue;
@@ -43,7 +42,7 @@ test('loader rejects missing references with asset context', async t => {
   const dir = await temporary(t);
   await cp(fixture, dir, { recursive: true });
   await writeFile(path.join(dir, 'core/commands/bdv-change-report/definition.yaml'), 'schema_version: 1\nkind: command\nid: bdv-change-report\ndescription: Example\nworkflow: skill/missing\n');
-  await assert.rejects(loadCore(dir), /command\/bdv-change-report: missing workflow/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /command\/bdv-change-report: missing workflow/);
 });
 
 test('loader rejects symlink resources', async t => {
@@ -52,11 +51,11 @@ test('loader rejects symlink resources', async t => {
   const resource = path.join(dir, 'core/skills/bdv-teach/GLOSSARY-FORMAT.md');
   await rm(resource);
   await symlink(path.join(dir, 'core/skills/bdv-teach/MISSION-FORMAT.md'), resource);
-  await assert.rejects(loadCore(dir), /Symlink not allowed/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /Symlink not allowed/);
 });
 
 test('OpenCode reports explicit invocation limit and blocks unverified agent policy', async () => {
-  const catalog = await loadCore(fixture);
+  const catalog = await loadCatalog(path.join(fixture, 'core'));
   const skill = catalog.get('skill/bdv-api-handoff')!;
   assert.equal(opencode.check(skill, catalog).status, 'limited');
   const files = opencode.render(skill, catalog);
@@ -69,7 +68,7 @@ test('OpenCode reports explicit invocation limit and blocks unverified agent pol
 });
 
 test('command includes authoritative workflow and argument wrapper', async () => {
-  const catalog = await loadCore(fixture);
+  const catalog = await loadCatalog(path.join(fixture, 'core'));
   const asset = catalog.get('command/bdv-change-report')!;
   const output = opencode.render(asset, catalog)[0]!;
   assert.match(output.content.toString(), /Arguments: \$ARGUMENTS/);

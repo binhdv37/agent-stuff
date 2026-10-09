@@ -1,4 +1,4 @@
-import type { Asset } from './core/schema.js';
+import type { Asset } from '../../core/src/index.js';
 export const adapterIds = ['opencode', 'codex', 'claude-code'] as const;
 export type AdapterId = typeof adapterIds[number];
 export type Compatibility = { asset: string; status: 'supported' | 'limited' | 'unsupported'; reason: string };

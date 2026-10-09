@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
-import { loadCore } from '../tool/src/core/load.js';
+import { loadCatalog } from '../core/src/index.js';
 import { getAdapter } from '../tool/src/registry.js';
 
 async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
@@ -26,7 +26,7 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
 }
 
 test('smart-commit stays explicit and renders without bundled helpers on every adapter', async () => {
-  const catalog = await loadCore('.'); const skill = catalog.get('skill/bdv-smart-commit')!;
+  const catalog = await loadCatalog(path.join('.', 'core')); const skill = catalog.get('skill/bdv-smart-commit')!;
   assert.equal(skill.resources.size, 0);
   for (const id of ['codex', 'claude-code', 'opencode']) {
     const adapter = getAdapter(id), output = adapter.render(skill, catalog);

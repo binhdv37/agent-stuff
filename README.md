@@ -18,9 +18,10 @@ a global or project directory.
 The harness runs the installed workflows. Personal drafts are not part of this
 repository.
 
-Core exposes an initial [public contract API](core/docs/README.md) for schema,
-field meanings, docs and catalog loading. Its schema/loader still live in the
-tool during the staged [module refactor](docs/plans/core-module-boundary.md);
+Core is an independent module with a [public contract API](core/docs/README.md)
+for schema, field meanings, docs, catalog loading and selection. It depends on
+Node.js, yaml and zod, with no tool/adapter imports. The staged
+[module refactor](docs/plans/core-module-boundary.md) is still in progress;
 adapter contract-version checks are not implemented yet.
 
 ## Start from a problem or idea
@@ -99,8 +100,9 @@ remove managed files that have local edits.
 | `core/skills/` | Workflow metadata, instructions, and supporting resources |
 | `core/agents/` | Portable role and policy definitions |
 | `core/commands/` | Entry points referencing a skill workflow |
+| `core/src/`, `core/docs/` | Public contract, schema, catalog loader, path checks and API docs |
 | `adapters/` | Harness-specific rendering and compatibility decisions |
-| `tool/src/` | CLI, validation, installation, and recovery |
+| `tool/src/` | CLI, adapter coordination, installation, recovery and verification |
 | `tests/` | Fixtures, migration checks, and filesystem lifecycle tests |
 
 ## Current adapter support

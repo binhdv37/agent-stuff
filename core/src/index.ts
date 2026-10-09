@@ -1,10 +1,13 @@
-import { loadCatalogRoot } from '../../tool/src/core/load.js';
-import type { Asset } from '../../tool/src/core/schema.js';
+import { loadCatalogRoot } from './catalog.js';
+import type { Asset } from './schema.js';
 import { getContract } from './contract.js';
 
 export { getContract } from './contract.js';
 export type { CoreContract, CoreSchema, KindContract, StuffKind, FieldCategory, FieldMeaning } from './contract.js';
-export type { Definition, Asset } from '../../tool/src/core/schema.js';
+export type { Definition, Asset } from './schema.js';
+export { definitionSchema, relativePath } from './schema.js';
+export { selectAssets } from './catalog.js';
+export { inside, assertNoSymlinks } from './paths.js';
 export type Catalog = Map<string, Asset>;
 export type DocsTopic = 'concepts' | 'format' | 'fields' | 'api';
 export type CoreErrorCode = 'CATALOG_INVALID' | 'UNKNOWN_DOCS_TOPIC';
@@ -53,7 +56,7 @@ Các file API/docs nằm ngoài ba thư mục catalog và không được nạp 
 getContract() trả schema cấu trúc và rules; loadCatalog(coreRoot) kiểm tra thêm
 custom refinements, file/resource, identity và quan hệ giữa các stuff.
 `,
-  api: `# API core v1
+  api: `# API core v2
 
 Import public entrypoint core/src/index.ts (ESM đã build: dist/core/src/index.js).
 getContract(): CoreContract — snapshot JSON với contractVersion,
@@ -68,8 +71,17 @@ CoreError có code CATALOG_INVALID hoặc UNKNOWN_DOCS_TOPIC; lỗi catalog có 
 và message giữ ngữ cảnh lỗi gốc. Không phụ thuộc consumer parse message.
 Schema JSON không thay thế validate đầy đủ của loader.
 
-Bước 1: facade còn dùng schema/loader trong tool/src/core; bước 2 sẽ di chuyển
-ownership, bỏ phụ thuộc này. Chưa expose package npm hoặc wiring adapter mới.
+selectAssets(catalog, only?): Asset[] — chọn full key và bổ sung helper agent;
+key không tồn tại hoặc selection rỗng bị từ chối.
+definitionSchema và relativePath là validator Zod cho definition và đường dẫn.
+definitionSchema chỉ validate cấu trúc/refinement; loadCatalog kiểm tra file/quan hệ.
+inside(root, relative): string — validate đường dẫn rồi resolve bên trong root.
+assertNoSymlinks(file): Promise<void> — từ chối symlink ở đường dẫn/ancestor tồn tại.
+Các validator/helper này có thể báo lỗi Zod hoặc Error thông thường; CoreError
+được dùng cho loadCatalog/getDocs, không bọc mọi helper.
+
+Core chỉ phụ thuộc Node.js, yaml và zod. Consumer chỉ import entrypoint public.
+Chưa expose package npm riêng hoặc version check trong adapter.
 `,
 };
 

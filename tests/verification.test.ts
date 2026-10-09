@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stringify } from 'yaml';
-import { loadCore } from '../tool/src/core/load.js';
+import { loadCatalog } from '../core/src/index.js';
 import { fingerprint, inspect, recordSchema, report, sha256, statusOf, type Record } from '../tool/src/verification/index.js';
 
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
@@ -19,7 +19,7 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
 }
 
 async function recordAt(source: string): Promise<Record> {
-  const catalog = await loadCore(source);
+  const catalog = await loadCatalog(path.join(source, 'core'));
   const evidencePath = 'evidence/skill/bdv-api-handoff/codex/latest.md';
   const bytes = 'Synthetic evidence for verification infrastructure tests only.\n';
   const artifact = path.join(source, 'docs/verification', evidencePath);
@@ -105,7 +105,7 @@ test('verification rejects unsubstantiated outcomes, changed evidence, wrong ide
 test('complete cases cannot mark a currently unsupported mapping as passed', async t => {
   const source = await temporary(t);
   const record = await recordAt(source);
-  const catalog = await loadCore(source);
+  const catalog = await loadCatalog(path.join(source, 'core'));
   record.asset = 'agent/experimental-plan';
   record.fingerprint = await fingerprint(source, catalog, record.asset, record.harness);
   const evidencePath = 'evidence/agent/experimental-plan/codex/latest.md';
@@ -119,14 +119,14 @@ test('complete cases cannot mark a currently unsupported mapping as passed', asy
 
 test('fingerprints cover resources, command workflows, delegated agents and implementation changes', async t => {
   const source = await temporary(t);
-  let catalog = await loadCore(source);
+  let catalog = await loadCatalog(path.join(source, 'core'));
   const skill = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
   const command = await fingerprint(source, catalog, 'command/bdv-change-report', 'opencode');
   const agent = await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode');
   await writeFile(path.join(source, 'core/skills/bdv-api-handoff/references/handoff-template.md'), 'Changed resource');
   await writeFile(path.join(source, 'core/skills/bdv-change-report/instructions.md'), 'Changed workflow');
   await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/instructions.md'), 'Changed helper');
-  catalog = await loadCore(source);
+  catalog = await loadCatalog(path.join(source, 'core'));
   assert.notEqual((await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex')).core, skill.core);
   assert.notEqual((await fingerprint(source, catalog, 'command/bdv-change-report', 'opencode')).core, command.core);
   assert.notEqual((await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode')).core, agent.core);
@@ -136,6 +136,20 @@ test('fingerprints cover resources, command workflows, delegated agents and impl
   const row = (await inspect(source)).find(row => row.asset === record.asset && row.harness === record.harness)!;
   assert.equal(row.stale, true);
   assert.match(report([row]), /Passed \(Stale\)/);
+});
+
+test('fingerprints cover the public core entrypoint and every moved implementation file', async t => {
+  const source = await temporary(t);
+  const catalog = await loadCatalog(path.join(source, 'core'));
+  let previous = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
+  for (const name of ['index', 'contract', 'schema', 'catalog', 'paths']) {
+    const file = path.join(source, `core/src/${name}.ts`);
+    await writeFile(file, (await readFile(file, 'utf8')) + '\n// fingerprint change\n');
+    const current = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
+    assert.notEqual(current.implementation, previous.implementation, name);
+    assert.equal(current.core, previous.core, name);
+    previous = current;
+  }
 });
 
 test('verification CLI checks the summary and refuses unverified completion targets', async t => {

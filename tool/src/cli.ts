@@ -5,8 +5,7 @@ import { mkdir, writeFile, lstat } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { loadCore, selectAssets } from './core/load.js';
-import { inside, assertNoSymlinks } from './core/paths.js';
+import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
 import { adapters, getAdapter } from './registry.js';
 import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
 
@@ -36,7 +35,7 @@ async function main(): Promise<void> {
   };
   try {
     if (['list', 'validate'].includes(command)) {
-      const catalog = await loadCore(path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url))));
+      const catalog = await loadCatalog(path.join(path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url))), 'core'));
       if (command === 'validate') console.log(`Validated ${catalog.size} assets`);
       else for (const a of catalog.values()) console.log(`${a.key}\t${a.definition.description}`);
       return;
@@ -60,7 +59,7 @@ async function main(): Promise<void> {
       const installed = command === 'update' ? await readManifest(context!) : null;
       if (command === 'update' && !installed) throw new Error('No managed installation found');
       const source = path.resolve(values.source ?? installed?.source ?? fileURLToPath(new URL('../../../', import.meta.url)));
-      const catalog = await loadCore(source);
+      const catalog = await loadCatalog(path.join(source, 'core'));
       let keys = values.only;
       if (installed) {
         const installedKeys = [...new Set(installed.files.map(f => f.asset))];

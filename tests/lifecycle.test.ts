@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { parse } from 'yaml';
 import { applyInstall, planInstall, planUninstall, targetContext, recoverInstall, readManifest } from '../tool/src/installation/index.js';
-import { loadCore } from '../tool/src/core/load.js';
+import { loadCatalog } from '../core/src/index.js';
 import { getAdapter } from '../tool/src/registry.js';
 import { adapterIds, type OutputFile } from '../tool/src/adapter.js';
 
@@ -96,7 +96,7 @@ test('recovery cannot displace a live installer', async t => {
 
 test('three adapters preserve resources and install into isolated scopes', async t => {
   const dir = await temporary(t);
-  const catalog = await loadCore('tests/fixtures');
+  const catalog = await loadCatalog(path.join('tests/fixtures', 'core'));
   const skill = catalog.get('skill/bdv-api-handoff')!;
   const home = path.join(dir, 'home');
   const project = path.join(dir, 'project');
@@ -117,7 +117,7 @@ test('three adapters preserve resources and install into isolated scopes', async
 });
 
 test('OpenCode maps restrictive agent policy without alternate write paths', async () => {
-  const catalog = await loadCore('tests/fixtures');
+  const catalog = await loadCatalog(path.join('tests/fixtures', 'core'));
   const original = catalog.get('agent/solution-architect')!;
   const asset = structuredClone(original);
   if (asset.definition.kind !== 'agent') throw new Error('Expected agent');

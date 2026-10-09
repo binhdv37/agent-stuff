@@ -4,12 +4,12 @@ import { readFile, mkdtemp, realpath, rm, cp, writeFile } from 'node:fs/promises
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { loadCore } from '../tool/src/core/load.js';
+import { loadCatalog } from '../core/src/index.js';
 import { hash } from '../tool/src/installation/index.js';
 import { getAdapter } from '../tool/src/registry.js';
 
 test('migration preserves baseline content except documented core revisions', async () => {
-  const catalog = await loadCore('.');
+  const catalog = await loadCatalog(path.join('.', 'core'));
   assert.equal(catalog.size, 16);
   const inventory = JSON.parse(await readFile('tests/fixtures/migration-inventory.json', 'utf8')) as { key: string; activation: string; hashes: Record<string, string> }[];
   assert.equal(inventory.length, 11);

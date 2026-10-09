@@ -5,8 +5,7 @@ import path from 'node:path';
 import { z } from 'zod';
 import { adapterIds, type AdapterId, type OutputFile } from '../adapter.js';
 import { getAdapter } from '../registry.js';
-import { relativePath } from '../core/schema.js';
-import { inside, assertNoSymlinks } from '../core/paths.js';
+import { relativePath, inside, assertNoSymlinks } from '../../../core/src/index.js';
 
 export const hash = (content: Buffer | string): string => createHash('sha256').update(content).digest('hex');
 const assetKey = z.string().regex(/^(skill|agent|command)\/[a-z0-9]+(-[a-z0-9]+)*$/);

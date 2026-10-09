@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/tests/*.test.js && npm run verification -- validate && npm run verification -- report --check",
     "verification": "node dist/tool/src/verification/cli.js",

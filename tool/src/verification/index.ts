@@ -4,9 +4,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
 import { adapterIds, type AdapterId } from '../adapter.js';
-import { loadCore, selectAssets } from '../core/load.js';
-import { assertNoSymlinks, inside } from '../core/paths.js';
-import { relativePath, type Asset } from '../core/schema.js';
+import { loadCatalog, selectAssets, assertNoSymlinks, inside, relativePath, type Asset } from '../../../core/src/index.js';
 import { getAdapter } from '../registry.js';
 
 const nonempty = z.string().trim().min(1);
@@ -64,7 +62,8 @@ export function statusOf(record: Record): Status {
 
 const implementationFiles = [
   'tool/src/adapter.ts', 'tool/src/render.ts', 'tool/src/registry.ts', 'tool/src/cli.ts',
-  'tool/src/core/schema.ts', 'tool/src/core/load.ts', 'tool/src/core/paths.ts',
+  'core/src/index.ts', 'core/src/contract.ts', 'core/src/schema.ts',
+  'core/src/catalog.ts', 'core/src/paths.ts',
   'tool/src/installation/index.ts', 'package-lock.json',
 ];
 
@@ -105,7 +104,7 @@ export type Row = {
 };
 
 export async function inspect(source: string, verificationRoot = path.join(source, 'docs/verification')): Promise<Row[]> {
-  const catalog = await loadCore(source);
+  const catalog = await loadCatalog(path.join(source, 'core'));
   const records = new Map<string, { record: Record; relative: string }>();
   for (const kind of ['skill', 'agent', 'command']) {
     const directory = path.join(verificationRoot, kind);
