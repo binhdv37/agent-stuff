@@ -18,7 +18,8 @@ Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
 
 ## Start here in a new session
 
-1. Read this file, then `README.md` for user-facing behavior. Consult
+1. Read this file, then `README.md` for user-facing behavior.
+   Read [project flow](docs/project-flow.md) for the core → adapter → installer flow. Consult
    `core/docs/concepts.md`, `core/docs/format.md` and `docs/core-development.md` before developing stuff.
    Consult `docs/adapter-development.md` for the schema/CLI and `docs/compatibility.md`
    before changing a harness mapping. `docs/migration.md` records deliberate

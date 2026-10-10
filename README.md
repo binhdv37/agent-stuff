@@ -19,6 +19,9 @@ a global or project directory.
 The harness runs the installed workflows. Personal drafts are not part of this
 repository.
 
+Start with the [core → adapter → installer flow](docs/project-flow.md) for
+module responsibilities and an installation example.
+
 Core is an independent module with a [public contract API](core/docs/README.md)
 for schema, field meanings, docs, catalog loading and selection. It depends on
 Node.js, yaml and zod, with no tool/adapter imports. The
