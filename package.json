@@ -31,22 +31,15 @@
     "dist/tool/",
     "dist/adapters/",
     "adapters/README.md",
+    "adapters/docs/",
     "core/",
     "scripts/check-activation.mjs",
     "README.md",
     "AGENTS.md",
-    "docs/entry-points.md",
-    "docs/project-flow.md",
-    "docs/concepts.md",
-    "docs/core-development.md",
+    "CLAUDE.md",
+    "tool/README.md",
+    "tool/docs/",
     "docs/testing.md",
-    "docs/verification/",
-    "docs/compatibility.md",
-    "docs/adapter-development.md",
-    "docs/harness-development.md",
-    "docs/harnesses/",
-    "docs/runtime/",
-    "docs/plans/core-module-boundary.md",
-    "docs/migration.md"
+    "verification/"
   ]
 }

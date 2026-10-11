@@ -45,8 +45,8 @@ cannot be fully preserved; the installer shows the limitations before you apply
 changes. In OpenCode, explicit-only invocation is expressed through instructions
 rather than native enforcement.
 
-See [compatibility](docs/compatibility.md) for details and version baselines, and
-[verification results](docs/verification/README.md) for recorded workflow checks
+See [compatibility](adapters/docs/compatibility.md) for details and version baselines, and
+[verification results](verification/README.md) for recorded workflow checks
 and remaining gaps. Installation support alone does not mean every workflow has
 been verified in your tool.
 
@@ -152,7 +152,5 @@ those files later through the same CLI.
 
 ## Further reading
 
-- [Compatibility and limits](docs/compatibility.md)
-- [Workflow verification results](docs/verification/README.md)
-- [CLI and recovery details](docs/adapter-development.md)
-- [Contributing and repository instructions](AGENTS.md)
+- [Compatibility and limits](adapters/docs/compatibility.md)
+- [CLI and recovery details](tool/README.md)

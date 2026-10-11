@@ -1,0 +1,101 @@
+# CLI và shared installer
+
+Dành cho người cần dùng CLI chi tiết hoặc sửa installer/build. [README](../README.md)
+là hướng dẫn end user. Tool điều phối public API core/adapter; installer quản lý
+filesystem, selection/confirmation, manifest và recovery. Không định nghĩa lại
+contract core hoặc native mapping.
+
+## Chạy từ checkout
+
+Node.js 22+, npm và Git. Filesystem installer đã test trên macOS; launcher/sync
+hướng tới macOS/Linux, chưa hỗ trợ Windows native.
+
+```bash
+npm ci
+npm run build
+npm test
+npm run cli -- validate --source .
+npm run cli -- list
+npm run cli -- install
+```
+
+`bash install.sh` chuẩn bị dependencies/build rồi gọi CLI. Menu chọn harness,
+scope, asset và preview trước confirm. Enter chọn các asset tương thích; asset
+unsupported được báo lý do. Không có terminal thì truyền đủ flags.
+
+```bash
+npm run cli -- build --agent codex --compatible-only --out dist/codex-preview
+npm run cli -- install --agent codex --scope project --project /path/to/project \
+  --only skill/bdv-api-handoff --dry-run
+```
+
+- `--out` phải là thư mục mới. Build không cài vào personal config.
+- `--source` là checkout/package có core, mặc định source cùng CLI; project đích
+  độc lập. Tool resolve `<source>/core`; thư viện core chỉ nhận core root.
+- `--only` lặp được, dùng `skill/id`, `command/id`, `agent/id`; planner tự thêm helper.
+- `--dry-run` chỉ preview. Bỏ flag để confirm/apply; script dùng `--yes`.
+- Limited cần `--accept-limitations` sau review. `--yes` không chấp nhận thay,
+  không vượt conflict/unsupported/contract mismatch. `--compatible-only` chủ động
+  bỏ unsupported, báo lý do; không dùng cho update để âm thầm bỏ asset đã cài.
+
+## Lifecycle và state
+
+```bash
+npm run cli -- update --agent codex --scope global --dry-run
+npm run cli -- uninstall --agent codex --scope global --only skill/bdv-api-handoff --dry-run
+npm run cli -- recover --agent codex --scope global --yes
+```
+
+Install thêm/cập nhật selection, không gỡ phần ngoài selection. Update mặc định
+dùng source/selection đã ghi trong manifest; có thể truyền lại. File/resource hoặc
+asset biến mất được lên kế hoạch remove sau preview. Catalog rỗng là lỗi validate;
+muốn gỡ tất cả dùng uninstall.
+
+Manifest: `<base>/.agent-stuff/installations/<scope>/<harness>.json`, base là home
+hoặc project. Nó lưu target, source local, adapter revision, file hashes và owner.
+Một installation dùng một catalog; chưa tải release hoặc lưu source riêng từng asset.
+Legacy adapter revision 1 vẫn đọc được; uninstall/recover không cần source còn tồn tại.
+
+Unmanaged file hoặc tracked file đổi hash gây conflict, kể cả unmanaged có cùng
+nội dung. Không có force overwrite/adopt tự động: backup/di chuyển hoặc giải quyết
+edit trước retry. Uninstall chỉ gỡ tracked chưa sửa, giữ file lạ; có thể còn folder rỗng.
+
+## Transaction và recovery
+
+Installer check paths/symlinks và lock PID/host trước apply. Journal giữ file và
+manifest trước/sau; ghi bằng temp + rename và sync, commit manifest cuối. Lỗi được
+bắt rollback; external edit khiến rollback dừng và giữ journal.
+
+Recover chỉ gỡ lock của process đã kết thúc trên cùng host. Manifest mới đã commit
+thì hoàn tất transaction; chưa commit thì restore trạng thái trước. External edit
+sau crash được giữ cùng journal để xử lý thủ công. PID tái sử dụng/host khác bị từ
+chối thay vì đoán. Tests kill process thật; chưa kiểm mất điện, network filesystem
+hoặc chống process cố ý đổi path giữa check/write.
+
+## Phát triển và đóng gói
+
+- `tool/src/cli.ts`: tương tác/dispatch; `tool/src/installation/index.ts`: plan,
+  state, transaction/recovery. Test filesystem trong context tạm, không personal config.
+- Test core/adapter/lifecycle thuộc trách nhiệm tương ứng. Runtime/E2E theo
+  [testing](../docs/testing.md); [verification tooling](docs/verification.md)
+  quản lý hồ sơ, không chạy harness hay thay đổi file đã cài.
+- Build dọn riêng output TypeScript core/adapters/tool/tests trước compile, giữ
+  dist previews khác; copy core docs để API getDocs chạy độc lập.
+
+```bash
+npm pack --pack-destination /path/to/output
+```
+
+Prepack build. Gói gồm compiled modules, core content và tài liệu hiện hành được
+link và hồ sơ verification được giữ lại; không đóng gói tests, plan/audit hoặc
+output chạy tạm. Chưa publish package.
+Smoke tarball trong thư mục tạm: API/docs/catalog, strict TypeScript consumer,
+CLI validate/list/install dry-run từ ngoài checkout. Dependency symlink chỉ chứng
+minh package contents, không chứng minh fresh registry install.
+
+## Dùng bản cũ
+
+Installer cũ không có manifest: file trùng đích gây conflict, cần backup/di chuyển;
+không tự nhận ownership hoặc xóa cả folder skill. State thử nghiệm không có segment
+`<scope>` không được tự nhập. Không dùng `npx skills add` hoặc installer cũ tải main;
+chọn tag/commit bằng Git rồi chạy launcher, hoặc dùng tgz local.

@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   }
   const rows = await inspect(source);
   if (command === 'report') {
-    const destination = path.join(source, 'docs/verification/README.md');
+    const destination = path.join(source, 'verification/README.md');
     await assertNoSymlinks(destination);
     const markdown = report(rows);
     if (values.check) {

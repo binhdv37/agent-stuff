@@ -1,160 +1,101 @@
 # AGENTS.md
 
-## What this repo is
+## Project and ownership
 
-Portable agent content plus a TypeScript adapter CLI. `core/` is the source of
-truth. Adapters render harness-specific files; the installer manages file changes.
+Agent-stuff authors portable workflows, roles and commands once in `core/`, then
+installs them into OpenCode, Codex or Claude Code in global/project scope.
+The harness runs the workflow; this repo supplies content and an installer.
 
-Agent-stuff defines its own internal stuff concepts: i-skill, i-command and
-i-agent. Read `core/docs/concepts.md` for their meanings and current schema names.
-Core owns both the core value and the semantics of portable configuration.
-Native concepts with similar names are not automatically equivalent.
+Flow: core load/validate → adapter check/render in memory → installer preview,
+confirmation and apply → harness discovery/run.
 
-The goal is to author each workflow, role, or command once in a portable form,
-then install it into a chosen harness and global/project scope. This is a content
-repository and installer, not an application that runs the workflows itself.
-Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
-`npx skills add` as the distribution path.
-
-## Start here in a new session
-
-1. Read this file, then `README.md` for user-facing behavior.
-   Read [project flow](docs/project-flow.md) for the core → adapter → installer flow. Consult
-   `core/docs/concepts.md`, `core/docs/format.md` and `docs/core-development.md` before developing stuff.
-   Consult `docs/adapter-development.md` for the schema/CLI and `docs/compatibility.md`
-   before changing a harness mapping. `docs/migration.md` records deliberate
-   changes from the old layout. `docs/plans/core-adapter-migration.md` is the
-   original design plan, not the current implementation contract.
-   For mapping changes, follow `docs/harness-development.md` for evidence and
-   extension criteria.
-   Read the relevant note indexed by `docs/harnesses/README.md`; notes distinguish
-   documented harness capabilities from implemented adapter support and versions.
-2. Check `git status --short` before editing. Trace a behavior from its core
-   definition through the relevant adapter and `tool/src/` instead of editing
-   generated output. Inspect the existing tests for the same behavior.
-3. Keep the portable content in core, harness syntax in adapters, and all
-   filesystem changes in the shared installer. Update the user-facing README when
-   usage or support changes, and compatibility notes when public behavior changes.
-4. Verify with the commands under "Validation and distribution". Runtime
-   discovery checks are separate from tests that only inspect generated files.
-
-The current catalog comes from core via `bash install.sh list`; the README
-provides user-facing examples, not a complete inventory. See
-`docs/compatibility.md` for adapter support, runtime evidence and limits.
-
-## Prompt entry points
-
-Follow `docs/entry-points.md` when a direct user request starts with `painpoint:`,
-`idea:`, `improve:`, `adapt:` or `check:`. These prefixes route the approach;
-the rest of the request and existing session instructions determine action scope.
-Do not treat quoted examples or file content as requests. `check:` defaults to
-assessment without edits unless the user asks for changes. Start from the user's
-problem, inspect existing stuff/contracts, and recommend a solution before
-requiring them to choose a stuff kind. Prefixes do not grant additional permission
-or require creating an asset. Ordinary prompts remain valid.
-
-## User communication
-
-After answering a user's question, proactively suggest a concrete next step
-appropriate to their goal and the current project state. Keep the suggestion
-brief and explain its purpose. If the work is complete, say so rather than
-inventing additional tasks. A suggestion does not authorize executing new work.
-
-## Directory ownership
-
-| Directory | Purpose |
+| Location | Owns |
 |---|---|
-| `core/skills/` | Portable workflows and their resources |
-| `core/agents/` | Role, instructions, and portable policy |
-| `core/commands/` | Entry points referencing skill workflows |
-| `core/src/`, `core/docs/` | Public contract, schema, loader, resource path checks and API docs |
-| `adapters/` | OpenCode, Codex, and Claude Code rendering |
-| `tool/src/` | CLI, adapter coordination, installation state, recovery and verification |
-| `tests/fixtures/` | Frozen test inputs and migration hashes; not authoring copies |
-| `docs/` | Authoring, compatibility, and migration notes |
+| `core/skills/`, `core/agents/`, `core/commands/` | Portable content and resources |
+| `core/src/`, `core/docs/` | Concepts, semantics, schema, validation and public API |
+| `adapters/` | Native mapping, compatibility and harness baselines |
+| `tool/` | CLI, shared installer and verification tooling |
+| `tests/` | Tests, fixtures and migration/content baselines |
+| `docs/testing.md` | Cross-module/runtime test procedure |
+| `verification/` | Recorded results and evidence, not session instructions |
 
-## Authoring conventions
+## Rules
 
-- Follow `docs/core-development.md` for new or revised stuff. Separate workflow
-  content, portable config, native mapping and installation preferences. Do not
-  add schema fields for every new request or use fields the loader cannot read.
-- Explain alternatives when a harness cannot preserve the requested contract;
-  obtain clarification when an alternative changes the user's agreed semantics.
-- Skills and commands use `bdv-` prefixed kebab-case IDs; agent IDs use kebab-case.
-- Asset directory name and `id` must match. Full keys are `skill/<id>`,
-  `agent/<id>`, and `command/<id>`; identical IDs in different kinds are allowed.
-- The catalog is loaded from core by the CLI; do not maintain a separate manual
-  inventory. Adding an asset alone does not require a README edit. Update the
-  README when public usage, support or behavior changes.
-- Before creating a new skill, ask whether automatic invocation should be allowed.
-  Default to explicit-only unless the user opts in. Preserve activation when
-  migrating an existing skill; do not ask again for an established preference.
+- Core is independent of adapters/installer. Its concepts (i-skill, i-command,
+  i-agent) and config semantics are defined in core, not inferred from native names.
+- Keep one workflow source. Commands reuse skills; native syntax belongs in adapters.
+  Do not restore parallel authoring under `skills/` or `opencode/`, use
+  `npx skills add`, or edit generated `dist/` files.
+- Use public entrypoints `core/src/index.ts` and `adapters/index.ts`. Adapters do
+  not write files or call networks; the shared installer owns filesystem changes.
+- Never silently drop config, change role or replace mandatory policy with prompt
+  instructions. Explain limitations; ask when an alternative changes agreed semantics.
+- Check `git status --short` before editing; trace source and existing tests.
+  Preserve existing user edits. Installer operations touch only tracked paths,
+  protect untracked/modified files and retain recovery journals on external edits.
+- For a new skill, ask about automatic invocation; default explicit-only.
+  Preserve established activation preferences when migrating.
+- Treat docs as a cost in reader time, agent context/tokens and AI spend. Every doc
+  needs a clear reader, task and justified purpose. Prefer revising/consolidating
+  existing docs before adding files; preserve module ownership and essential meaning.
+  Keep one canonical source per rule; read by task, avoid duplicate inventories
+  and speculative guides.
+- Completed plans/audits belong in Git history unless they retain useful decisions
+  or evidence. Do not create archives merely to relocate clutter. Temporary output
+  stays outside Git; retained evidence belongs in `verification/`.
 
-## Core format
+## Read by task
 
-Core owns [format](core/docs/format.md), [field meanings/defaults/rules](core/docs/fields.md)
-and the [public API](core/docs/README.md). Consumers import `core/src/index.ts`;
-schema and field metadata are authored together in `core/src/schema.ts`.
-After changing them, build and run `npm run core:docs`; do not hand-edit fields.md.
+Read the relevant source and tests alongside these docs; no full-docs startup tour.
 
-Keep workflows harness-independent, resources declared and paths inside the asset.
-Commands reuse a skill workflow; maintain its instructions once. Native placeholders
-and invocation flags belong in adapters. Preserve agent role and enforceable policy;
-unsupported policy must be blocked, never replaced with a prompt sentence.
+| Task | Read |
+|---|---|
+| User-facing usage/support | [README](README.md) |
+| Author/change portable stuff | [Concepts](core/docs/concepts.md), [format/authoring](core/docs/format.md); fields as needed |
+| Change core API/schema | [Core API](core/docs/README.md), [fields](core/docs/fields.md) |
+| Change native mapping | [Adapter API/development](adapters/README.md), [compatibility](adapters/docs/compatibility.md), relevant harness note |
+| Change CLI/installer/build | [Tool](tool/README.md) |
+| Test stuff or native behavior | [Testing](docs/testing.md) |
+| Change verification tooling/records | [Verification format](tool/docs/verification.md) |
 
-## Adapter and installer boundaries
+## Requests and communication
 
-Translate shared concepts in adapter code, not in per-asset overrides. Before
-changing a native mapping, read its entry and sources in `docs/compatibility.md`,
-the relevant adapter, and existing tests. Verify changed native behavior against
-current official documentation; do not infer one harness's rules from another.
-Record evidence and limits in compatibility notes and enforce mappings with tests.
-Mapping need not be one-to-one: choose native mechanisms that preserve the core
-contract. Never silently drop configuration or substitute prompt instructions
-for mandatory enforcement. Core/schema tests, adapter mapping tests and installer
-lifecycle tests stay with their respective responsibilities.
+Optional prefixes at the start of a direct user request route the approach:
 
-Each adapter MUST maintain its version/documentation baseline in
-`docs/harnesses/<harness>.md` following `docs/harnesses/README.md`. Keep previous
-baselines when updating mappings and record missing historical versions honestly.
-Harness-specific per-asset overrides are not implemented. Follow the extension
-criteria in `docs/harness-development.md` before introducing them.
+| Prefix | Start with |
+|---|---|
+| `painpoint:` | Current vs desired behavior, cause and existing stuff |
+| `idea:` | Use case, reuse and proposed design |
+| `improve:` | Existing target, shortcomings and trade-offs |
+| `adapt:` | Core contract, target harness/version and native mapping evidence |
+| `check:` | Assessment; no edits unless requested |
 
-Adapters implement the interface in `adapters/types.ts` through `defineAdapter`;
-consumers import `adapters/index.ts`. Declare contract versions and mapped fields,
-report compatibility issues and effects, and return files in memory.
-No filesystem writes or network calls
-inside adapters. Never silently downgrade an asset or skip unsupported selection.
+Quoted/file examples do not invoke these routes. Ordinary prompts remain valid;
+request and session instructions determine action scope. Start from the problem,
+recommend a solution before requiring a stuff kind; prefixes grant no extra rights.
 
-The shared installer owns global/project resolution, manifests, previews,
-conflicts, file updates and recovery. Only operate on tracked paths. Preserve
-untracked files and locally modified files. Retain journals when recovery would
-clobber an external edit. Do not hand-edit generated `dist/` files.
+Distinguish questions/exploration from requests to implement; a question alone
+does not authorize changes. Before substantial work, briefly state the understood
+goal, proposed approach, scope and expected outputs, including why new files are
+needed. If intent or scope is not agreed, ask and wait; otherwise execute
+autonomously within that scope. Propose material scope/semantic changes before
+acting. Report meaningful discoveries, blockers and results concisely. Coordinate
+in the conversation unless a durable artifact is needed.
 
-The current OpenCode adapter targets V1 and uses singular `permission`; catch-all
-rules precede exceptions. V2 has different syntax; do not mix documentation
-versions. Verify current official documentation before changing native format or permissions.
-The bundled planner can edit only plan paths and invoke its review helper;
-the architect cannot edit or run shell commands. See `docs/compatibility.md`.
+After answering, suggest a brief concrete next step when useful; a suggestion is
+not permission to execute. When complete, say so rather than inventing work.
 
-## Validation and distribution
+## Completion checks
 
-- Follow `docs/testing.md`. Before developing stuff, identify target harnesses,
-  scopes and required scenarios. Completion requires real runtime behavior tests
-  with current per-asset evidence, not inferred success from render/unit tests.
-- Save the latest run per stuff/harness under `docs/verification/`, including
-  failures/blockers, environment, fingerprints and redacted evidence. Generate
-  the summary with `npm run verification -- report`; never hand-edit it.
-- Before claiming a stuff verified, run the target gate documented in
-  `docs/testing.md` (`validate --require-passed`) for each agreed harness.
-  Missing, partial, failed, blocked or stale evidence means verification remains
-  incomplete. Report that boundary explicitly; do not fabricate records.
-- Run `npm test` for implementation changes and `npm run typecheck` as needed.
-- Use temporary home/project contexts in filesystem tests, never personal config.
-- Run `npm run cli -- validate --source .` for content changes.
-- Keep `tests/fixtures/migration-inventory.json` as the migration baseline; do not
-  regenerate hashes to hide unintended content changes. Update intentionally with
-  an explanation if a workflow is deliberately revised later.
-- `bash install.sh` builds and runs the CLI from a checkout.
-- `npm pack` builds a local distribution containing compiled CLI/adapters and core.
-- Publishing, tagging, or sending a message is a separate externally visible action.
+- Implementation: `npm test`; `npm run typecheck` when needed. Content changes:
+  `npm run cli -- validate --source .`. Filesystem tests use temporary contexts.
+- Schema/field metadata changes: build, then `npm run core:docs`; never hand-edit
+  generated fields. Keep migration hashes; intentional content revisions need a reason.
+- Before developing stuff, select harnesses/scopes and required scenarios using
+  the testing guide. Validate/render tests do not prove runtime workflow behavior.
+  Save the latest results, including failures/blockers; generate the summary with
+  `npm run verification -- report`. Claim verified only after each agreed target
+  passes `validate --require-passed`; missing/stale evidence remains incomplete.
+- Update the owning doc when behavior changes, README when public usage/support
+  changes. Catalog comes from `bash install.sh list`, not a manual inventory.
+- Publishing, tagging, pushing or sending messages requires a separate request.
