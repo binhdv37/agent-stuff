@@ -33,13 +33,14 @@ Do not restore parallel authoring copies under `skills/` or `opencode/`, or use
    definition through the relevant adapter and `tool/src/` instead of editing
    generated output. Inspect the existing tests for the same behavior.
 3. Keep the portable content in core, harness syntax in adapters, and all
-   filesystem changes in the shared installer. Update the README inventory and
-   compatibility notes when public behavior changes.
+   filesystem changes in the shared installer. Update the user-facing README when
+   usage or support changes, and compatibility notes when public behavior changes.
 4. Verify with the commands under "Validation and distribution". Runtime
    discovery checks are separate from tests that only inspect generated files.
 
-See the README for current inventory and `docs/compatibility.md` for adapter
-support, runtime evidence and limits.
+The current catalog comes from core via `bash install.sh list`; the README
+provides user-facing examples, not a complete inventory. See
+`docs/compatibility.md` for adapter support, runtime evidence and limits.
 
 ## Prompt entry points
 
@@ -82,7 +83,9 @@ inventing additional tasks. A suggestion does not authorize executing new work.
 - Skills and commands use `bdv-` prefixed kebab-case IDs; agent IDs use kebab-case.
 - Asset directory name and `id` must match. Full keys are `skill/<id>`,
   `agent/<id>`, and `command/<id>`; identical IDs in different kinds are allowed.
-- New public assets MUST be added to the appropriate README table.
+- The catalog is loaded from core by the CLI; do not maintain a separate manual
+  inventory. Adding an asset alone does not require a README edit. Update the
+  README when public usage, support or behavior changes.
 - Before creating a new skill, ask whether automatic invocation should be allowed.
   Default to explicit-only unless the user opts in. Preserve activation when
   migrating an existing skill; do not ask again for an established preference.

@@ -1,62 +1,60 @@
 # Agent Stuff
 
-Portable agent content for OpenCode, Codex, and Claude Code.
+Reusable workflows and agent roles for OpenCode, Codex, and Claude Code.
 
-Agent-stuff develops its own reusable components, called **stuff**: `i-skill`
-(capability/workflow), `i-command` (user-invoked prompt/template), and `i-agent`
-(agent identity, role and working instructions). Core defines their content and
-portable configuration semantics; adapters translate that intent into native
-harness mechanisms. These concepts need not map one-to-one to native concepts.
-See the [glossary](core/docs/concepts.md), [format](core/docs/format.md),
-[field reference](core/docs/fields.md) and [stuff development flow](docs/core-development.md).
-The current schema still uses `skill`, `command` and `agent`; standalone command
-templates and additional config types require explicit schema/adapter development.
+Agent Stuff helps you give your AI coding tool a repeatable way to handle tasks
+such as documenting an API, explaining code, or handing work over to another
+session. Choose the workflows you need and install them into your tool, globally
+or for a specific project.
 
-Write instructions once in `core/`. The TypeScript CLI validates the definitions,
-uses an adapter to generate harness files, and installs the selected assets into
-a global or project directory.
+The reusable components are called **stuff**: skills provide workflows, commands
+provide shortcuts to workflows, and agents provide specialized roles and working
+boundaries. Your AI tool runs them using the code and context you provide.
 
-The harness runs the installed workflows. Personal drafts are not part of this
-repository.
+## What you can use it for
 
-Start with the [core → adapter → installer flow](docs/project-flow.md) for
-module responsibilities and an installation example.
+A few examples from the collection:
 
-Core is an independent module with a [public contract API](core/docs/README.md)
-for schema, field meanings, docs, catalog loading and selection. It depends on
-Node.js, yaml and zod, with no tool/adapter imports. The
-[module refactor](docs/plans/core-module-boundary.md) is complete; its
-[validation record](docs/runtime/core-module-boundary-2026-10-09.md) documents
-checks and runtime limits.
-The independent [adapter module](adapters/README.md) checks core contract versions
-and reports field-specific limitations before rendering or installation.
+| When you need to… | Try | Expected result |
+|---|---|---|
+| Help frontend engineers integrate a backend API | [bdv-api-handoff](core/skills/bdv-api-handoff/instructions.md) | Markdown documentation of requests, responses, errors, and frontend-relevant behavior |
+| Understand unfamiliar code | [bdv-explain-code](core/skills/bdv-explain-code/instructions.md) | An explanation of the code and how it works |
+| Continue work in another session | [bdv-handoff](core/skills/bdv-handoff/instructions.md) | A concise handoff document with sensitive information redacted |
 
-## Start from a problem or idea
+These are examples, rather than a complete catalog. To see the available stuff
+and descriptions from your checkout, run:
 
-When working with an AI Agent in this repo, use a prefix to state your intent:
-
-| Prefix | Use it for |
-|---|---|
-| `painpoint:` | An unwanted behavior or frustrating experience |
-| `idea:` | A new capability you want to explore |
-| `improve:` | Improving existing stuff |
-| `adapt:` | Mapping stuff to a harness or target version |
-| `check:` | Assessing content or behavior; defaults to no edits |
-
-```text
-painpoint: agent cứ tự commit khi t chưa cho phép.
-T muốn chỉ commit khi t yêu cầu rõ ràng. Gợi ý cách xử lý trước.
+```bash
+bash install.sh list
 ```
 
-You do not need to choose a stuff kind first. The Agent investigates and recommends
-a solution; ask it to implement when you want changes. Prefixes are a repo prompt
-convention guided by `AGENTS.md`, not CLI commands. Ordinary prompts still work.
-See [entry points](docs/entry-points.md) for scope and examples.
+You can also browse the [skills](core/skills/), [agents](core/agents/), and
+[commands](core/commands/) before installing. The installer reports which items
+work with your chosen tool.
 
-## Install from a checkout
+## Supported tools
 
-Requires Node.js 22+ and npm. The filesystem installer is tested on macOS; its
-POSIX launcher and durability operations are intended for macOS/Linux.
+| Tool | Skills | Commands | Agents |
+|---|---|---|---|
+| OpenCode | Supported; explicit invocation has a reported limitation | Separate commands | Primary agents and the planner's read-only review helper |
+| Codex | Supported, including native invocation policy | Use the corresponding skills | Not mapped by this adapter |
+| Claude Code | Supported, also available as slash commands | Use skill slash commands | Not mapped by this adapter |
+
+Support describes the current adapters. Some metadata or activation behavior
+cannot be fully preserved; the installer shows the limitations before you apply
+changes. In OpenCode, explicit-only invocation is expressed through instructions
+rather than native enforcement.
+
+See [compatibility](docs/compatibility.md) for details and version baselines, and
+[verification results](docs/verification/README.md) for recorded workflow checks
+and remaining gaps. Installation support alone does not mean every workflow has
+been verified in your tool.
+
+## Get started
+
+You need **Node.js 22+**, **npm**, **Git**, and the AI tool you want to use.
+The filesystem installer is tested on macOS; its launcher and filesystem
+operations are intended for macOS/Linux.
 
 ```bash
 git clone https://github.com/binhdv37/agent-stuff.git
@@ -64,136 +62,97 @@ cd agent-stuff
 bash install.sh
 ```
 
-Choose a harness, global/project scope, assets, then review and apply the changes.
-The CLI shows unsupported assets and compatibility limitations before installing.
-To use a particular source version, check out that tag or commit before building.
+The launcher installs dependencies if needed and builds the CLI. The installer
+then asks you to:
 
-For scripted use:
+1. Choose OpenCode, Codex, or Claude Code.
+2. Choose **global** scope for use across projects, or **project** scope for one
+   existing project directory.
+3. Select stuff using the displayed keys, such as `skill/bdv-api-handoff`.
+4. Review the proposed file changes and any compatibility limitations, then
+   confirm installation.
 
-```bash
-npm ci
-npm run build
+To use a particular source version, check out that tag or commit before running
+the launcher.
 
-# Preview all compatible OpenCode assets in an existing project
-npm run cli -- install --agent opencode --scope project --project /path/to/project \
-  --compatible-only --dry-run
+## Use an installed workflow
 
-# Install one Codex skill globally
-npm run cli -- install --agent codex --scope global \
-  --only skill/bdv-api-handoff --yes
+For example, to prepare API documentation with Codex:
 
-# Preview an update or removal
-npm run cli -- update --agent codex --scope global --dry-run
-npm run cli -- uninstall --agent codex --scope global --dry-run
+1. Run `bash install.sh`, choose `codex` and `project`, and enter the path to your
+   backend project.
+2. Select `skill/bdv-api-handoff`, review the preview, and confirm installation.
+3. Open a new Codex session in that backend project and make an explicit request:
+
+```text
+Use bdv-api-handoff to document the orders API for frontend integration.
+Start from the routes and handlers in src/orders.
 ```
 
-Assets reported as limited require `--accept-limitations` when applying in
-non-interactive mode. OpenCode explicit invocation is expressed in instructions;
-unmapped display names/descriptions or argument hints are also reported per field.
-`--yes` does not accept limitations or bypass conflicts. Contract mismatches block
-rendering even with `--compatible-only`.
+Replace the API name and path with your own. The workflow inspects the
+implementation and prepares Markdown covering the request and response contract,
+authentication, errors, and behavior relevant to the frontend. It asks for
+clarification when product meaning cannot be established from the code.
 
-The CLI defaults to the core bundled with it. Use `--source /path/to/checkout` to
-work with another checkout. Update defaults to the source recorded at installation.
-For an interrupted installation, use `recover` with the same harness and scope.
+For other skills, explicitly name the workflow and describe the target or outcome
+you want. Most skills require explicit invocation; check the selected skill's
+`definition.yaml` for its activation policy. Claude Code also exposes skills as
+slash commands; OpenCode provides separate commands for selected workflows.
 
-Existing files from the old installer are untracked and cause a conflict. Back up
-and move the conflicting legacy files before installing; the CLI does not overwrite
-or adopt them automatically. Uninstall preserves unrelated files and refuses to
-remove managed files that have local edits.
+## Preview, update, and remove
 
-## Layout
+From your checkout, you can preview a specific installation without changing the
+target project:
 
-| Directory | Purpose |
-|---|---|
-| `core/skills/` | Workflow metadata, instructions, and supporting resources |
-| `core/agents/` | Portable role and policy definitions |
-| `core/commands/` | Entry points referencing a skill workflow |
-| `core/src/`, `core/docs/` | Public contract, schema, catalog loader, path checks and API docs |
-| `adapters/` | Public interface, contract guards, native rendering and compatibility decisions |
-| `tool/src/` | CLI, adapter coordination, installation, recovery and verification |
-| `tests/` | Fixtures, migration checks, and filesystem lifecycle tests |
+```bash
+bash install.sh install --agent codex --scope project \
+  --project /path/to/backend --only skill/bdv-api-handoff --dry-run
+```
 
-## Current adapter support
+For the same project, preview an update or removal:
 
-| Adapter | Skills | Commands | Agents |
-|---|---|---|---|
-| OpenCode | All 11; explicit invocation has a reported limitation | Both commands | Two primary agents and the planner's read-only review helper |
-| Codex | All 11, including native invocation policy | No separate command files; invoke the corresponding skills | Not mapped |
-| Claude Code | All 11, also available as slash commands | No separate command files; use skill slash commands | Not mapped |
+```bash
+bash install.sh update --agent codex --scope project \
+  --project /path/to/backend --dry-run
 
-See [compatibility](docs/compatibility.md) for runtime checks and policy limits;
-[migration notes](docs/migration.md) list intentional changes from the old layout.
-Metadata omitted by an adapter makes the selected asset limited: Codex currently
-omits argument hints; Claude Code omits display_name/short_description; OpenCode
-omits those UI fields and argument hints. Native output is unchanged by this audit.
+bash install.sh uninstall --agent codex --scope project \
+  --project /path/to/backend --dry-run
+```
 
-## Working on this repository
+Remove `--dry-run` to review and confirm applying the changes. For a global
+installation, use `--scope global` and omit `--project`. Update uses the source
+recorded at installation unless you supply `--source /path/to/checkout`.
 
-Start with [AGENTS.md](AGENTS.md) for the authoring rules and a new-session
-checklist. Write portable content in `core/`, harness-specific output rules in
-`adapters/`, and installation behavior in `tool/src/`. Generated `dist/` files
-are build output. Add new public assets to the tables below, then run
-`npm run cli -- validate --source .` for content changes and `npm test` for
-implementation changes. The [development guide](docs/adapter-development.md)
-has CLI and recovery details; [compatibility](docs/compatibility.md) separates
-filesystem tests from runtime checks.
-Follow the [stuff development flow](docs/core-development.md) when authoring,
-and the [mapping guide](docs/harness-development.md) when changing adapters.
-The [harness research notes](docs/harnesses/README.md) explain native concepts,
-version differences, adapter reference versions and documentation baselines,
-and the checks needed before extending a mapping. Reference records preserve
-what a mapping was based on; the CLI does not detect or gate harness versions.
-The [activation smoke runner](docs/adapter-development.md#smoke-activation-từ-checkout)
-checks discovery and optional model behavior in temporary global/project contexts;
-recorded outcomes and pending checks are in compatibility notes.
+For scripted installation, provide the selection flags and `--yes`. Items
+reported as limited also require `--accept-limitations` after you review them.
+`--yes` does not accept limitations or bypass file conflicts. Run
+`bash install.sh --help` for available options.
 
-The inventory below contains 16 assets: 11 skills, three agents, and two commands.
+### Common installation issues
 
-## Verification
+- **Unsupported selection:** choose items supported by your tool, or use
+  `--compatible-only` when installing to select only compatible items. Compatible
+  items may still have limitations that need your acceptance.
+- **File conflict:** existing unmanaged files, including files from the old
+  installer, are preserved. Back up and move conflicting files before retrying;
+  the installer does not automatically adopt them or overwrite local edits.
+- **Locally edited installed files:** update and uninstall stop when they would
+  overwrite or remove modified files. Preserve your edits before resolving the
+  conflict. Unrelated files are left in place.
+- **Interrupted installation:** run `bash install.sh recover` with the same
+  `--agent`, `--scope`, and project path as the interrupted operation.
 
-See the [verification summary](docs/verification/README.md) for the latest
-per-stuff/harness results, missing coverage and stale evidence. New or revised
-stuff must pass real runtime scenarios on agreed targets before being reported
-verified. `npm test` checks implementation and record integrity; it does not
-prove every workflow works. The [testing guide](docs/testing.md) defines the
-required stages, evidence format and completion gate.
+## How it works
 
-## Agents
+Agent Stuff keeps shared workflow content in `core/`. An adapter translates it
+into files your chosen tool understands, and the installer places and tracks
+those files in global or project scope. Your AI tool discovers the installed
+content and runs the workflows. You can install only what you need and manage
+those files later through the same CLI.
 
-OpenCode installs both primary agents. Selecting the planner also installs its
-read-only review helper.
+## Further reading
 
-| Agent | What It Does | Permission boundary |
-|---|---|---|
-| **experimental-plan** | Explores code and writes implementation plans | Can edit only `.auragent/plans/` and call the review helper |
-| **solution-architect** | Designs architecture and evaluates trade-offs | Read-only; shell and edits denied |
-| **bdv-plan-reviewer** | Reads code and critiques a proposed plan for the planner | Read-only subagent; shell, edits and further delegation denied |
-
-## Commands
-
-OpenCode commands share the instructions of the corresponding core skill.
-
-| Command | What It Does | Usage |
-|---|---|---|
-| **bdv-change-report** | Generates a high-level change report | `/bdv-change-report [scope]` |
-| **bdv-explain-code** | Explains existing code | `/bdv-explain-code <target>` |
-
-## Skills
-
-Reusable workflows. All skills require explicit invocation except `bdv-grill-me`,
-which may activate from matching requests.
-
-| Skill | What It Does | Say This to Trigger |
-|-------|-------------|-------------------|
-| **bdv-api-handoff** | Generates FE-ready API docs from backend code | "document this API", "hand off" |
-| **bdv-brainstorm-first** | Forces brainstorming before any code is written | "brainstorm first", "let's brainstorm" |
-| **bdv-change-report** | Generates a high-level report of code changes | "change report", "summarize the changes" |
-| **bdv-explain-code** | Explains existing code for quick review — no diff needed | "explain this code", "walk me through" |
-| **bdv-grill-me** | Interviews you relentlessly on a plan until it's solid | "grill me", "stress-test my plan" |
-| **bdv-handoff** | Creates a concise, redacted handoff document for the next agent or session | "create a session handoff", "handoff for the next agent" |
-| **bdv-ielts-speaking-coach** | Interactive IELTS Speaking practice with scoring | "IELTS speaking", "practice IELTS" |
-| **bdv-interview-coach** | Mock technical interview with model answers | "interview", "mock interview" |
-| **bdv-product-brief** | Turns vague ideas into structured product briefs | "I have an idea for..." |
-| **bdv-smart-commit** | Reads changes, warns about edits outside session work, proposes exact-file staging + a Conventional Commit for approval, then offers separately approved push and a PR/MR link | Explicitly invoke `bdv-smart-commit` |
-| **bdv-teach** | Creates a stateful learning workspace with lessons, trusted resources, and learning records | "teach me <topic>", "help me learn <topic>" |
+- [Compatibility and limits](docs/compatibility.md)
+- [Workflow verification results](docs/verification/README.md)
+- [CLI and recovery details](docs/adapter-development.md)
+- [Contributing and repository instructions](AGENTS.md)

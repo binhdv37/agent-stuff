@@ -73,10 +73,13 @@ implementation tests khi có thay đổi code và gate `--require-passed` cho t�
 target trước khi báo hoàn tất kiểm chứng. Test adapter chung không thay thế
 test workflow; bằng chứng adapter vẫn ghi trong compatibility.
 
-Thêm public asset vào README, cập nhật glossary nếu đổi concept, development
-guide nếu đổi format/CLI và hồ sơ adapter nếu đổi mapping. Publish/tag là hành
-động riêng. Nếu workflow chưa đạt gate, báo phần đã triển khai và phần kiểm
-chứng còn thiếu; không kết luận rằng nó chạy được.
+Catalog được CLI đọc trực tiếp từ core qua `bash install.sh list`; không duy
+trì inventory thủ công riêng. Chỉ cập nhật README khi cách sử dụng, hỗ trợ hoặc
+hành vi công khai thay đổi; thêm asset đơn thuần không yêu cầu sửa README. Cập
+nhật glossary nếu đổi concept, development guide nếu đổi format/CLI và hồ sơ
+adapter nếu đổi mapping. Publish/tag là hành động riêng. Nếu workflow chưa đạt
+gate, báo phần đã triển khai và phần kiểm chứng còn thiếu; không kết luận rằng
+nó chạy được.
 
 ## Ví dụ: i-skill chỉ hoạt động buổi chiều
 
