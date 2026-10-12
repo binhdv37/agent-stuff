@@ -23,15 +23,15 @@ export type CoreContract = {
 };
 
 const rules = [
-  'Schema là JSON Schema draft 2020-12 cho input YAML: required/default/type/enum được lấy từ validator hiện có. Unknown field bị từ chối ở cả definition và policy.',
-  'JSON Schema không diễn đạt hết custom refinements, filesystem và quan hệ catalog. loadCatalog là bước validate đầy đủ; không dùng schema JSON để thay loader.',
-  'Đường dẫn tương đối được chuẩn hóa: không rỗng, không tuyệt đối, không backslash/colon/NUL, không segment rỗng/dot/dot-dot. Resource và instructions phải tồn tại và không qua symlink.',
-  'resources không trùng; instructions không rỗng; kind/id khớp thư mục; catalog không rỗng; workflow và delegation_targets phải tham chiếu đúng loại.',
-  'write_paths khác rỗng không đi cùng workspace_write: allow. delegation_targets chỉ có khi delegation: allow, và allow cần ít nhất một target chỉ đọc, không shell, không delegation.',
-  'Policy cần enforcement. Nếu shell làm mất giới hạn ghi, adapter phải chặn tổ hợp đó; đây là kiểm tra tương thích harness, không phải điều kiện để YAML hợp lệ.',
-  'metadata chỉ tác động hiển thị; content cần giữ nội dung và tài nguyên; behavior điều khiển cách dùng; enforcement cần cơ chế quyền. structure xác định format/identity. Category không tự quyết định một field được bỏ qua hay không.',
-  'Không hiểu field ảnh hưởng hành vi thì chặn. Metadata hiển thị thiếu mapping có thể limited với báo cáo rõ. Nội dung hoặc quyền bắt buộc không bảo toàn được thì unsupported; không thay bằng lời nhắc.',
-  'Contract version độc lập với schema_version YAML và revision adapter. Thay đổi API public, schema, default, ngữ nghĩa hoặc ràng buộc phải tăng contract version; chỉnh chính tả/diễn đạt không đổi nghĩa thì không. Adapter phải khai báo version hiểu được và từ chối version không hỗ trợ.',
+  'JSON Schema draft 2020-12 describes YAML input; required fields, defaults, types, and enums come from the validators. Unknown definition and policy fields are rejected.',
+  'loadCatalog performs full validation, including custom constraints, files, and catalog references that JSON Schema alone cannot check.',
+  'Relative paths must be non-empty and normalized: no absolute paths, backslashes, colons, NUL, or empty, dot, or dot-dot segments. Instructions and resources must exist without symlinks.',
+  'Resources must be unique, instructions non-empty, kind/id consistent with directories, and the catalog non-empty. Workflow and delegation references must resolve to the correct kinds.',
+  'Non-empty write_paths cannot accompany workspace_write: allow. delegation_targets must be empty unless delegation is allow; allow requires at least one delegated target with workspace_write, shell, and delegation denied and no write_paths.',
+  'Execution policies require enforcement. Shell access that bypasses write restrictions cannot satisfy the policy; enforcement feasibility is outside YAML validation.',
+  'Categories describe meaning: structure is format/identity; metadata is display-only; content is instructions/descriptions/resources; behavior controls use; enforcement requires permissions. A category alone does not permit dropping a field.',
+  'Unrecognized behavioral fields or unpreserved mandatory content/permissions block use. Other interpretation limits, including display-only metadata omissions, must be disclosed. Prompt instructions cannot replace permissions.',
+  'Contract version is independent of YAML schema_version. Public API, schema, default, meaning, or constraint changes require a contract version increment; wording-only changes do not. Interpreting definitions requires declared version support; unsupported versions must be rejected.',
 ];
 
 function fieldMeanings(schema: CoreSchema, prefix = ''): Record<string, FieldMeaning> {

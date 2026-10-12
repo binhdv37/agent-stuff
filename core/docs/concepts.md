@@ -1,70 +1,111 @@
-# Các concept nội bộ của Agent-stuff
+# Core concepts
 
-Core định nghĩa các concept và ngữ nghĩa portable dưới đây. Tên tương tự trong
-một harness không bảo đảm cùng nghĩa. Core không phụ thuộc adapter hoặc installer.
+Core defines reusable knowledge, workflows, and agent roles, together with their
+configuration and supporting resources. These are organized as skill, command,
+and agent definitions, collectively called **stuff**. Their meaning is independent
+of any particular execution environment.
 
-## Thuật ngữ
+## Skills, commands, and agents
 
-| Thuật ngữ | Nghĩa |
-|---|---|
-| Stuff | Thành phần tái sử dụng có nội dung, cấu hình và contract riêng |
-| Core value | Workflow, prompt/template hoặc instructions định hình agent |
-| Cấu hình core | Tham số portable điều khiển cách dùng hoặc ràng buộc stuff |
-| Contract | Ý nghĩa, input, output, ràng buộc và tiêu chí kiểm chứng |
-| Asset | Một instance của stuff trong catalog; tên dùng trong implementation |
-| Harness | Môi trường AI Agent chạy nội dung, như Codex, OpenCode, Claude Code |
-| Adapter | Diễn giải contract core thành cơ chế native của harness |
-| Installer | Quản lý preview và vòng đời file cài ở global/project scope |
+### Skill
 
-## Các loại stuff
+A skill packages reusable instructions and supporting resources that give an
+agent specialized knowledge or a repeatable way to perform a task. It can contain
+a workflow, reference guidance, templates, or scripts.
 
-### i-skill
+Skills commonly use **progressive disclosure**: a name and description support
+discovery, while full instructions and supporting resources are loaded as needed.
+This is separate from who may invoke the skill. Core defines two activation modes:
 
-Năng lực/workflow tái sử dụng gồm instructions và tài nguyên cần thiết. Core value
-mô tả cách thực hiện; config mô tả activation và metadata. `explicit` yêu cầu user
-gọi rõ ràng; `matching-request` cho phép model tự chọn khi request phù hợp.
+- `explicit` (default): the user must explicitly request the workflow or name the
+  skill. An exact skill name is not required when the workflow is clearly requested.
+- `matching-request`: the model may select the skill when the request matches its
+  purpose. This permits automatic invocation; it does not guarantee it.
 
-### i-command
+An explicit-only skill can still load on demand. Activation describes when using
+the skill is permitted, not how its content is loaded.
 
-Prompt/template được user chủ động gọi, có thể nhận input. Schema v1 hiện chỉ hỗ
-trợ tham chiếu một i-skill qua `workflow: skill/<id>` để duy trì workflow một lần.
-Concept rộng hơn không có nghĩa loader đã hỗ trợ template độc lập.
+### Command
 
-### i-agent
+A command is a reusable prompt template or set of instructions invoked explicitly
+by the user, often through a slash command, with optional arguments. Here,
+"command" means a custom prompt command, not a shell command or a built-in action
+such as `/help` or `/undo`.
 
-Vai trò, bản sắc, cách suy nghĩ và cách làm việc của agent, được định hình bằng
-instructions. Config biểu đạt role và policy thực thi. Persona “chỉ đọc” không
-thay quyền cấm ghi; primary không được tự đổi thành delegated để dễ mapping.
+Commands provide a user-chosen entry point; skills may also be selected by the
+model when their activation mode permits it. A command's prompt can enter the
+conversation only when invoked, so on-demand loading is not exclusive to skills.
 
-## Nội dung và cấu hình
+In Agent-stuff schema v1, a command references one skill through
+`workflow: skill/<id>`. It has no independent instruction body or resources;
+the skill owns the workflow so it is maintained once. The definition does not
+specify an argument parser or native placeholder syntax.
 
-Core sở hữu kiểu, giá trị hợp lệ, mặc định, phạm vi, xung đột và kết quả của config.
-Phân loại yêu cầu trước khi thêm field:
+### Agent
 
-- Cách làm riêng của workflow: core value.
-- Ý định dùng chung giữa harness: config portable, nếu có contract rõ.
-- Cú pháp/cơ chế native: adapter.
-- Preference cá nhân/project khi cài: bên triển khai, không trộn vào asset portable.
+An agent is an AI assistant configured for a particular role or area of
+responsibility, with instructions that guide its behavior and permissions that
+govern its actions. Core represents these as an agent definition.
 
-Schema hiện chưa hỗ trợ model preference, profile hoặc native per-asset overrides.
-Không thêm YAML mà loader chưa hiểu; chỉ mở rộng contract khi có use case thực tế.
+The `role` describes how the agent participates:
 
-## Contract khi được chuyển đổi
+- `primary`: the main assistant the user works with directly.
+- `delegated`: a helper invoked by another agent for a task.
 
-Không cần mapping 1–1 với concept native, nhưng phải giữ ý nghĩa core. `supported`
-là bảo toàn; `limited` là khác biệt được công khai và chấp nhận; `unsupported` là
-yêu cầu bắt buộc không giữ được. Không âm thầm bỏ config hoặc dùng lời nhắc thay
-policy. Phương án đổi semantics cần user đồng ý. Mapping support và runtime
-verification là hai thông tin khác nhau; core chỉ validate contract portable.
+Instructions define expertise, approach, and working style. The execution `policy`
+defines permissions. Describing an agent as "read-only" does not deny write access;
+that restriction must be declared in the execution policy and enforced. The role is
+part of the agent's declared behavior, not merely a display label.
 
-## Tên trong schema v1
+## How they relate
 
-| Concept | kind | Thư mục từ core root | Full key |
-|---|---|---|---|
-| i-skill | skill | skills/ | skill/&lt;id&gt; |
-| i-command | command | commands/ | command/&lt;id&gt; |
-| i-agent | agent | agents/ | agent/&lt;id&gt; |
+A skill supplies knowledge or a way to do a task; a command provides an explicit
+entry point; an agent supplies the assistant's role and execution permissions.
+They have distinct responsibilities even when their instructions overlap.
 
-`i-*` chỉ là tên concept, không phải kind YAML/flag CLI. Loại mới cần contract,
-schema và loader; đổi format cần migration có chủ đích. Xem [format](format.md),
-[fields](fields.md) và [API](README.md) để author hoặc consume core.
+For example, `skill/bdv-explain-code` owns the code explanation workflow, while
+`command/bdv-explain-code` references it as a user-invoked entry point.
+Separately, `agent/solution-architect` defines an architecture advisor: its
+instructions guide the advice, and its policy denies workspace writes and shell
+execution.
+
+## Instructions, configuration, and resources
+
+- **Instructions** describe what the agent should know or do: procedures,
+  reference guidance, and role-specific behavior.
+- **Configuration** declares structured properties such as activation, role,
+  workflow references, and permissions. Core defines their types, defaults,
+  scope, meaning, and valid combinations.
+- **Supporting resources** are declared files used by the instructions, such as
+  references, templates, or scripts. Their bytes and references are part of the
+  definition.
+
+`definition.yaml` contains identity, descriptions, display metadata, configuration,
+and file references; it is not purely configuration. In particular, `description`
+can affect discovery, while display metadata serves presentation. Configuration
+captures portable behavior rather than environment-specific syntax or personal
+deployment preferences.
+
+## Contract and validation
+
+A definition's **contract** is its declared meaning and requirements: expected
+behavior, inputs and outputs, constraints, and criteria for checking results.
+These are expressed through both instructions and structured fields. Instructions
+guide behavior; execution permissions require enforcement and cannot be replaced
+by prompt instructions.
+
+Core validates structure, references, files, and declared constraints. It does not
+execute the definitions or prove that a model follows the instructions and produces
+the expected result.
+
+## Names and further reading
+
+The repository calls its portable concepts `i-skill`, `i-command`, and `i-agent`
+to distinguish them from similarly named features in other environments. YAML
+`kind` values are `skill`, `command`, and `agent`; catalog keys use `kind/<id>`.
+The public API calls a loaded catalog entry an `Asset`.
+
+See [format and authoring](format.md) for files, schema v1 limits, and contract
+extensions; [fields](fields.md) for field semantics; and [API](README.md) for loading
+and consuming core. The skill model follows the terminology of
+[Agent Skills](https://agentskills.io/what-are-skills).

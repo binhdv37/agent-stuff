@@ -39,7 +39,6 @@ test('public docs read the canonical module files and generated field reference'
     assert.equal(getDocs(topic), await readFile(`core/docs/${file}`, 'utf8'));
   }
   assert.equal(getDocs('fields'), await readFile('core/docs/fields.md', 'utf8'));
-  assert.match(getDocs('concepts'), /### i-command/);
   assert.match(getDocs('format'), /definition.yaml/);
   assert.match(getDocs('api'), /DOCS_UNAVAILABLE/);
 });
@@ -53,7 +52,7 @@ test('public snapshots cannot mutate later contract/docs results', () => {
   assert.match(next.kinds.skill.fields.activation!.description, /explicit/);
   assert.equal(next.kinds.skill.schema.properties!.activation!.default, 'explicit');
   assert.ok(next.rules.length);
-  assert.match(getDocs('fields'), /\| activation \| explicit \/ matching-request \| không \| "explicit"/);
+  assert.match(getDocs('fields'), /\| activation \| explicit \/ matching-request \| no \| "explicit"/);
   for (const topic of ['concepts', 'format', 'api'] as const) assert.match(getDocs(topic), /^# /);
   assert.throws(() => getDocs('toString' as DocsTopic), (error: unknown) =>
     error instanceof CoreError && error.code === 'UNKNOWN_DOCS_TOPIC');

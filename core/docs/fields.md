@@ -2,64 +2,67 @@
 
 # Field reference — contract 3
 
+Required refers to YAML input; defaults apply when fields are omitted.
+Optional does not mean a declared value may be discarded.
+
 ## skill
 
-| Field | Kiểu/giá trị | Bắt buộc ở input | Mặc định | Nhóm | Ý nghĩa |
+| Field | Type / values | Required | Default | Category | Meaning |
 |---|---|---|---|---|---|
-| schema_version | 1 | có | — | structure | Phiên bản format definition.yaml; hiện chỉ chấp nhận 1. |
-| id | string | có | — | structure | ID kebab-case, tối đa 64 ký tự; phải khớp tên thư mục. Full key là kind/id. Quy ước authoring dùng bdv- cho skill/command, schema không enforce prefix này. |
-| description | string | có | — | content | Mô tả mục đích và ngữ cảnh sử dụng; có thể tham gia discovery nên không được coi như metadata hiển thị có thể bỏ qua. |
-| display_name | string | không | — | metadata | Tên hiển thị tùy chọn; không thay ID hoặc quyền kích hoạt. |
-| short_description | string | không | — | metadata | Mô tả ngắn để hiển thị; không thay description hoặc contract hành vi. |
-| instructions | string | có | — | content | Đường dẫn tương đối đến hướng dẫn UTF-8 không rỗng; instructions.md là quy ước, tên file khác hợp lệ. Hướng dẫn không thay thế enforcement policy. |
-| resources | array | không | [] | content | Danh sách file hỗ trợ tương đối trong asset; giữ nguyên byte, không trùng. Không dùng definition.yaml, SKILL.md hoặc file instructions làm resource. |
-| kind | "skill" | có | — | structure | Loại stuff: skill, agent hoặc command; phải khớp thư mục chứa. |
-| activation | explicit / matching-request | không | "explicit" | behavior | explicit: chỉ kích hoạt khi user yêu cầu workflow hoặc gọi tên skill rõ ràng. matching-request: model được tự chọn khi request phù hợp, không bắt buộc tự kích hoạt. Giới hạn native phải được báo, không âm thầm bỏ field. |
-| argument_hint | string | không | — | metadata | Gợi ý input/đối số cho người dùng; không phải parser, giá trị mặc định hay cú pháp placeholder native. |
+| schema_version | 1 | yes | — | structure | definition.yaml format version; only 1 is accepted. |
+| id | string | yes | — | structure | Kebab-case ID, at most 64 characters, matching the directory name. Catalog key: kind/id. |
+| description | string | yes | — | content | Purpose and usage context; may affect discovery, so not display-only metadata. 1–1024 characters. |
+| display_name | string | no | — | metadata | Display label; does not replace the ID or control activation. |
+| short_description | string | no | — | metadata | Short display summary; does not replace description or behavioral requirements. |
+| instructions | string | yes | — | content | Relative path to non-empty UTF-8 instructions; instructions.md is conventional, not required as the filename. Instructions do not replace permissions. |
+| resources | array | no | [] | content | Supporting file paths relative to the definition directory; preserve bytes. No duplicates or reserved names: definition.yaml, SKILL.md, or the instructions file. |
+| kind | "skill" | yes | — | structure | Definition kind; must match its catalog directory. |
+| activation | explicit / matching-request | no | "explicit" | behavior | explicit: the user explicitly requests the workflow or names the skill. matching-request: the model may select it for a matching request; automatic invocation is not guaranteed. |
+| argument_hint | string | no | — | metadata | User-facing input hint; not a parser, default value, or native placeholder syntax. |
 
 ## agent
 
-| Field | Kiểu/giá trị | Bắt buộc ở input | Mặc định | Nhóm | Ý nghĩa |
+| Field | Type / values | Required | Default | Category | Meaning |
 |---|---|---|---|---|---|
-| schema_version | 1 | có | — | structure | Phiên bản format definition.yaml; hiện chỉ chấp nhận 1. |
-| id | string | có | — | structure | ID kebab-case, tối đa 64 ký tự; phải khớp tên thư mục. Full key là kind/id. Quy ước authoring dùng bdv- cho skill/command, schema không enforce prefix này. |
-| description | string | có | — | content | Mô tả mục đích và ngữ cảnh sử dụng; có thể tham gia discovery nên không được coi như metadata hiển thị có thể bỏ qua. |
-| display_name | string | không | — | metadata | Tên hiển thị tùy chọn; không thay ID hoặc quyền kích hoạt. |
-| short_description | string | không | — | metadata | Mô tả ngắn để hiển thị; không thay description hoặc contract hành vi. |
-| instructions | string | có | — | content | Đường dẫn tương đối đến hướng dẫn UTF-8 không rỗng; instructions.md là quy ước, tên file khác hợp lệ. Hướng dẫn không thay thế enforcement policy. |
-| resources | array | không | [] | content | Danh sách file hỗ trợ tương đối trong asset; giữ nguyên byte, không trùng. Không dùng definition.yaml, SKILL.md hoặc file instructions làm resource. |
-| kind | "agent" | có | — | structure | Loại stuff: skill, agent hoặc command; phải khớp thư mục chứa. |
-| role | primary / delegated | có | — | behavior | primary: agent người dùng làm việc trực tiếp; delegated: helper được agent khác gọi. Không đổi role để thuận tiện mapping. |
-| policy | object | có | — | enforcement | Quyền thực thi, tách biệt với persona/instructions. allow: được phép; ask: cần xin phép trước hành động; deny: bị cấm. Mỗi quyền bỏ trống mặc định deny; policy object vẫn bắt buộc. |
-| policy.workspace_read | allow / ask / deny | không | "deny" | enforcement | Quyền đọc/tìm kiếm nội dung workspace. |
-| policy.workspace_write | allow / ask / deny | không | "deny" | enforcement | Quyền ghi/sửa workspace mặc định; write_paths khai báo các ngoại lệ allow. |
-| policy.shell | allow / ask / deny | không | "deny" | enforcement | Quyền chạy shell; không được dùng shell để vượt giới hạn ghi. |
-| policy.questions | allow / ask / deny | không | "deny" | enforcement | Quyền dùng cơ chế hỏi người dùng của harness. |
-| policy.delegation | allow / ask / deny | không | "deny" | enforcement | Quyền gọi helper; allow chỉ hợp lệ khi có delegation_targets tường minh. |
-| policy.delegation_targets | array | không | [] | enforcement | Full key agent/id được phép gọi. Mỗi target phải tồn tại, có role delegated, deny ghi/shell/delegation và không có write_paths. |
-| policy.write_paths | array | không | [] | enforcement | Pattern đường dẫn tương đối theo project, làm ngoại lệ allow cho workspace_write. Không đi ra ngoài project; không được kết hợp danh sách khác rỗng với workspace_write: allow. Adapter phải bảo toàn phạm vi pattern hoặc báo unsupported. |
+| schema_version | 1 | yes | — | structure | definition.yaml format version; only 1 is accepted. |
+| id | string | yes | — | structure | Kebab-case ID, at most 64 characters, matching the directory name. Catalog key: kind/id. |
+| description | string | yes | — | content | Purpose and usage context; may affect discovery, so not display-only metadata. 1–1024 characters. |
+| display_name | string | no | — | metadata | Display label; does not replace the ID or control activation. |
+| short_description | string | no | — | metadata | Short display summary; does not replace description or behavioral requirements. |
+| instructions | string | yes | — | content | Relative path to non-empty UTF-8 instructions; instructions.md is conventional, not required as the filename. Instructions do not replace permissions. |
+| resources | array | no | [] | content | Supporting file paths relative to the definition directory; preserve bytes. No duplicates or reserved names: definition.yaml, SKILL.md, or the instructions file. |
+| kind | "agent" | yes | — | structure | Definition kind; must match its catalog directory. |
+| role | primary / delegated | yes | — | behavior | primary: assistant the user works with directly. delegated: helper invoked by another agent. The declared role must be preserved. |
+| policy | object | yes | — | enforcement | Execution permissions, separate from instructions. allow permits an action; ask requires prior approval; deny forbids it. Omitted permission decisions default to deny; policy itself is required. |
+| policy.workspace_read | allow / ask / deny | no | "deny" | enforcement | Permission to read and search workspace content. |
+| policy.workspace_write | allow / ask / deny | no | "deny" | enforcement | Default workspace write permission; write_paths declares allow exceptions. |
+| policy.shell | allow / ask / deny | no | "deny" | enforcement | Permission to run shell commands; must not bypass write restrictions. |
+| policy.questions | allow / ask / deny | no | "deny" | enforcement | Permission to use the user-question mechanism. |
+| policy.delegation | allow / ask / deny | no | "deny" | enforcement | Permission to invoke helpers; allow requires explicit delegation_targets. |
+| policy.delegation_targets | array | no | [] | enforcement | Allowed agent/id references. Each target must exist, be delegated, deny workspace writes, shell, and delegation, and have no write_paths. |
+| policy.write_paths | array | no | [] | enforcement | Project-relative allow-exception patterns for workspace_write. Must stay within the project, retain their scope, and be empty when workspace_write is allow. |
 
 ## command
 
-| Field | Kiểu/giá trị | Bắt buộc ở input | Mặc định | Nhóm | Ý nghĩa |
+| Field | Type / values | Required | Default | Category | Meaning |
 |---|---|---|---|---|---|
-| schema_version | 1 | có | — | structure | Phiên bản format definition.yaml; hiện chỉ chấp nhận 1. |
-| id | string | có | — | structure | ID kebab-case, tối đa 64 ký tự; phải khớp tên thư mục. Full key là kind/id. Quy ước authoring dùng bdv- cho skill/command, schema không enforce prefix này. |
-| description | string | có | — | content | Mô tả mục đích và ngữ cảnh sử dụng; có thể tham gia discovery nên không được coi như metadata hiển thị có thể bỏ qua. |
-| display_name | string | không | — | metadata | Tên hiển thị tùy chọn; không thay ID hoặc quyền kích hoạt. |
-| short_description | string | không | — | metadata | Mô tả ngắn để hiển thị; không thay description hoặc contract hành vi. |
-| kind | "command" | có | — | structure | Loại stuff: skill, agent hoặc command; phải khớp thư mục chứa. |
-| workflow | string | có | — | behavior | Tham chiếu skill/id phải tồn tại trong catalog. Command là điểm gọi chủ động dùng lại workflow; schema v1 chưa có template độc lập. |
-| argument_hint | string | không | — | metadata | Gợi ý input/đối số; không định nghĩa parser hoặc placeholder native. |
+| schema_version | 1 | yes | — | structure | definition.yaml format version; only 1 is accepted. |
+| id | string | yes | — | structure | Kebab-case ID, at most 64 characters, matching the directory name. Catalog key: kind/id. |
+| description | string | yes | — | content | Purpose and usage context; may affect discovery, so not display-only metadata. 1–1024 characters. |
+| display_name | string | no | — | metadata | Display label; does not replace the ID or control activation. |
+| short_description | string | no | — | metadata | Short display summary; does not replace description or behavioral requirements. |
+| kind | "command" | yes | — | structure | Definition kind; must match its catalog directory. |
+| workflow | string | yes | — | behavior | Existing skill/id reference for a user-invoked workflow; schema v1 has no standalone command template. |
+| argument_hint | string | no | — | metadata | User-facing input hint; not a parser, default value, or native placeholder syntax. |
 
-## Ràng buộc
+## Constraints
 
-- Schema là JSON Schema draft 2020-12 cho input YAML: required/default/type/enum được lấy từ validator hiện có. Unknown field bị từ chối ở cả definition và policy.
-- JSON Schema không diễn đạt hết custom refinements, filesystem và quan hệ catalog. loadCatalog là bước validate đầy đủ; không dùng schema JSON để thay loader.
-- Đường dẫn tương đối được chuẩn hóa: không rỗng, không tuyệt đối, không backslash/colon/NUL, không segment rỗng/dot/dot-dot. Resource và instructions phải tồn tại và không qua symlink.
-- resources không trùng; instructions không rỗng; kind/id khớp thư mục; catalog không rỗng; workflow và delegation_targets phải tham chiếu đúng loại.
-- write_paths khác rỗng không đi cùng workspace_write: allow. delegation_targets chỉ có khi delegation: allow, và allow cần ít nhất một target chỉ đọc, không shell, không delegation.
-- Policy cần enforcement. Nếu shell làm mất giới hạn ghi, adapter phải chặn tổ hợp đó; đây là kiểm tra tương thích harness, không phải điều kiện để YAML hợp lệ.
-- metadata chỉ tác động hiển thị; content cần giữ nội dung và tài nguyên; behavior điều khiển cách dùng; enforcement cần cơ chế quyền. structure xác định format/identity. Category không tự quyết định một field được bỏ qua hay không.
-- Không hiểu field ảnh hưởng hành vi thì chặn. Metadata hiển thị thiếu mapping có thể limited với báo cáo rõ. Nội dung hoặc quyền bắt buộc không bảo toàn được thì unsupported; không thay bằng lời nhắc.
-- Contract version độc lập với schema_version YAML và revision adapter. Thay đổi API public, schema, default, ngữ nghĩa hoặc ràng buộc phải tăng contract version; chỉnh chính tả/diễn đạt không đổi nghĩa thì không. Adapter phải khai báo version hiểu được và từ chối version không hỗ trợ.
+- JSON Schema draft 2020-12 describes YAML input; required fields, defaults, types, and enums come from the validators. Unknown definition and policy fields are rejected.
+- loadCatalog performs full validation, including custom constraints, files, and catalog references that JSON Schema alone cannot check.
+- Relative paths must be non-empty and normalized: no absolute paths, backslashes, colons, NUL, or empty, dot, or dot-dot segments. Instructions and resources must exist without symlinks.
+- Resources must be unique, instructions non-empty, kind/id consistent with directories, and the catalog non-empty. Workflow and delegation references must resolve to the correct kinds.
+- Non-empty write_paths cannot accompany workspace_write: allow. delegation_targets must be empty unless delegation is allow; allow requires at least one delegated target with workspace_write, shell, and delegation denied and no write_paths.
+- Execution policies require enforcement. Shell access that bypasses write restrictions cannot satisfy the policy; enforcement feasibility is outside YAML validation.
+- Categories describe meaning: structure is format/identity; metadata is display-only; content is instructions/descriptions/resources; behavior controls use; enforcement requires permissions. A category alone does not permit dropping a field.
+- Unrecognized behavioral fields or unpreserved mandatory content/permissions block use. Other interpretation limits, including display-only metadata omissions, must be disclosed. Prompt instructions cannot replace permissions.
+- Contract version is independent of YAML schema_version. Public API, schema, default, meaning, or constraint changes require a contract version increment; wording-only changes do not. Interpreting definitions requires declared version support; unsupported versions must be rejected.
