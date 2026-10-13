@@ -19,9 +19,22 @@ npm run cli -- list
 npm run cli -- install
 ```
 
-`bash install.sh` chuẩn bị dependencies/build rồi gọi CLI. Menu chọn harness,
-scope, asset và preview trước confirm. Enter chọn các asset tương thích; asset
-unsupported được báo lý do. Không có terminal thì truyền đủ flags.
+`bash install.sh` chuẩn bị dependencies/build rồi gọi CLI. CLI dùng `@clack/prompts`
+cho menu harness/scope và checkbox asset theo nhóm, có mô tả ngắn; unsupported bị
+disable kèm lý do. Arrow keys di chuyển, Space chọn, Enter tiếp tục; mặc định không
+chọn asset nào, A chọn tất cả compatible một cách chủ động. Project path phải nhập
+rõ (hỗ trợ `~/`); path sai được nhập lại, chọn source checkout cần confirm riêng.
+Preview và limitations vẫn cần review/accept trước apply. Escape/Ctrl+C hoặc từ
+chối confirm báo `Cancelled. No files changed.`; install thành công gợi ý cách dùng
+item đã chọn. Không có terminal hoặc dùng `--yes` thì truyền đủ flags.
+
+Interactive compatibility dùng bảng Item/Support/Details, hoặc rows khi terminal
+hẹp; mỗi field bị ảnh hưởng dẫn tới note giải thích effect, effect chung chỉ xuất
+hiện một lần. Supported không in boilerplate invocation. Apply dùng progress bar tự
+render (cyan `█` fill + `░` empty, kèm %) fill từ trái sang phải với ease-out (~900ms)
+để install nhanh vẫn có cảm giác hoàn tất; màu tôn trọng `NO_COLOR` và output không
+TTY. Success báo số item và file created/updated/removed/unchanged trước location
+và Next step. Failure dừng bar rồi giữ lỗi gốc.
 
 ```bash
 npm run cli -- build --agent codex --compatible-only --out dist/codex-preview
@@ -76,6 +89,10 @@ hoặc chống process cố ý đổi path giữa check/write.
 
 - `tool/src/cli.ts`: tương tác/dispatch; `tool/src/installation/index.ts`: plan,
   state, transaction/recovery. Test filesystem trong context tạm, không personal config.
+- `tool/src/prompts.ts`: terminal UI/validation; `tests/interactive.test.ts` kiểm
+  selection, cancellation, target và regression flag-driven. Smoke terminal thật
+  cần kiểm phím điều hướng, Enter khi selection rỗng, path sai rồi nhập lại,
+  từ chối source checkout, Escape/Ctrl+C và install thành công trong project tạm.
 - Test core/adapter/lifecycle thuộc trách nhiệm tương ứng. Runtime/E2E theo
   [testing](../docs/testing.md); [verification tooling](docs/verification.md)
   quản lý hồ sơ, không chạy harness hay thay đổi file đã cài.

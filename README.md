@@ -62,15 +62,8 @@ cd agent-stuff
 bash install.sh
 ```
 
-The launcher installs dependencies if needed and builds the CLI. The installer
-then asks you to:
-
-1. Choose OpenCode, Codex, or Claude Code.
-2. Choose **global** scope for use across projects, or **project** scope for one
-   existing project directory.
-3. Select stuff using the displayed keys, such as `skill/bdv-api-handoff`.
-4. Review the proposed file changes and any compatibility limitations, then
-   confirm installation.
+Follow the prompts to choose your AI tool, where to install, and the stuff you
+want, then confirm installation.
 
 To use a particular source version, check out that tag or commit before running
 the launcher.

@@ -2,12 +2,12 @@
 import { parseArgs } from 'node:util';
 import { homedir } from 'node:os';
 import { mkdir, writeFile, lstat } from 'node:fs/promises';
-import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
-import { adapters, getAdapter, type Compatibility } from '../../adapters/index.js';
+import { getAdapter, type Compatibility } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
+import { Cancelled, InteractiveFlow } from './prompts.js';
 
 function printCompatibility(result: Compatibility): void {
   console.log(`${result.status}: ${result.asset}${result.issues.length ? '' : `: ${result.reason}`}`);
@@ -36,11 +36,8 @@ async function main(): Promise<void> {
   const command = positionals[0] ?? 'install';
   if (positionals.length > 1 || !['list', 'validate', 'build', 'install', 'update', 'uninstall', 'recover'].includes(command)) throw new Error('Unknown command; use --help');
   const interactive = process.stdin.isTTY && !values.yes;
-  const rl = interactive ? createInterface({ input: process.stdin, output: process.stdout }) : undefined;
-  const ask = async (question: string): Promise<string> => {
-    if (!rl) throw new Error(`Missing options for non-interactive execution: ${question}`);
-    return (await rl.question(question)).trim();
-  };
+  const flow = interactive ? new InteractiveFlow() : undefined;
+  const missing = (flag: string): never => { throw new Error(`Missing options for non-interactive execution: ${flag}`); };
   try {
     if (['list', 'validate'].includes(command)) {
       const catalog = await loadCatalog(path.join(path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url))), 'core'));
@@ -48,19 +45,22 @@ async function main(): Promise<void> {
       else for (const a of catalog.values()) console.log(`${a.key}\t${a.definition.description}`);
       return;
     }
-    const agent = values.agent ?? await ask(`Harness (${adapters.map(a => a.id).join(', ')}): `);
+    flow?.start(command);
+    const agent = values.agent ?? (flow ? await flow.harness() : missing('--agent'));
     const adapter = getAdapter(agent);
-    const scope = command === 'build' ? undefined : values.scope ?? await ask('Scope (project/global): ');
-    const project = values.project ?? (scope === 'project' && interactive ? (await ask(`Project directory [${process.cwd()}]: `) || process.cwd()) : process.cwd());
+    const scope = command === 'build' ? undefined : values.scope ?? (flow ? await flow.scope() : missing('--scope'));
+    const defaultSource = path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url)));
+    const project = values.project ?? (scope === 'project' && flow ? await flow.project(defaultSource) : process.cwd());
     if (scope === 'project' && !values.project && !interactive) throw new Error('Project install requires --project <existing directory>');
     const context = scope ? await targetContext(scope, project, homedir(), adapter.id) : undefined;
     if (command === 'recover') {
       if (values['dry-run']) throw new Error('Recover does not support --dry-run; inspect the journal before applying');
-      if (!values.yes && (await ask('Recover the interrupted installation? [y/N]: ')).toLowerCase() !== 'y') return;
+      if (!values.yes) { if (flow) await flow.confirm('Recover the interrupted installation?', false); else missing('--yes'); }
       console.log(await recoverInstall(context!)); return;
     }
     let plan: Plan;
     let limited = false;
+    let selectedKeys: string[] = [];
     if (command === 'uninstall') {
       plan = await planUninstall(context!, values.only);
     } else {
@@ -78,16 +78,12 @@ async function main(): Promise<void> {
       const presentKeys = keys?.filter(k => catalog.has(k) || !installed);
       let selected = presentKeys?.length === 0 ? [] : selectAssets(catalog, presentKeys);
       if (interactive && command === 'install' && !keys) {
-        const compatible = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
-        for (const a of selected) {
-          const c = adapter.check(a, catalog);
-          printCompatibility(c);
-        }
-        const answer = await ask('Assets (comma-separated kind/id; Enter selects all compatible assets): ');
-        selected = answer ? selectAssets(catalog, answer.split(',').map(s => s.trim())) : compatible;
+        keys = await flow!.assets(catalog, adapter);
+        selected = selectAssets(catalog, keys);
       }
       const compatibility = selected.map(a => adapter.check(a, catalog));
-      for (const c of compatibility) printCompatibility(c);
+      if (flow) flow.compatibility(compatibility);
+      else for (const c of compatibility) printCompatibility(c);
       if (values['compatible-only']) {
         if (command === 'update') throw new Error('Update cannot skip incompatible installed assets; select them explicitly');
         selected = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
@@ -95,6 +91,7 @@ async function main(): Promise<void> {
         throw new Error('Selection contains unsupported assets; use --only or --compatible-only');
       }
       limited = selected.some(a => adapter.check(a, catalog).status === 'limited');
+      selectedKeys = (keys ?? selected.map(a => a.key)).filter(key => selected.some(a => a.key === key));
       const files = selected.flatMap(a => adapter.render(a, catalog));
       if (!files.length && !removed.length) throw new Error('No compatible assets selected');
       validateOutputs(files);
@@ -114,17 +111,25 @@ async function main(): Promise<void> {
       }
       plan = await planInstall(context!, files, source, removed);
     }
-    for (const change of plan.changes) console.log(`${change.action} ${inside(plan.context.target, change.path)}`);
+    if (flow) flow.preview(plan);
+    else for (const change of plan.changes) console.log(`${change.action} ${inside(plan.context.target, change.path)}`);
     if (plan.changes.some(c => c.action === 'conflict')) throw new Error('Conflicts found; no files changed');
-    if (values['dry-run']) return;
+    if (values['dry-run']) { flow?.previewComplete(); return; }
     if (limited && !values['accept-limitations']) {
-      if (!interactive || (await ask('Accept the compatibility limitations shown above? [y/N]: ')).toLowerCase() !== 'y') {
-        throw new Error('Use --accept-limitations after reviewing compatibility');
-      }
+      if (!flow) throw new Error('Use --accept-limitations after reviewing compatibility');
+      await flow.confirm('Accept the compatibility limitations shown above?');
     }
-    if (!values.yes && (await ask('Apply these changes? [y/N]: ')).toLowerCase() !== 'y') return;
-    await applyInstall(plan);
-    console.log(`${command} complete`);
-  } finally { rl?.close(); }
+    if (!values.yes) { if (flow) await flow.confirm('Apply these changes?'); else missing('--yes'); }
+    if (flow) {
+      await flow.apply(command, plan, () => applyInstall(plan));
+      flow.complete(command, plan, scope, project, selectedKeys);
+    } else {
+      await applyInstall(plan);
+      console.log(`${command} complete`);
+    }
+  } catch (error) {
+    if (error instanceof Cancelled) { flow?.cancel(); return; }
+    throw error;
+  }
 }
 main().catch(error => { console.error((error as Error).message); process.exitCode = 1; });
