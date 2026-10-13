@@ -5,6 +5,7 @@ import path from 'node:path';
 import type { Asset } from '../../core/src/index.js';
 import { adapters, type Adapter, type Compatibility } from '../../adapters/index.js';
 import type { Plan } from './installation/index.js';
+import { formatConflict } from './conflicts.js';
 
 export class Cancelled extends Error {}
 
@@ -223,14 +224,14 @@ export class InteractiveFlow {
     this.ui.note(formatCompatibility(results, (process.stdout.columns ?? 100) - 6), 'Compatibility');
   }
 
-  preview(plan: Plan): void {
+  preview(plan: Plan, command: string): void {
     const counts = new Map<string, number>();
     for (const change of plan.changes) counts.set(change.action, (counts.get(change.action) ?? 0) + 1);
     this.ui.note([
       `Target: ${plan.context.target}`,
       [...counts].map(([action, count]) => `${count} ${action}`).join(' · '),
       '',
-      ...plan.changes.map(c => `${c.action}  ${c.path}`),
+      ...plan.changes.map(c => c.action === 'conflict' ? formatConflict(c, command) : `${c.action}  ${c.path}`),
     ].join('\n'), 'Review changes');
   }
 

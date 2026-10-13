@@ -8,6 +8,7 @@ import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/
 import { getAdapter, type Compatibility } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
 import { Cancelled, InteractiveFlow } from './prompts.js';
+import { formatConflict } from './conflicts.js';
 
 function printCompatibility(result: Compatibility): void {
   console.log(`${result.status}: ${result.asset}${result.issues.length ? '' : `: ${result.reason}`}`);
@@ -111,9 +112,14 @@ async function main(): Promise<void> {
       }
       plan = await planInstall(context!, files, source, removed);
     }
-    if (flow) flow.preview(plan);
-    else for (const change of plan.changes) console.log(`${change.action} ${inside(plan.context.target, change.path)}`);
-    if (plan.changes.some(c => c.action === 'conflict')) throw new Error('Conflicts found; no files changed');
+    const hasConflicts = plan.changes.some(c => c.action === 'conflict');
+    if (flow) flow.preview(plan, command);
+    else {
+      if (hasConflicts) console.log(`Target: ${plan.context.target}`);
+      for (const change of plan.changes) console.log(change.action === 'conflict'
+        ? formatConflict(change, command) : `${change.action} ${inside(plan.context.target, change.path)}`);
+    }
+    if (hasConflicts) throw new Error(`${command} blocked by conflicts. No files changed.`);
     if (values['dry-run']) { flow?.previewComplete(); return; }
     if (limited && !values['accept-limitations']) {
       if (!flow) throw new Error('Use --accept-limitations after reviewing compatibility');

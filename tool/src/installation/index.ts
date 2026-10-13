@@ -16,8 +16,10 @@ const manifestSchema = z.strictObject({
 });
 export type Manifest = z.infer<typeof manifestSchema>;
 export type Context = { adapter: AdapterId; target: string; manifest: string };
-export type Change = { asset: string; path: string; content: Buffer | null;
-  action: 'create' | 'update' | 'unchanged' | 'remove' | 'conflict'; before: Buffer | null };
+export type Conflict = { reason: 'modified' | 'unmanaged' } | { reason: 'other-asset'; owner: string };
+export type Change = { asset: string; path: string; content: Buffer | null; before: Buffer | null } & (
+  { action: 'create' | 'update' | 'unchanged' | 'remove' } | { action: 'conflict'; conflict: Conflict }
+);
 export type Plan = { context: Context; changes: Change[]; previousManifest: Buffer | null; nextManifest: Manifest };
 
 export async function targetContext(scope: string, project: string, home: string, adapter: AdapterId = 'opencode'): Promise<Context> {
@@ -84,9 +86,16 @@ export async function planInstall(context: Context, files: OutputFile[], source:
   for (const file of files) {
     const before = await readOptional(inside(context.target, file.path));
     const tracked = old.get(file.path);
-    const action = tracked && tracked.asset !== file.asset ? 'conflict'
-      : before === null ? 'create'
-      : !tracked || hash(before) !== tracked.hash ? 'conflict'
+    const conflict: Conflict | undefined = tracked && tracked.asset !== file.asset
+      ? { reason: 'other-asset', owner: tracked.asset }
+      : before === null ? undefined
+      : !tracked ? { reason: 'unmanaged' }
+      : hash(before) !== tracked.hash ? { reason: 'modified' } : undefined;
+    if (conflict) {
+      changes.push({ ...file, before, action: 'conflict', conflict });
+      continue;
+    }
+    const action = before === null ? 'create'
       : hash(before) === hash(file.content) ? 'unchanged' : 'update';
     changes.push({ ...file, before, action });
   }
@@ -95,7 +104,9 @@ export async function planInstall(context: Context, files: OutputFile[], source:
     if (!selected.has(file.asset) || wanted.has(file.path)) continue;
     const before = await readOptional(inside(context.target, file.path));
     changes.push({ ...file, before, content: null,
-      action: before !== null && hash(before) !== file.hash ? 'conflict' : 'remove' });
+      ...(before !== null && hash(before) !== file.hash
+        ? { action: 'conflict' as const, conflict: { reason: 'modified' as const } }
+        : { action: 'remove' as const }) });
     records.delete(file.path);
   }
   for (const file of files) records.set(file.path, { asset: file.asset, path: file.path, hash: hash(file.content) });

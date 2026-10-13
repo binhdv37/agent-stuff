@@ -105,15 +105,36 @@ test('untracked and locally edited files conflict without overwrite', async t =>
   const dir = await temporary(t);
   const context = await targetContext('project', dir, dir);
   await applyInstall(await planInstall(context, [file()], fixture));
+  const manifest = await readFile(context.manifest);
   await writeFile(path.join(context.target, file().path), 'my changes');
   const conflict = await planInstall(context, [file('replacement')], fixture);
   assert.equal(conflict.changes[0]!.action, 'conflict');
+  assert.deepEqual(conflict.changes[0], { ...file('replacement'), before: Buffer.from('my changes'),
+    action: 'conflict', conflict: { reason: 'modified' } });
   await assert.rejects(applyInstall(conflict), /conflicts/);
   assert.equal(await readFile(path.join(context.target, file().path), 'utf8'), 'my changes');
   const untracked = { ...file(), path: 'skills/example/untracked.md' };
   await writeFile(path.join(context.target, untracked.path), untracked.content);
   const plan = await planInstall(context, [file(), untracked], fixture);
   assert.equal(plan.changes[1]!.action, 'conflict');
+  assert.deepEqual(plan.changes[1], { ...untracked, before: untracked.content,
+    action: 'conflict', conflict: { reason: 'unmanaged' } });
+  await assert.rejects(applyInstall(plan), /conflicts/);
+  assert.deepEqual(await readFile(context.manifest), manifest);
+  assert.deepEqual(await readFile(path.join(context.target, untracked.path)), untracked.content);
+});
+
+test('ownership validation rejects files recorded under another asset before mutation', async t => {
+  const dir = await temporary(t);
+  const context = await targetContext('project', dir, dir);
+  await applyInstall(await planInstall(context, [file()], fixture));
+  const manifest = JSON.parse(await readFile(context.manifest, 'utf8'));
+  manifest.files[0].asset = 'skill/other';
+  const invalid = JSON.stringify(manifest);
+  await writeFile(context.manifest, invalid);
+  await assert.rejects(planInstall(context, [file('replacement')], fixture), /Path does not belong to skill\/other/);
+  assert.equal(await readFile(context.manifest, 'utf8'), invalid);
+  assert.equal(await readFile(path.join(context.target, file().path), 'utf8'), 'initial');
 });
 
 test('partial install preserves other records and detects edits after preview', async t => {

@@ -32,13 +32,41 @@ test('update removes stale resources and uninstall preserves unrelated files', a
 test('uninstall refuses local edits and rejects untracked selection', async t => {
   const dir = await temporary(t);
   const context = await targetContext('project', dir, dir);
-  await applyInstall(await planInstall(context, [file()], '.'));
+  await applyInstall(await planInstall(context, [file(), file('resource', 'resource.md')], '.'));
+  const manifest = await readFile(context.manifest);
   await writeFile(path.join(context.target, file().path), 'mine');
   const plan = await planUninstall(context);
-  assert.equal(plan.changes[0]!.action, 'conflict');
+  const modified = plan.changes.find(change => change.path === file().path)!;
+  assert.equal(modified.action, 'conflict');
+  if (modified.action === 'conflict') assert.deepEqual(modified.conflict, { reason: 'modified' });
+  assert.equal(modified.content, null);
   await assert.rejects(applyInstall(plan), /conflicts/);
   await assert.rejects(planUninstall(context, ['skill/missing']), /not installed/);
   assert.equal(await readFile(path.join(context.target, file().path), 'utf8'), 'mine');
+  assert.equal(await readFile(path.join(context.target, file('resource', 'resource.md').path), 'utf8'), 'resource');
+  assert.deepEqual(await readFile(context.manifest), manifest);
+  const update = await planInstall(context, [file('mine')], '.');
+  assert.equal(update.changes[0]!.action, 'conflict');
+  await assert.rejects(applyInstall(update), /conflicts/);
+  assert.deepEqual(await readFile(context.manifest), manifest);
+});
+
+test('update reports modified stale resources as conflicts and preserves the entire installation', async t => {
+  const dir = await temporary(t);
+  const context = await targetContext('project', dir, dir);
+  await applyInstall(await planInstall(context, [file(), file('resource', 'resource.md')], '.'));
+  const manifest = await readFile(context.manifest);
+  await writeFile(path.join(context.target, file('resource', 'resource.md').path), 'my resource');
+  const plan = await planInstall(context, [file('updated')], '.');
+  assert.equal(plan.changes[0]!.action, 'update');
+  const stale = plan.changes.find(change => change.path.endsWith('/resource.md'))!;
+  assert.equal(stale.action, 'conflict');
+  if (stale.action === 'conflict') assert.deepEqual(stale.conflict, { reason: 'modified' });
+  assert.equal(stale.content, null);
+  await assert.rejects(applyInstall(plan), /conflicts/);
+  assert.equal(await readFile(path.join(context.target, file().path), 'utf8'), 'initial');
+  assert.equal(await readFile(path.join(context.target, 'skills/example/resource.md'), 'utf8'), 'my resource');
+  assert.deepEqual(await readFile(context.manifest), manifest);
 });
 
 test('caught write failure rolls back earlier changes and preserves manifest', async t => {

@@ -69,9 +69,16 @@ hoặc project. Nó lưu target, source local, adapter revision, file hashes và
 Một installation dùng một catalog; chưa tải release hoặc lưu source riêng từng asset.
 Legacy adapter revision 1 vẫn đọc được; uninstall/recover không cần source còn tồn tại.
 
-Unmanaged file hoặc tracked file đổi hash gây conflict, kể cả unmanaged có cùng
-nội dung. Không có force overwrite/adopt tự động: backup/di chuyển hoặc giải quyết
-edit trước retry. Uninstall chỉ gỡ tracked chưa sửa, giữ file lạ; có thể còn folder rỗng.
+Conflict phân biệt file đã sửa từ lúc cài, file unmanaged có sẵn (kể cả cùng nội
+dung), hoặc path được ghi dưới owner khác. Preview nêu nguyên nhân, item, path tương
+đối với target và cách xử lý. Một conflict chặn toàn bộ selection: không đổi file
+hay state cài đặt; `--yes` không bỏ qua và không tự overwrite/adopt.
+
+Để giữ nội dung, di chuyển file conflict ra ngoài target rồi retry; với file đã
+sửa, có thể khôi phục đúng nội dung lúc cài thay thế. Chỉ copy backup không giải
+quyết conflict vì file gốc vẫn còn. Uninstall có thể dùng `--only` chọn item không
+conflict để gỡ trước; item đã sửa vẫn được cài và tracked. Uninstall chỉ gỡ tracked
+chưa sửa, giữ file lạ; có thể còn folder rỗng.
 
 ## Transaction và recovery
 
