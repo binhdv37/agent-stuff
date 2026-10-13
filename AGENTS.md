@@ -35,14 +35,36 @@ confirmation and apply → harness discovery/run.
   protect untracked/modified files and retain recovery journals on external edits.
 - For a new skill, ask about automatic invocation; default explicit-only.
   Preserve established activation preferences when migrating.
-- Treat docs as a cost in reader time, agent context/tokens and AI spend. Every doc
-  needs a clear reader, task and justified purpose. Prefer revising/consolidating
-  existing docs before adding files; preserve module ownership and essential meaning.
-  Keep one canonical source per rule; read by task, avoid duplicate inventories
-  and speculative guides.
 - Completed plans/audits belong in Git history unless they retain useful decisions
   or evidence. Do not create archives merely to relocate clutter. Temporary output
   stays outside Git; retained evidence belongs in `verification/`.
+
+## Documentation changes
+
+Documentation changes require explicit approval. Before adding, modifying, deleting,
+moving or regenerating any documentation—including README files, agent instructions
+and generated references—propose the change in the conversation and wait for approval.
+Commands that rewrite documentation require the same approval.
+
+Keep the proposal brief and explain:
+
+- **Files and actions:** which files will change and how.
+- **Reader and purpose:** who needs the documentation and what task it supports.
+- **Reason and scope:** why the change is necessary and what information will be
+  added, changed or removed.
+- **Value:** why the information belongs in documentation; for a new file, why an
+  existing file cannot serve that purpose.
+
+A general implementation request does not authorize documentation changes. Approval
+covers only the proposed scope; ask again if it expands.
+
+Treat docs as a cost in reader time, agent context/tokens and AI spend. Every file
+must provide concrete value to a clear reader and task. Keep docs concise, precise
+and appropriate for that reader. Prefer revising/consolidating existing docs;
+preserve module ownership and essential meaning. Keep one canonical source per
+rule and read by task. Avoid duplicate inventories, speculative guides, irrelevant
+implementation details and explanations of interactions that explain themselves.
+Propose removing redundant or purposeless docs; never remove them without approval.
 
 ## Read by task
 
@@ -89,13 +111,17 @@ not permission to execute. When complete, say so rather than inventing work.
 
 - Implementation: `npm test`; `npm run typecheck` when needed. Content changes:
   `npm run cli -- validate --source .`. Filesystem tests use temporary contexts.
-- Schema/field metadata changes: build, then `npm run core:docs`; never hand-edit
-  generated fields. Keep migration hashes; intentional content revisions need a reason.
+- Schema/field metadata changes: after documentation approval, build, then run
+  `npm run core:docs`; never hand-edit generated fields. Keep migration hashes;
+  intentional content revisions need a reason.
 - Before developing stuff, select harnesses/scopes and required scenarios using
   the testing guide. Validate/render tests do not prove runtime workflow behavior.
-  Save the latest results, including failures/blockers; generate the summary with
-  `npm run verification -- report`. Claim verified only after each agreed target
-  passes `validate --require-passed`; missing/stale evidence remains incomplete.
-- Update the owning doc when behavior changes, README when public usage/support
-  changes. Catalog comes from `bash install.sh list`, not a manual inventory.
+  With documentation approval, save the latest results, including failures/blockers,
+  and generate the summary with `npm run verification -- report`. Claim verified
+  only after each agreed target passes `validate --require-passed`; missing/stale
+  evidence remains incomplete.
+- Propose updates to the owning doc when behavior changes, README when public
+  usage/support changes, under the documentation approval rule. Report required
+  documentation changes as pending until approved and applied. Catalog comes from
+  `bash install.sh list`, not a manual inventory.
 - Publishing, tagging, pushing or sending messages requires a separate request.
