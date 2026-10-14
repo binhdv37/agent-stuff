@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import type { Asset } from '../../core/src/index.js';
 import { adapters, type Adapter, type Compatibility } from '../../adapters/index.js';
-import type { Plan } from './installation/index.js';
+import type { Plan, InstallationStatus } from './installation/index.js';
 import { formatConflict } from './conflicts.js';
 
 export class Cancelled extends Error {}
@@ -79,8 +79,7 @@ export function assetOptions(catalog: Map<string, Asset>, adapter: Adapter): Rec
   const labels = { skill: 'Skills · workflows', command: 'Commands · shortcuts', agent: 'Agents · roles' };
   for (const asset of catalog.values()) {
     const compatibility = adapter.check(asset, catalog);
-    const description = asset.definition.short_description ?? asset.definition.description.split(/(?<=[.!?])\s/)[0]!;
-    const summary = description.replace(/\s+/g, ' ').trim();
+    const summary = assetSummary(asset);
     const hint = compatibility.status === 'unsupported'
       ? `Not supported: ${compatibility.reason || compatibility.issues.map(i => i.effect).join(' ')}`
       : `${compatibility.status === 'limited' ? 'Limited · ' : ''}${summary.length > 100 ? `${summary.slice(0, 97)}…` : summary}`;
@@ -90,6 +89,67 @@ export function assetOptions(catalog: Map<string, Asset>, adapter: Adapter): Rec
     });
   }
   return groups;
+}
+
+export function assetSummary(asset: Asset): string {
+  const description = asset.definition.short_description ?? asset.definition.description
+    .replace(/\s*Do not invoke automatically\.[\s\S]*$/, '')
+    .replace(/\s*Invoke explicitly as [\s\S]*$/, '');
+  // Keep abbreviations such as "e.g." intact when selecting the first sentence.
+  return description.replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s+(?=[A-Z])/)[0]!;
+}
+
+export function catalogItems(catalog: Map<string, Asset>, adapter?: Adapter) {
+  return [...catalog.values()].map(asset => ({
+    key: asset.key, kind: asset.definition.kind,
+    description: asset.definition.description, summary: assetSummary(asset),
+    compatibility: adapter ? adapter.check(asset, catalog) : null,
+  }));
+}
+
+export function formatList(items: ReturnType<typeof catalogItems>, width: number): string {
+  width = Math.max(1, width);
+  const shorten = (text: string, size: number): string => text.length <= size ? text
+    : size <= 1 ? '…' : `${text.slice(0, size - 1)}…`;
+  const labels = { skill: 'Skills', command: 'Commands', agent: 'Agents' };
+  const statuses = { supported: 'Supported', limited: 'Limited', unsupported: 'Not supported' };
+  const lines: string[] = [];
+  for (const kind of ['skill', 'command', 'agent'] as const) {
+    const group = items.filter(item => item.kind === kind);
+    if (!group.length) continue;
+    if (lines.length) lines.push('');
+    lines.push(shorten(labels[kind], width));
+    const keyWidth = Math.max(...group.map(item => item.key.length));
+    const hasCompatibility = group.some(item => item.compatibility);
+    for (const item of group) {
+      const support = item.compatibility ? statuses[item.compatibility.status] : '';
+      const prefix = hasCompatibility && width < keyWidth + 20 ? `${support}  ${item.key}`
+        : `${item.key.padEnd(keyWidth)}${hasCompatibility ? `  ${support.padEnd(13)}` : ''}`;
+      lines.push(shorten(`${prefix}  ${item.summary}`, width));
+    }
+  }
+  return lines.join('\n');
+}
+
+export function formatStatus(installations: (InstallationStatus & { scope: string })[], verbose = false): string {
+  return installations.map(installation => {
+    const lines = [`${harnessNames[installation.agent]} · ${installation.scope}`, `Target: ${installation.target}`];
+    if (installation.error) return [...lines, `Error: ${installation.error}`].join('\n');
+    if (!installation.installed) return [...lines, 'No managed installation found.'].join('\n');
+    lines.push(`Source: ${installation.source}`, `Assets (${installation.assets.length}):`,
+      ...installation.assets.map(asset => `  ${asset}`));
+    const counts = ['unchanged', 'modified', 'missing', 'unreadable'].flatMap(status => {
+      const count = installation.files.filter(file => file.status === status).length;
+      return count ? [`${count} ${status}`] : [];
+    });
+    lines.push(`Files: ${counts.join(' · ') || 'none'}`);
+    for (const file of installation.files) {
+      if (verbose || file.status !== 'unchanged') {
+        lines.push(`  ${file.status}  ${file.path}${file.error ? `: ${file.error}` : ''}`);
+      }
+    }
+    return lines.join('\n');
+  }).join('\n\n');
 }
 
 function wrap(value: string, width: number): string[] {

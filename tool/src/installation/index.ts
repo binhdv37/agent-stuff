@@ -69,6 +69,40 @@ export async function readManifest(context: Context): Promise<Manifest | null> {
   const bytes = await readOptional(context.manifest);
   return bytes ? parseManifest(bytes, context) : null;
 }
+
+export type InstallationStatus = {
+  agent: AdapterId; target: string; manifest: string; installed: boolean;
+  source: string | null; adapter_version: number | null; assets: string[];
+  files: { asset: string; path: string; status: 'unchanged' | 'modified' | 'missing' | 'unreadable'; error: string | null }[];
+  error: string | null;
+};
+
+export async function inspectInstallation(context: Context): Promise<InstallationStatus> {
+  const result: InstallationStatus = { agent: context.adapter, target: context.target, manifest: context.manifest,
+    installed: false, source: null, adapter_version: null, assets: [], files: [], error: null };
+  let manifest;
+  try { manifest = await readManifest(context); }
+  catch (error) {
+    result.error = `Cannot read installation manifest: ${(error as Error).message}`;
+    return result;
+  }
+  if (!manifest) return result;
+  result.installed = true;
+  result.source = manifest.source;
+  result.adapter_version = manifest.adapter_version;
+  result.assets = [...new Set(manifest.files.map(file => file.asset))].sort();
+  for (const file of manifest.files) {
+    try {
+      const content = await readOptional(inside(context.target, file.path));
+      result.files.push({ asset: file.asset, path: file.path,
+        status: content === null ? 'missing' : hash(content) === file.hash ? 'unchanged' : 'modified', error: null });
+    } catch (error) {
+      result.files.push({ asset: file.asset, path: file.path, status: 'unreadable', error: (error as Error).message });
+    }
+  }
+  return result;
+}
+
 const journalPath = (context: Context): string => `${context.manifest}.journal`;
 const same = (a: Buffer | null, b: Buffer | null): boolean => a === null ? b === null : b !== null && a.equals(b);
 const encodedManifest = (manifest: Manifest): Buffer => Buffer.from(JSON.stringify(manifest, null, 2) + '\n');

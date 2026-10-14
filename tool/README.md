@@ -27,6 +27,10 @@ rõ (hỗ trợ `~/`); path sai được nhập lại, chọn source checkout c�
 Preview và limitations vẫn cần review/accept trước apply. Escape/Ctrl+C hoặc từ
 chối confirm báo `Cancelled. No files changed.`; install thành công gợi ý cách dùng
 item đã chọn. Không có terminal hoặc dùng `--yes` thì truyền đủ flags.
+`list` và `status` không prompt; `bash install.sh --help` liệt kê commands cho end
+user trước commands contributor. `<command> --help` nêu flags, defaults và ví dụ
+riêng. Launcher gửi output chuẩn bị dependencies/build sang stderr để stdout JSON
+không bị trộn log.
 CLI báo các flags bắt buộc còn thiếu cùng lúc; lỗi input nêu flag/value và cách sửa.
 `--only` thiếu kind hoặc gõ sai gợi ý full key gần nhất; tên trùng giữa các kind
 được liệt kê để người dùng chọn rõ.
@@ -62,7 +66,29 @@ npm run cli -- install --agent codex --scope project --project /path/to/project 
 
 ## Lifecycle và state
 
+`list` nhóm Skills/Commands/Agents, căn cột và rút gọn mỗi item thành một dòng theo
+terminal width. Summary ưu tiên `short_description`, fallback mô tả đầu tiên không
+kèm activation boilerplate; không sửa portable content. `--agent` đánh dấu supported,
+limited hoặc unsupported và vẫn giữ toàn bộ catalog. `list --json` trả
+`{schema_version: 1, agent, items}` với description nguyên vẹn, summary và compatibility
+đầy đủ (null khi không chọn agent).
+
+`status` chỉ đọc managed manifests và so sánh hashes của tracked files; không cần
+source còn tồn tại, không thay đổi files/state, locks hoặc recovery journals. Mặc
+định kiểm tất cả harnesses ở project hiện tại và global; `--agent`, `--scope`,
+`--project` thu hẹp/chọn đích. Output nêu target, source đã ghi, asset keys và số file
+unchanged/modified/missing/unreadable, kèm path tương đối của file khác unchanged.
+`--verbose` hiện mọi tracked file; file ngoài manifest không được kiểm kê.
+`status --json` trả `{schema_version: 1, installations}`, gồm scope, agent, target,
+manifest, source, adapter_version, assets, files và errors. Không có manifest là
+kết quả bình thường; manifest rỗng vẫn được phân biệt với chưa cài. File modified
+hoặc missing không làm exit lỗi; unreadable files hoặc manifest lỗi trả exit 1 và
+giữ kết quả các installation khác.
+
 ```bash
+npm run cli -- list --agent claude-code
+npm run cli -- status --scope project --project /path/to/project
+npm run cli -- status --json
 npm run cli -- update --agent codex --scope global --dry-run
 npm run cli -- uninstall --agent codex --scope global --only skill/bdv-api-handoff --dry-run
 npm run cli -- recover --agent codex --scope global --yes

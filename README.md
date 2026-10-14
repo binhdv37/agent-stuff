@@ -26,11 +26,13 @@ and descriptions from your checkout, run:
 
 ```bash
 bash install.sh list
+bash install.sh list --agent claude-code
 ```
 
 You can also browse the [skills](core/skills/), [agents](core/agents/), and
-[commands](core/commands/) before installing. The installer reports which items
-work with your chosen tool.
+[commands](core/commands/) before installing. With `--agent`, the catalog marks each
+item as supported, limited, or unsupported for your chosen tool. Add `--json` for
+complete machine-readable output.
 
 ## Supported tools
 
@@ -93,6 +95,17 @@ you want. Most skills require explicit invocation; check the selected skill's
 slash commands; OpenCode provides separate commands for selected workflows.
 
 ## Preview, update, and remove
+
+To see installed assets and locally modified or missing files in a project:
+
+```bash
+bash install.sh status --scope project --project /path/to/backend
+```
+
+Without filters, `status` checks all tools in the current project and global scope.
+Use `--agent codex` to narrow the tool, `--verbose` to show every tracked file, or
+`--json` for scripts. Status only reads managed installation state and files; it
+does not need the original source checkout.
 
 From your checkout, you can preview a specific installation without changing the
 target project:

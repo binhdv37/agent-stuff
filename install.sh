@@ -13,10 +13,10 @@ if ! command -v node >/dev/null || ! command -v npm >/dev/null; then
 fi
 node -e 'if (Number(process.versions.node.split(".")[0]) < 22) { console.error("Node.js 22 or newer is required"); process.exit(1); }'
 if [[ ! -d "$SOURCE_ROOT/node_modules" ]]; then
-  npm --prefix "$SOURCE_ROOT" ci
+  npm --prefix "$SOURCE_ROOT" ci >&2
 fi
-npm --prefix "$SOURCE_ROOT" run build
-if [[ $# -eq 0 || "$1" == --* ]]; then
+npm --prefix "$SOURCE_ROOT" run build >&2
+if [[ $# -eq 0 || ( "$1" == --* && "$1" != --help ) ]]; then
   set -- install "$@"
 fi
 exec node "$SOURCE_ROOT/dist/tool/src/cli.js" "$@"

@@ -6,11 +6,68 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
 import { getAdapter, adapterIds } from '../../adapters/index.js';
-import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
-import { Cancelled, InteractiveFlow, formatCompatibility, formatPreview } from './prompts.js';
+import { applyInstall, planInstall, planUninstall, readManifest, inspectInstallation, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
+import { Cancelled, InteractiveFlow, catalogItems, formatList, formatStatus, formatCompatibility, formatPreview } from './prompts.js';
 
-const commands = ['list', 'validate', 'build', 'install', 'update', 'uninstall', 'recover'];
+const commands = ['list', 'status', 'install', 'update', 'uninstall', 'recover', 'validate', 'build'];
 const usage = (command: string): string => `Usage: bash install.sh ${command} [options]`;
+const options: Record<string, string> = {
+  source: '<checkout>  Read core content from this checkout/package (default: source accompanying CLI)',
+  agent: 'opencode|codex|claude-code  Choose an AI tool',
+  scope: 'project|global  Choose installation scope',
+  project: '<directory>  Choose an existing project directory',
+  only: '<kind/id>  Select an item; repeat for multiple items',
+  out: '<new directory>  Write rendered files to a new directory',
+  'dry-run': 'Preview without applying changes',
+  'accept-limitations': 'Explicitly accept reported compatibility limitations',
+  'compatible-only': 'Explicitly skip unsupported items',
+  yes: 'Apply without prompts; does not accept limitations or bypass conflicts',
+  verbose: 'Show individual files and full compatibility details',
+  json: 'Write complete, untruncated JSON to stdout',
+  help: 'Show help for this command',
+};
+const targetOptions = ['agent', 'scope', 'project'];
+const applyOptions = ['only', 'dry-run', 'yes', 'verbose'];
+const commandHelp: Record<string, { description: string; flags: string[]; example: string; note?: string }> = {
+  list: { description: 'List available skills, commands, and agents.', flags: ['source', 'agent', 'json'],
+    example: 'list --agent claude-code', note: 'Without --agent, show the whole catalog. With --agent, mark compatibility without hiding items.' },
+  status: { description: 'Inspect managed installations without changing files or installation state.',
+    flags: [...targetOptions, 'verbose', 'json'], example: 'status --scope project --project /path/to/project',
+    note: 'Defaults: all AI tools, both scopes, current directory for project scope. Reports tracked files only; no source checkout is required.' },
+  install: { description: 'Install selected items after reviewing compatibility and file changes.',
+    flags: ['source', ...targetOptions, ...applyOptions, 'compatible-only', 'accept-limitations'],
+    example: 'install --agent codex --scope project --project /path/to/project --only skill/bdv-api-handoff --dry-run',
+    note: 'Without flags, prompts guide installation. Without a terminal, supply --agent, --scope, --project for project scope, and --yes unless previewing.' },
+  update: { description: 'Update managed items using their recorded source and selection by default.',
+    flags: ['source', ...targetOptions, ...applyOptions, 'accept-limitations'],
+    example: 'update --agent codex --scope global --dry-run', note: 'For update, --source defaults to the recorded installation source; --only defaults to all installed items.' },
+  uninstall: { description: 'Remove managed files, preserving modified and unrelated files.',
+    flags: [...targetOptions, ...applyOptions], example: 'uninstall --agent codex --scope global --only skill/bdv-api-handoff --dry-run' },
+  recover: { description: 'Recover an interrupted installation from its journal.',
+    flags: [...targetOptions, 'yes'], example: 'recover --agent codex --scope global',
+    note: 'Recovery applies changes and has no dry-run mode.' },
+  validate: { description: 'Validate the portable source catalog.', flags: ['source'], example: 'validate --source .' },
+  build: { description: 'Render compatible items into a new output directory without installing.',
+    flags: ['source', 'agent', 'only', 'compatible-only', 'out', 'dry-run', 'verbose'],
+    example: 'build --agent codex --compatible-only --out /path/to/new-preview', note: '--agent and --out are required.' },
+};
+
+function help(command?: string): string {
+  if (!command) return [
+    'Usage: bash install.sh [command] [options]', '', 'End-user commands:',
+    ...commands.slice(0, 6).map(name => `  ${name.padEnd(12)} ${commandHelp[name]!.description}`),
+    '', 'Contributor commands:',
+    ...commands.slice(6).map(name => `  ${name.padEnd(12)} ${commandHelp[name]!.description}`),
+    '', 'With no command, the CLI defaults to install. Run bash install.sh <command> --help for flags and defaults.',
+    '--verbose: show individual files and full compatibility details on install/update/uninstall; all tracked files on status.',
+    '', 'Examples:', '  bash install.sh list --agent claude-code', '  bash install.sh status', '  bash install.sh install',
+  ].join('\n');
+  const entry = commandHelp[command]!;
+  return [usage(command), '', entry.description, '', 'Options:',
+    ...[...entry.flags, 'help'].map(flag => `  --${flag} ${command === 'status' && flag === 'verbose' ? 'Show every tracked file, including unchanged files' : options[flag]}`),
+    ...(entry.note ? ['', entry.note] : []), '', 'Example:', `  bash install.sh ${entry.example}`,
+  ].join('\n');
+}
 
 function distance(a: string, b: string): number {
   let row = Array.from({ length: b.length + 1 }, (_, i) => i);
@@ -63,7 +120,7 @@ async function main(): Promise<void> {
     project: { type: 'string' }, only: { type: 'string', multiple: true }, out: { type: 'string' },
     'dry-run': { type: 'boolean' }, 'accept-limitations': { type: 'boolean' },
     'compatible-only': { type: 'boolean' }, yes: { type: 'boolean' }, help: { type: 'boolean' },
-    verbose: { type: 'boolean' },
+    verbose: { type: 'boolean' }, json: { type: 'boolean' },
   } });
   let args: ReturnType<typeof parse>;
   try { args = parse(); }
@@ -72,7 +129,7 @@ async function main(): Promise<void> {
     if (!e.code?.startsWith('ERR_PARSE_ARGS_')) throw error;
     const command = commands.includes(process.argv[2] ?? '') ? process.argv[2]! : 'install';
     const option = e.message.match(/'(--?[^'\s]+)/)?.[1];
-    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help', '--verbose'];
+    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help', '--verbose', '--json'];
     const message = e.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
       ? `Unknown option "${option}". Remove it or use a supported flag.`
       : switches.includes(option ?? '') ? `${option} does not take a value.\nPass ${option} without an argument or =value.`
@@ -80,34 +137,50 @@ async function main(): Promise<void> {
     throw new Error(`${message}\n${usage(command)}\nRun \`bash install.sh ${command} --help\` for options.`);
   }
   const { values, positionals } = args;
-  if (values.help) {
-    console.log('Usage: npm run cli -- <list|validate|build|install|update|uninstall|recover> [options]\n' +
-      '  --source <checkout> --agent opencode|codex|claude-code\n' +
-      '  --scope project|global --project <existing directory>\n' +
-      '  --only skill/id (repeatable) --compatible-only --out <new build directory>\n' +
-      '  --dry-run --accept-limitations --yes\n' +
-      '  --verbose: show individual files and full compatibility details\n' +
-      'Without flags, install prompts for harness, scope, assets and confirmation.');
-    return;
-  }
   const command = positionals[0] ?? 'install';
   if (!commands.includes(command)) throw new Error(`Unknown command "${command}".\nChoose ${commands.join(', ')}; run \`bash install.sh --help\` for options.`);
   if (positionals.length > 1) throw new Error(`Unexpected argument "${positionals[1]}" for ${command}.\n${usage(command)}\nRemove extra arguments; select items with --only <kind/id>.`);
+  if (values.help) { console.log(help(positionals[0])); return; }
+  if (values.json && !['list', 'status'].includes(command)) throw new Error(`--json is only supported by list and status.\nRun \`bash install.sh ${command} --help\` for options.`);
+  if (['list', 'status'].includes(command)) {
+    const unsupported = Object.keys(values).filter(flag => !commandHelp[command]!.flags.includes(flag));
+    if (unsupported.length) throw new Error(`Unsupported options for ${command}: ${unsupported.map(flag => `--${flag}`).join(', ')}.\nRun \`bash install.sh ${command} --help\` for options.`);
+  }
   const interactive = process.stdin.isTTY && !values.yes;
   const flow = interactive ? new InteractiveFlow() : undefined;
   const missing = (...flags: string[]): never => { throw new Error(`Missing required options for ${command}: ${flags.join(', ')}.\nPass ${flags.join(' and ')}; run \`bash install.sh ${command} --help\` for values.`); };
   try {
-    if (['list', 'validate'].includes(command)) {
-      const catalog = await loadCatalog(path.join(path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url))), 'core'));
-      if (command === 'validate') console.log(`Validated ${catalog.size} assets`);
-      else for (const a of catalog.values()) console.log(`${a.key}\t${a.definition.description}`);
-      return;
-    }
     if (values.agent && !adapterIds.includes(values.agent as typeof adapterIds[number])) {
       throw new Error(`Unknown --agent value "${values.agent}".${suggestion(values.agent, [...adapterIds])}\nUse --agent ${adapterIds.join('|')}.`);
     }
     if (command !== 'build' && values.scope && !['project', 'global'].includes(values.scope)) {
       throw new Error(`Invalid --scope value "${values.scope}".\nUse --scope project or --scope global.`);
+    }
+    if (['list', 'validate'].includes(command)) {
+      const catalog = await loadCatalog(path.join(path.resolve(values.source ?? fileURLToPath(new URL('../../../', import.meta.url))), 'core'));
+      if (command === 'validate') console.log(`Validated ${catalog.size} assets`);
+      else {
+        const items = catalogItems(catalog, values.agent ? getAdapter(values.agent) : undefined);
+        console.log(values.json ? JSON.stringify({ schema_version: 1, agent: values.agent ?? null, items }, null, 2)
+          : formatList(items, process.stdout.columns ?? 100));
+      }
+      return;
+    }
+    if (command === 'status') {
+      const project = values.project ?? process.cwd();
+      const scopes = values.scope ? [values.scope] : ['project', 'global'];
+      if (scopes.includes('project')) await checkProject(project);
+      const installations = [];
+      for (const scope of scopes) {
+        for (const id of values.agent ? [values.agent] : adapterIds) {
+          const context = await targetContext(scope, project, homedir(), getAdapter(id).id);
+          installations.push({ scope, ...await inspectInstallation(context) });
+        }
+      }
+      console.log(values.json ? JSON.stringify({ schema_version: 1, installations }, null, 2)
+        : formatStatus(installations, values.verbose));
+      if (installations.some(installation => installation.error || installation.files.some(file => file.error))) process.exitCode = 1;
+      return;
     }
     if (!flow) {
       const required = [!values.agent && '--agent', command !== 'build' && !values.scope && '--scope',
