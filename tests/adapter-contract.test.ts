@@ -126,8 +126,10 @@ test('CLI refuses limited metadata until accepted and retains legacy manifest co
   assert.throws(() => execFileSync(process.execPath, [cli, ...args], { encoding: 'utf8', stdio: 'pipe' }),
     (error: unknown) => {
       const e = error as { stdout: string; stderr: string };
-      assert.match(e.stdout, /argument_hint \[limited\]/);
-      assert.match(e.stdout, /Effect:/);
+      assert.match(e.stdout, /argument_hint/);
+      assert.match(e.stdout, /Limited/);
+      assert.match(e.stdout.replace(/\s+/g, ' '), /supplied display\/input hint metadata is omitted/);
+      assert.doesNotMatch(e.stdout, /Review changes/);
       assert.doesNotMatch(e.stdout, /^(create|update|remove|unchanged) /m);
       return /accept-limitations/.test(e.stderr);
     });
@@ -150,8 +152,9 @@ test('CLI acceptance cannot override unsupported assets or write installation fi
     '--yes', '--accept-limitations'], { encoding: 'utf8', stdio: 'pipe' }),
   (error: unknown) => {
     const e = error as { stdout: string; stderr: string };
-    assert.match(e.stdout, /unsupported: agent\/solution-architect/);
-    assert.match(e.stdout, /\[unsupported\]/);
+    assert.match(e.stdout, /agent\/solution-architect/);
+    assert.match(e.stdout, /Not supported/);
+    assert.match(e.stdout, /role/);
     return /Selection contains unsupported assets/.test(e.stderr);
   });
   await assert.rejects(access(path.join(root, '.agents')));

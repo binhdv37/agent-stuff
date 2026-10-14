@@ -49,7 +49,8 @@ test('CLI updates installed selection and uninstalls without requiring its sourc
   run('install', ...target, '--source', source, '--only', 'skill/bdv-api-handoff', '--yes');
   const instructions = path.join(source, 'core/skills/bdv-api-handoff/instructions.md');
   await writeFile(instructions, 'Updated workflow\n');
-  assert.match(run('update', ...target, '--dry-run'), /update .*SKILL.md/);
+  assert.match(run('update', ...target, '--dry-run'), /Files: 1 update/);
+  assert.match(run('update', ...target, '--dry-run', '--verbose'), /update  skills\/bdv-api-handoff\/SKILL.md/);
   run('update', ...target, '--yes');
   assert.match(await readFile(path.join(dir, '.agents/skills/bdv-api-handoff/SKILL.md'), 'utf8'), /Updated workflow/);
   await rm(source, { recursive: true });

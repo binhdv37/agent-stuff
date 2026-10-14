@@ -7,7 +7,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import * as prompts from '@clack/prompts';
 import { loadCatalog } from '../core/src/index.js';
 import { getAdapter, adapterIds } from '../adapters/index.js';
-import { Cancelled, InteractiveFlow, completionSummary, formatCompatibility, validateProject } from '../tool/src/prompts.js';
+import { Cancelled, InteractiveFlow, completionSummary, formatCompatibility, formatPreview, validateProject } from '../tool/src/prompts.js';
 import { readManifest, targetContext, type Change, type Plan } from '../tool/src/installation/index.js';
 import { formatConflict } from '../tool/src/conflicts.js';
 
@@ -166,6 +166,67 @@ test('compatibility wraps columns and uses compact rows on narrow terminals with
   }
 });
 
+test('verbose compatibility includes every field reason and effect within the terminal width', async () => {
+  const catalog = await loadCatalog('core');
+  const adapter = getAdapter('opencode');
+  const results = ['skill/bdv-handoff', 'skill/bdv-explain-code'].map(key => adapter.check(catalog.get(key)!, catalog));
+  const formatted = formatCompatibility(results, 60, true);
+  const normalized = formatted.replace(/\s+/g, ' ');
+  assert.ok(formatted.split('\n').every(line => line.length <= 60));
+  assert.doesNotMatch(formatted, /\u001b\[/);
+  for (const result of results) {
+    assert.ok(normalized.includes(`Limited: ${result.asset}`));
+    for (const issue of result.issues) {
+      assert.ok(normalized.includes(`${issue.field} [${issue.status}]: ${issue.reason}`));
+      assert.ok(normalized.includes(`Effect: ${issue.effect}`));
+    }
+  }
+  let seen = '';
+  const flow = new InteractiveFlow({ ...prompts, bar: noopBar,
+    note: message => { seen = message ?? ''; },
+  });
+  for (const verbose of [false, true]) {
+    flow.compatibility(results, verbose);
+    assert.equal(seen, formatCompatibility(results, (process.stdout.columns ?? 100) - 6, verbose));
+  }
+});
+
+test('previews summarize file actions by destination, with relative individual files only in verbose mode', () => {
+  const changes: Change[] = [
+    { asset: 'skill/one', path: 'skills/one/SKILL.md', action: 'create', content: null, before: null },
+    { asset: 'skill/one', path: 'skills/one/references/example.md', action: 'create', content: null, before: null },
+    { asset: 'skill/two', path: 'skills/two/SKILL.md', action: 'update', content: null, before: null },
+    { asset: 'skill/two', path: 'skills/two/old.md', action: 'remove', content: null, before: null },
+    { asset: 'command/one', path: 'commands/one.md', action: 'unchanged', content: null, before: null },
+    { asset: 'agent/one', path: 'config.toml', action: 'update', content: null, before: null },
+  ];
+  const plan = { context: { target: '/example/target' }, changes } as Plan;
+  let seen = '';
+  const flow = new InteractiveFlow({ ...prompts, bar: noopBar,
+    note: message => { seen = message ?? ''; },
+  });
+  const compact = formatPreview(plan, 'install');
+  assert.match(compact, /Files: 2 create · 2 update · 1 remove · 1 unchanged/);
+  assert.match(compact, /skills\/: 2 create · 1 update · 1 remove/);
+  assert.match(compact, /commands\/: 1 unchanged/);
+  assert.match(compact, /\.\/: 1 update/);
+  assert.match(compact, /--verbose/);
+  for (const change of changes) assert.ok(!compact.includes(change.path));
+  for (const verbose of [false, true]) {
+    const formatted = formatPreview(plan, 'install', verbose);
+    flow.preview(plan, 'install', verbose);
+    assert.equal(seen, formatted);
+    assert.doesNotMatch(formatted, /\u001b\[/);
+    if (verbose) {
+      for (const change of changes) {
+        assert.ok(formatted.includes(`${change.action}  ${change.path}`));
+        assert.ok(!formatted.includes(`/example/target/${change.path}`));
+      }
+    }
+  }
+  assert.equal(formatPreview({ ...plan, changes: [] }, 'update'), 'Target: /example/target\nFiles: no changes');
+});
+
 function progressPlan(): Plan {
   return { context: { adapter: 'claude-code', target: '/example/target' }, changes: [
     { asset: 'skill/bdv-explain-code', action: 'create' },
@@ -183,7 +244,7 @@ test('completion counts distinct items and reports actual file actions including
   assert.equal(completionSummary('update', plan), 'Update complete · no file changes');
 });
 
-test('interactive preview explains every conflict cause with relative paths and concrete next steps', () => {
+test('compact and verbose previews explain every conflict cause with relative paths and concrete next steps', () => {
   const changes: Change[] = [
     { asset: 'skill/edited', path: 'skills/edited/SKILL.md', content: null, before: Buffer.from('mine'),
       action: 'conflict', conflict: { reason: 'modified' } },
@@ -196,27 +257,31 @@ test('interactive preview explains every conflict cause with relative paths and 
   const flow = new InteractiveFlow({ ...prompts, bar: noopBar,
     note: (message, title) => { assert.equal(title, 'Review changes'); preview = message ?? ''; },
   });
-  const plan = { context: { target: '/example/target' }, changes } as Plan;
-  flow.preview(plan, 'uninstall');
-  assert.match(preview, /Target: \/example\/target/);
-  assert.match(preview, /3 conflict/);
-  assert.match(preview, /Modified since installation/);
-  assert.match(preview, /existing file is not managed/);
-  assert.match(preview, /Tracked by another item: skill\/owner/);
-  assert.match(preview, /uninstall --only skill\/owner/);
-  assert.match(preview, /restore its original installed contents/);
-  assert.match(preview, /To remove other items first, select them with --only/);
-  for (const change of changes) {
-    if (change.action !== 'conflict') continue;
-    assert.ok(preview.includes(formatConflict(change, 'uninstall')));
-    assert.ok(preview.includes(`! Conflict: ${change.path}`));
-    assert.ok(preview.includes(`Item: ${change.asset}`));
+  const plan = { context: { target: '/example/target' }, changes: [...changes,
+    { asset: 'skill/other', path: 'skills/other/SKILL.md', action: 'create', content: null, before: null },
+  ] } as Plan;
+  for (const verbose of [false, true]) {
+    flow.preview(plan, 'uninstall', verbose);
+    assert.match(preview, /Target: \/example\/target/);
+    assert.match(preview, /3 conflict/);
+    assert.match(preview, /Modified since installation/);
+    assert.match(preview, /existing file is not managed/);
+    assert.match(preview, /Tracked by another item: skill\/owner/);
+    assert.match(preview, /uninstall --only skill\/owner/);
+    assert.match(preview, /restore its original installed contents/);
+    assert.match(preview, /To remove other items first, select them with --only/);
+    for (const change of changes) {
+      if (change.action !== 'conflict') continue;
+      assert.ok(preview.includes(formatConflict(change, 'uninstall')));
+      assert.equal(preview.split(`! Conflict: ${change.path}`).length - 1, 1);
+      assert.ok(preview.includes(`Item: ${change.asset}`));
+    }
+    assert.doesNotMatch(preview, /! Conflict: \/example\/target/);
+    assert.doesNotMatch(preview, /\u001b\[/);
+    flow.preview(plan, 'update', verbose);
+    assert.match(preview, /Then re-run update/);
+    assert.doesNotMatch(preview, /To remove other items first/);
   }
-  assert.doesNotMatch(preview, /! Conflict: \/example\/target/);
-  assert.doesNotMatch(preview, /\u001b\[/);
-  flow.preview(plan, 'update');
-  assert.match(preview, /Then re-run update/);
-  assert.doesNotMatch(preview, /To remove other items first/);
 });
 
 test('progress follows the real operation, finishes before usage guidance, and stops on failure', async () => {
@@ -267,12 +332,12 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
         assert.equal(await readManifest(context), null);
         const unacceptedPreview = spawnSync(process.execPath, [cli, 'install', ...flags, '--dry-run'], { env, encoding: 'utf8' });
         assert.equal(unacceptedPreview.status, 0, unacceptedPreview.stderr);
-        assert.match(unacceptedPreview.stdout, /create /);
+        assert.match(unacceptedPreview.stdout, /Files: \d+ create/);
         assert.equal(await readManifest(context), null);
       }
       flags.push('--accept-limitations');
       const preview = execFileSync(process.execPath, [cli, 'install', ...flags, '--dry-run'], { env, encoding: 'utf8' });
-      assert.match(preview, /create /);
+      assert.match(preview, /Files: \d+ create/);
       assert.equal(await readManifest(context), null);
       const installed = execFileSync(process.execPath, [cli, 'install', ...flags], { env, encoding: 'utf8' });
       assert.match(installed, /install complete/);
@@ -285,6 +350,46 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
       assert.equal((await readManifest(context))!.files.length, 0);
     }
   }
+});
+
+test('CLI compact and verbose previews show compatibility once and leave targets untouched for every harness', async t => {
+  const dir = await temporary(t);
+  const cli = path.resolve('dist/tool/src/cli.js');
+  const catalog = await loadCatalog('tests/fixtures/core');
+  const selected = ['skill/bdv-handoff', 'skill/bdv-api-handoff'].map(key => catalog.get(key)!);
+  for (const id of adapterIds) {
+    const adapter = getAdapter(id);
+    const results = selected.map(asset => adapter.check(asset, catalog));
+    const files = selected.flatMap(asset => adapter.render(asset, catalog));
+    const flags = ['--agent', id, '--scope', 'project', '--project', dir, '--source', path.resolve('tests/fixtures'),
+      ...selected.flatMap(asset => ['--only', asset.key]), '--dry-run'];
+    for (const verbose of [false, true]) {
+      const env: NodeJS.ProcessEnv = { ...process.env, HOME: dir };
+      delete env.NO_COLOR;
+      if (verbose) env.NO_COLOR = '1';
+      const result = spawnSync(process.execPath, [cli, 'install', ...flags, ...(verbose ? ['--verbose'] : [])],
+        { env, encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stdout.split('Compatibility\n').length - 1, 1);
+      const [compatibility, preview] = result.stdout.split('Review changes\n');
+      const normalized = compatibility!.replace(/\s+/g, ' ');
+      for (const checked of results) {
+        assert.ok(normalized.includes(checked.asset));
+        for (const issue of checked.issues) {
+          assert.ok(normalized.includes(issue.field));
+          assert.ok(normalized.includes(issue.effect));
+          if (verbose) assert.ok(normalized.includes(issue.reason));
+          else assert.equal(normalized.split(issue.effect).length - 1, 1);
+        }
+      }
+      assert.match(preview!, new RegExp(`Files: ${files.length} create`));
+      assert.match(preview!, /skills\//);
+      for (const file of files) assert.equal(preview!.includes(`create  ${file.path}`), verbose);
+      assert.doesNotMatch(result.stdout + result.stderr, /\u001b\[/);
+      assert.deepEqual(await readdir(dir), []);
+    }
+  }
+  assert.match(execFileSync(process.execPath, [cli, '--help'], { encoding: 'utf8' }), /--verbose.*individual files/);
 });
 
 test('CLI argument and selection errors name the cause, give a fix, and never mutate the target', async t => {
@@ -309,6 +414,7 @@ test('CLI argument and selection errors name the cause, give a fix, and never mu
     { name: 'missing flag value', args: ['install', '--agent'], patterns: [/Missing or invalid value for --agent/, /Pass --agent <value>/] },
     { name: 'ambiguous flag value', args: ['--agent', '--yes'], patterns: [/Missing or invalid value for --agent/, /--agent=<value>/] },
     { name: 'value on switch', args: ['--yes=maybe'], patterns: [/--yes does not take a value/, /Pass --yes without/] },
+    { name: 'value on verbose switch', args: ['--verbose=maybe'], patterns: [/--verbose does not take a value/, /Pass --verbose without/] },
     { name: 'unsupported explicit item', args: [...flags, '--only', 'agent/solution-architect'],
       patterns: [/unsupported assets for --agent claude-code: agent\/solution-architect/, /Remove the unsupported --only entries/, /--compatible-only/],
       absent: /use --only or --compatible-only/ },

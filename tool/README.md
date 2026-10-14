@@ -31,9 +31,13 @@ CLI báo các flags bắt buộc còn thiếu cùng lúc; lỗi input nêu flag/
 `--only` thiếu kind hoặc gõ sai gợi ý full key gần nhất; tên trùng giữa các kind
 được liệt kê để người dùng chọn rõ.
 
-Interactive compatibility dùng bảng Item/Support/Details, hoặc rows khi terminal
-hẹp; mỗi field bị ảnh hưởng dẫn tới note giải thích effect, effect chung chỉ xuất
-hiện một lần. Supported không in boilerplate invocation. Apply dùng progress bar tự
+Compatibility ở cả interactive và script dùng bảng Item/Support/Details, hoặc rows
+khi terminal hẹp; mỗi field bị ảnh hưởng dẫn tới note giải thích effect, effect chung chỉ xuất
+hiện một lần. Supported không in boilerplate invocation. Preview nêu target, tổng số
+file create/update/remove/unchanged và nhóm theo thư mục đích thay vì liệt kê từng
+file; conflicts luôn hiện đầy đủ nguyên nhân và cách xử lý. `--verbose` hiện từng
+file với path tương đối với target và đầy đủ reason/effect cho mỗi field compatibility.
+Compatibility vẫn chỉ in một lần. Apply dùng progress bar tự
 render (cyan `█` fill + `░` empty, kèm %) fill từ trái sang phải với ease-out (~900ms)
 để install nhanh vẫn có cảm giác hoàn tất; màu tôn trọng `NO_COLOR` và output không
 TTY. Success báo số item và file created/updated/removed/unchanged trước location

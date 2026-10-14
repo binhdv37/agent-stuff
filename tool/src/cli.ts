@@ -5,10 +5,9 @@ import { mkdir, writeFile, lstat, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
-import { getAdapter, adapterIds, type Compatibility } from '../../adapters/index.js';
+import { getAdapter, adapterIds } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
-import { Cancelled, InteractiveFlow } from './prompts.js';
-import { formatConflict } from './conflicts.js';
+import { Cancelled, InteractiveFlow, formatCompatibility, formatPreview } from './prompts.js';
 
 const commands = ['list', 'validate', 'build', 'install', 'update', 'uninstall', 'recover'];
 const usage = (command: string): string => `Usage: bash install.sh ${command} [options]`;
@@ -58,20 +57,13 @@ async function checkProject(project: string): Promise<void> {
   if (!info.isDirectory()) throw new Error(`--project is not a directory: ${project}\nPass an existing directory with --project.`);
 }
 
-function printCompatibility(result: Compatibility): void {
-  console.log(`${result.status}: ${result.asset}${result.issues.length ? '' : `: ${result.reason}`}`);
-  for (const issue of result.issues) {
-    console.log(`  ${issue.field} [${issue.status}]: ${issue.reason}`);
-    console.log(`    Effect: ${issue.effect}`);
-  }
-}
-
 async function main(): Promise<void> {
   const parse = () => parseArgs({ allowPositionals: true, options: {
     source: { type: 'string' }, agent: { type: 'string' }, scope: { type: 'string' },
     project: { type: 'string' }, only: { type: 'string', multiple: true }, out: { type: 'string' },
     'dry-run': { type: 'boolean' }, 'accept-limitations': { type: 'boolean' },
     'compatible-only': { type: 'boolean' }, yes: { type: 'boolean' }, help: { type: 'boolean' },
+    verbose: { type: 'boolean' },
   } });
   let args: ReturnType<typeof parse>;
   try { args = parse(); }
@@ -80,7 +72,7 @@ async function main(): Promise<void> {
     if (!e.code?.startsWith('ERR_PARSE_ARGS_')) throw error;
     const command = commands.includes(process.argv[2] ?? '') ? process.argv[2]! : 'install';
     const option = e.message.match(/'(--?[^'\s]+)/)?.[1];
-    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help'];
+    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help', '--verbose'];
     const message = e.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
       ? `Unknown option "${option}". Remove it or use a supported flag.`
       : switches.includes(option ?? '') ? `${option} does not take a value.\nPass ${option} without an argument or =value.`
@@ -94,6 +86,7 @@ async function main(): Promise<void> {
       '  --scope project|global --project <existing directory>\n' +
       '  --only skill/id (repeatable) --compatible-only --out <new build directory>\n' +
       '  --dry-run --accept-limitations --yes\n' +
+      '  --verbose: show individual files and full compatibility details\n' +
       'Without flags, install prompts for harness, scope, assets and confirmation.');
     return;
   }
@@ -164,8 +157,8 @@ async function main(): Promise<void> {
         selected = selectAssets(catalog, keys);
       }
       const compatibility = selected.map(a => adapter.check(a, catalog));
-      if (flow) flow.compatibility(compatibility);
-      else for (const c of compatibility) printCompatibility(c);
+      if (flow) flow.compatibility(compatibility, values.verbose);
+      else console.log(`Compatibility\n${formatCompatibility(compatibility, process.stdout.columns ?? 100, values.verbose)}`);
       if (values['compatible-only']) {
         if (command === 'update') throw new Error('Update does not support --compatible-only.\nRemove --compatible-only; use --only <installed-key> to explicitly select installed items.');
         selected = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
@@ -201,12 +194,8 @@ async function main(): Promise<void> {
     if (!hasConflicts && !flow && !values['dry-run'] && limited && !values['accept-limitations']) {
       throw new Error('Selected items have compatibility limitations. No files changed.\nReview the compatibility details above, then rerun with --accept-limitations; --yes alone does not accept limitations.');
     }
-    if (flow) flow.preview(plan, command);
-    else {
-      if (hasConflicts) console.log(`Target: ${plan.context.target}`);
-      for (const change of plan.changes) console.log(change.action === 'conflict'
-        ? formatConflict(change, command) : `${change.action} ${inside(plan.context.target, change.path)}`);
-    }
+    if (flow) flow.preview(plan, command, values.verbose);
+    else console.log(`Review changes\n${formatPreview(plan, command, values.verbose)}`);
     if (hasConflicts) throw new Error(`${command} blocked by conflicts. No files changed.`);
     if (values['dry-run']) { flow?.previewComplete(); return; }
     if (limited && !values['accept-limitations']) {

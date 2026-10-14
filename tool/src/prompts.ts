@@ -105,16 +105,25 @@ function wrap(value: string, width: number): string[] {
   return lines.length ? lines : [''];
 }
 
-export function formatCompatibility(results: Compatibility[], width: number): string {
+export function formatCompatibility(results: Compatibility[], width: number, verbose = false): string {
   if (!results.length) return 'No items to review.';
   width = Math.max(16, width);
+  const statuses = { supported: 'Full', limited: 'Limited', unsupported: 'Not supported' };
+  if (verbose) {
+    return results.map(result => [
+      ...wrap(`${statuses[result.status]}: ${result.asset}${result.issues.length ? '' : `: ${result.reason}`}`, width),
+      ...result.issues.flatMap(issue => [
+        ...wrap(`${issue.field} [${issue.status}]: ${issue.reason}`, width - 2).map(line => `  ${line}`),
+        ...wrap(`Effect: ${issue.effect}`, width - 4).map(line => `    ${line}`),
+      ]),
+    ].join('\n')).join('\n\n');
+  }
   const notes = new Map<string, { id: number; text: string }>();
   const reference = (status: string, text: string): number => {
     const key = JSON.stringify([status, text]);
     if (!notes.has(key)) notes.set(key, { id: notes.size + 1, text: `${status}: ${text}` });
     return notes.get(key)!.id;
   };
-  const statuses = { supported: 'Full', limited: 'Limited', unsupported: 'Not supported' };
   const rows = results.map(result => {
     const fields = new Map<number, Set<string>>();
     for (const issue of result.issues) {
@@ -152,6 +161,35 @@ export function formatCompatibility(results: Compatibility[], width: number): st
     for (const { id, text } of notes.values()) {
       const prefix = `[${id}] `;
       lines.push(...wrap(text, width - prefix.length).map((line, index) => `${index ? ' '.repeat(prefix.length) : prefix}${line}`));
+    }
+  }
+  return lines.join('\n').trimEnd();
+}
+
+export function formatPreview(plan: Plan, command: string, verbose = false): string {
+  const counts = (changes: Plan['changes']): string => ['create', 'update', 'remove', 'unchanged', 'conflict']
+    .flatMap(action => {
+      const count = changes.filter(change => change.action === action).length;
+      return count ? [`${count} ${action}`] : [];
+    }).join(' · ');
+  const lines = [`Target: ${plan.context.target}`, `Files: ${counts(plan.changes) || 'no changes'}`];
+  if (verbose) {
+    lines.push('', ...plan.changes.map(change => change.action === 'conflict'
+      ? formatConflict(change, command) : `${change.action}  ${change.path}`));
+  } else {
+    const directories = new Map<string, Plan['changes']>();
+    for (const change of plan.changes) {
+      if (change.action === 'conflict') continue;
+      const directory = change.path.includes('/') ? `${change.path.split('/')[0]}/` : './';
+      if (!directories.has(directory)) directories.set(directory, []);
+      directories.get(directory)!.push(change);
+    }
+    if (directories.size) {
+      lines.push('', ...[...directories].map(([directory, changes]) => `${directory}: ${counts(changes)}`),
+        'Use --verbose for individual files and full compatibility details.');
+    }
+    for (const change of plan.changes) {
+      if (change.action === 'conflict') lines.push('', formatConflict(change, command));
     }
   }
   return lines.join('\n').trimEnd();
@@ -220,19 +258,12 @@ export class InteractiveFlow {
     }));
   }
 
-  compatibility(results: Compatibility[]): void {
-    this.ui.note(formatCompatibility(results, (process.stdout.columns ?? 100) - 6), 'Compatibility');
+  compatibility(results: Compatibility[], verbose = false): void {
+    this.ui.note(formatCompatibility(results, (process.stdout.columns ?? 100) - 6, verbose), 'Compatibility');
   }
 
-  preview(plan: Plan, command: string): void {
-    const counts = new Map<string, number>();
-    for (const change of plan.changes) counts.set(change.action, (counts.get(change.action) ?? 0) + 1);
-    this.ui.note([
-      `Target: ${plan.context.target}`,
-      [...counts].map(([action, count]) => `${count} ${action}`).join(' · '),
-      '',
-      ...plan.changes.map(c => c.action === 'conflict' ? formatConflict(c, command) : `${c.action}  ${c.path}`),
-    ].join('\n'), 'Review changes');
+  preview(plan: Plan, command: string, verbose = false): void {
+    this.ui.note(formatPreview(plan, command, verbose), 'Review changes');
   }
 
   previewComplete(): void { this.ui.outro('Preview only. No files changed.'); }
