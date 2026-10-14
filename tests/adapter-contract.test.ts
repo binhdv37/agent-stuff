@@ -128,6 +128,7 @@ test('CLI refuses limited metadata until accepted and retains legacy manifest co
       const e = error as { stdout: string; stderr: string };
       assert.match(e.stdout, /argument_hint \[limited\]/);
       assert.match(e.stdout, /Effect:/);
+      assert.doesNotMatch(e.stdout, /^(create|update|remove|unchanged) /m);
       return /accept-limitations/.test(e.stderr);
     });
   await assert.rejects(access(path.join(root, '.agents')));

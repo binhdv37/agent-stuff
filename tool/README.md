@@ -27,6 +27,9 @@ rõ (hỗ trợ `~/`); path sai được nhập lại, chọn source checkout c�
 Preview và limitations vẫn cần review/accept trước apply. Escape/Ctrl+C hoặc từ
 chối confirm báo `Cancelled. No files changed.`; install thành công gợi ý cách dùng
 item đã chọn. Không có terminal hoặc dùng `--yes` thì truyền đủ flags.
+CLI báo các flags bắt buộc còn thiếu cùng lúc; lỗi input nêu flag/value và cách sửa.
+`--only` thiếu kind hoặc gõ sai gợi ý full key gần nhất; tên trùng giữa các kind
+được liệt kê để người dùng chọn rõ.
 
 Interactive compatibility dùng bảng Item/Support/Details, hoặc rows khi terminal
 hẹp; mỗi field bị ảnh hưởng dẫn tới note giải thích effect, effect chung chỉ xuất
@@ -50,6 +53,8 @@ npm run cli -- install --agent codex --scope project --project /path/to/project 
 - Limited cần `--accept-limitations` sau review. `--yes` không chấp nhận thay,
   không vượt conflict/unsupported/contract mismatch. `--compatible-only` chủ động
   bỏ unsupported, báo lý do; không dùng cho update để âm thầm bỏ asset đã cài.
+  Non-interactive thiếu acceptance dừng trước preview thay đổi, nhưng vẫn hiện
+  compatibility; `--dry-run` vẫn preview và conflicts luôn được hiện để xử lý.
 
 ## Lifecycle và state
 

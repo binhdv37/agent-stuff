@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -263,6 +263,11 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
         const rejected = spawnSync(process.execPath, [cli, 'install', ...flags], { env, encoding: 'utf8' });
         assert.equal(rejected.status, 1);
         assert.match(rejected.stderr, /--accept-limitations/);
+        assert.doesNotMatch(rejected.stdout, /^(create|update|remove|unchanged) /m);
+        assert.equal(await readManifest(context), null);
+        const unacceptedPreview = spawnSync(process.execPath, [cli, 'install', ...flags, '--dry-run'], { env, encoding: 'utf8' });
+        assert.equal(unacceptedPreview.status, 0, unacceptedPreview.stderr);
+        assert.match(unacceptedPreview.stdout, /create /);
         assert.equal(await readManifest(context), null);
       }
       flags.push('--accept-limitations');
@@ -278,6 +283,87 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
       assert.match(execFileSync(process.execPath, [cli, 'update', ...flags], { env, encoding: 'utf8' }), /update complete/);
       assert.match(execFileSync(process.execPath, [cli, 'uninstall', ...flags], { env, encoding: 'utf8' }), /uninstall complete/);
       assert.equal((await readManifest(context))!.files.length, 0);
+    }
+  }
+});
+
+test('CLI argument and selection errors name the cause, give a fix, and never mutate the target', async t => {
+  const dir = await temporary(t);
+  const cli = path.resolve('dist/tool/src/cli.js');
+  const file = path.join(dir, 'not-directory');
+  await writeFile(file, 'preserve me');
+  const target = ['--scope', 'project', '--project', dir, '--yes'];
+  const flags = ['--agent', 'claude-code', ...target];
+  const cases: { name: string; args: string[]; patterns: RegExp[]; absent?: RegExp }[] = [
+    { name: 'missing project', args: ['--agent', 'claude-code', '--scope', 'project', '--project', path.join(dir, 'missing'), '--yes'],
+      patterns: [/Project directory not found:/, /Pass an existing directory with --project/] },
+    { name: 'file project', args: ['--agent', 'claude-code', '--scope', 'project', '--project', file, '--yes'],
+      patterns: [/--project is not a directory:/, /Pass an existing directory/] },
+    { name: 'missing scope', args: ['--agent', 'claude-code', '--project', dir, '--yes'],
+      patterns: [/Missing required options for install: --scope/, /Pass --scope/] },
+    { name: 'all missing options', args: [], patterns: [/--agent, --scope, --yes/, /Pass --agent and --scope and --yes/] },
+    { name: 'missing project and confirmation', args: ['--agent', 'claude-code', '--scope', 'project'],
+      patterns: [/--project, --yes/, /Pass --project and --yes/] },
+    { name: 'unknown option', args: ['update', '--bogus'], patterns: [/Unknown option "--bogus"/, /Remove it/, /Usage: bash install.sh update/],
+      absent: /positional argument starting with/ },
+    { name: 'missing flag value', args: ['install', '--agent'], patterns: [/Missing or invalid value for --agent/, /Pass --agent <value>/] },
+    { name: 'ambiguous flag value', args: ['--agent', '--yes'], patterns: [/Missing or invalid value for --agent/, /--agent=<value>/] },
+    { name: 'value on switch', args: ['--yes=maybe'], patterns: [/--yes does not take a value/, /Pass --yes without/] },
+    { name: 'unsupported explicit item', args: [...flags, '--only', 'agent/solution-architect'],
+      patterns: [/unsupported assets for --agent claude-code: agent\/solution-architect/, /Remove the unsupported --only entries/, /--compatible-only/],
+      absent: /use --only or --compatible-only/ },
+    { name: 'missing kind prefix', args: [...flags, '--only', 'bdv-explain-code'],
+      patterns: [/--only: "bdv-explain-code"/, /Did you mean skill\/bdv-explain-code or command\/bdv-explain-code\?/, /bash install.sh list/] },
+    { name: 'typo', args: [...flags, '--only', 'skill/bdv-explan-code'],
+      patterns: [/--only: "skill\/bdv-explan-code"/, /Did you mean skill\/bdv-explain-code\?/] },
+    { name: 'unrelated item', args: [...flags, '--only', 'skill/zzzzzzzzzzzzzz'],
+      patterns: [/Unknown item/, /full key with --only/], absent: /Did you mean/ },
+    { name: 'informal harness name', args: ['--agent', 'claude', ...target],
+      patterns: [/Unknown --agent value "claude"/, /Did you mean claude-code\?/, /Use --agent/], absent: /Unknown adapter/ },
+    { name: 'invalid scope', args: ['--agent', 'claude-code', '--scope', 'local', '--yes'],
+      patterns: [/Invalid --scope value "local"/, /Use --scope project or --scope global/] },
+    { name: 'missing build output', args: ['build', '--agent', 'claude-code'],
+      patterns: [/Missing required options for build: --out/, /Pass --out/] },
+    { name: 'unknown command', args: ['instal'], patterns: [/Unknown command "instal"/, /Choose list/, /bash install.sh --help/] },
+    { name: 'extra positional', args: ['install', 'bdv-explain-code'],
+      patterns: [/Unexpected argument "bdv-explain-code"/, /select items with --only/] },
+    { name: 'unaccepted limitations', args: [...flags, '--source', path.resolve('tests/fixtures'), '--only', 'skill/bdv-handoff'],
+      patterns: [/No files changed/, /--accept-limitations/, /--yes alone does not accept limitations/] },
+  ];
+  for (const scenario of cases) {
+    await t.test(scenario.name, async () => {
+      const result = spawnSync(process.execPath, [cli, ...scenario.args], { encoding: 'utf8', env: { ...process.env, HOME: dir } });
+      assert.equal(result.status, 1, result.stderr);
+      for (const pattern of scenario.patterns) assert.match(result.stderr, pattern);
+      if (scenario.absent) assert.doesNotMatch(result.stderr, scenario.absent);
+      assert.doesNotMatch(result.stderr, /ENOENT|ENOTDIR|Scope \(project\/global\):|ERR_PARSE_ARGS_|\n\s+at /);
+      assert.doesNotMatch(result.stdout, /^(create|update|remove|unchanged) /m);
+      assert.deepEqual(await readdir(dir), ['not-directory']);
+      assert.equal(await readFile(file, 'utf8'), 'preserve me');
+    });
+  }
+});
+
+test('update and uninstall suggest installed keys without mutating installation state', async t => {
+  const dir = await temporary(t);
+  const cli = path.resolve('dist/tool/src/cli.js');
+  const flags = ['--agent', 'claude-code', '--scope', 'project', '--project', dir, '--yes'];
+  const run = (command: string, ...args: string[]) => spawnSync(process.execPath, [cli, command, ...flags, ...args],
+    { encoding: 'utf8', env: { ...process.env, HOME: dir } });
+  const installed = run('install', '--only', 'skill/bdv-explain-code');
+  assert.equal(installed.status, 0, installed.stderr);
+  const context = await targetContext('project', dir, dir, 'claude-code');
+  const before = await readFile(context.manifest);
+  const manifest = (await readManifest(context))!;
+  const contents = await Promise.all(manifest.files.map(file => readFile(path.join(context.target, file.path))));
+  for (const command of ['update', 'uninstall']) {
+    const result = run(command, '--only', 'bdv-explain-code');
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /Item is not installed in --only: "bdv-explain-code"/);
+    assert.match(result.stderr, /Did you mean skill\/bdv-explain-code\?/);
+    assert.deepEqual(await readFile(context.manifest), before);
+    for (const [index, file] of manifest.files.entries()) {
+      assert.deepEqual(await readFile(path.join(context.target, file.path)), contents[index]);
     }
   }
 });
@@ -310,6 +396,15 @@ test('flag-driven conflicts explain how to resolve them without changing files o
       assert.equal(await readManifest(context), null);
       assert.equal(await readFile(destination, 'utf8'), 'existing unmanaged file');
       await assert.rejects(readFile(path.join(context.target, 'skills/bdv-grill-me/SKILL.md')), { code: 'ENOENT' });
+      if (id === 'opencode' && scope === 'project') {
+        const withoutAcceptance = spawnSync(process.execPath, [cli, 'install', ...flags.filter(flag => flag !== '--accept-limitations'), ...selection],
+          { env, encoding: 'utf8' });
+        assert.equal(withoutAcceptance.status, 1);
+        assert.match(withoutAcceptance.stdout, /existing file is not managed/);
+        assert.match(withoutAcceptance.stderr, /install blocked by conflicts/);
+        assert.equal(await readManifest(context), null);
+        assert.equal(await readFile(destination, 'utf8'), 'existing unmanaged file');
+      }
       await rm(destination);
       const installed = run('install', ...selection);
       assert.equal(installed.status, 0, installed.stderr);
