@@ -10,7 +10,8 @@ contract core hoặc native mapping.
 Node.js 22+ và npm; Git chỉ cần khi dùng checkout. Filesystem installer đã test trên macOS; launcher/sync
 hướng tới macOS/Linux, chưa hỗ trợ Windows native.
 
-Dùng CLI từ npm đã build sẵn, không cần clone hoặc compiler trên máy người dùng:
+Package chưa publish. Sau release đầu tiên, dùng CLI đã build sẵn, không cần clone
+hoặc compiler trên máy người dùng:
 
 ```bash
 npx agent-stuff@latest
@@ -172,7 +173,7 @@ npm pack --pack-destination /path/to/output
 
 Prepack build. Gói gồm compiled modules, core skills/agents/commands, core docs qua
 compiled API, adapter docs và README; không đóng gói TypeScript sources, tests,
-verification records hoặc output chạy tạm.
+verification records hoặc output chạy tạm. Chưa publish package.
 
 `tests/distribution.test.ts` kiểm tarball, install/update cho cả ba harnesses ở hai
 scopes, xóa source package cũ, source override và legacy path updates. Test dùng

@@ -58,13 +58,14 @@ You need **Node.js 22+**, **npm**, and the AI tool you want to use.
 The filesystem installer is tested on macOS; its launcher and filesystem
 operations are intended for macOS/Linux.
 
-Install without cloning or building the repository:
+**npm publication is pending.** After the first release, install without cloning
+or building the repository:
 
 ```bash
 npx agent-stuff@latest
 ```
 
-To work from a local repository copy instead, you also need Git:
+Until then, or to work from a local repository copy, you also need Git:
 
 ```bash
 git clone https://github.com/binhdv37/agent-stuff.git
@@ -105,7 +106,7 @@ slash commands; OpenCode provides separate commands for selected workflows.
 
 ## Preview, update, and remove
 
-The following commands use npm. From a local repository copy,
+The following commands use npm after publication. From a local repository copy,
 replace `npx agent-stuff@latest` with `bash install.sh`.
 
 To see installed assets and locally modified or missing files in a project:
