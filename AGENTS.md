@@ -73,7 +73,7 @@ Read the relevant source and tests alongside these docs; no full-docs startup to
 | Task | Read |
 |---|---|
 | User-facing usage/support | [README](README.md) |
-| Author/change portable stuff | [Concepts](core/docs/concepts.md), [format/authoring](core/docs/format.md); fields as needed |
+| Author/change portable stuff | [Concepts](core/docs/concepts.md), [format/authoring](core/docs/format.md); for skills, [required checklist review and user approval](core/docs/skill-checklist.md); fields as needed |
 | Change core API/schema | [Core API](core/docs/README.md), [fields](core/docs/fields.md) |
 | Change native mapping | [Adapter API/development](adapters/README.md), [compatibility](adapters/docs/compatibility.md), relevant harness note |
 | Change CLI/installer/build | [Tool](tool/README.md) |

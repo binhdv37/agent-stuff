@@ -56,9 +56,15 @@ Validation checks definitions, not execution or model behavior.
    behavior, constraints, and success criteria; prefer reuse or revision.
 2. For a new skill, ask whether automatic invocation is wanted; default to
    `explicit`. Check that the existing format can express the requirements.
+   Before development, select target harnesses/scopes and required scenarios using
+   the [testing guide](../../docs/testing.md).
 3. Write instructions once, declare configuration and resources in
    `definition.yaml`, and let commands reference skills instead of duplicating them.
 4. Validate with `loadCatalog`; test defaults, errors, references, and constraints.
+5. For every new or changed skill, complete the required
+   [checklist review and user approval](skill-checklist.md#required-review-and-user-approval).
+   Present findings and verification limits for the user's decision; known issues
+   may be accepted, but approval does not turn them into passing checks.
 
 Extend the contract only for a concrete use case. Define field meaning, type,
 default, conflicting combinations, enforcement requirements, errors, and format/API
