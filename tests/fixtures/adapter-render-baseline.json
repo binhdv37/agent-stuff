@@ -72,7 +72,7 @@
       "adapter": "opencode",
       "asset": "skill/bdv-smart-commit",
       "path": "skills/bdv-smart-commit/SKILL.md",
-      "sha256": "32fab6bff5c2362bd3808f37c4341b2179205c121f833c28c22835fefad3e4e3"
+      "sha256": "ccae8e97fe1e4af544348192b2956f73b6cccb2d751e44c4e0ec42a472a22052"
     },
     {
       "adapter": "opencode",
@@ -258,7 +258,7 @@
       "adapter": "codex",
       "asset": "skill/bdv-smart-commit",
       "path": "skills/bdv-smart-commit/SKILL.md",
-      "sha256": "32fab6bff5c2362bd3808f37c4341b2179205c121f833c28c22835fefad3e4e3"
+      "sha256": "ccae8e97fe1e4af544348192b2956f73b6cccb2d751e44c4e0ec42a472a22052"
     },
     {
       "adapter": "codex",
@@ -372,7 +372,7 @@
       "adapter": "claude-code",
       "asset": "skill/bdv-smart-commit",
       "path": "skills/bdv-smart-commit/SKILL.md",
-      "sha256": "df055d3bf39b2e6f2beb1421010e2e15eb34572ad5ad8f0e6ae36cc637731bf3"
+      "sha256": "072175340b2993fa77e9f6ca1b28eaade9b690e9f0a57a9133a0558ecab04aec"
     },
     {
       "adapter": "claude-code",

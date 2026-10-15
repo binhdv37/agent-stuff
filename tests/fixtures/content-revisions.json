@@ -1,10 +1,10 @@
 [
   {
     "key": "skill/bdv-smart-commit",
-    "reason": "2026-10-03: user-authorized smart-commit rewrite; simplifies to session-based read/propose/approval/execution, removes snapshots, pre-execution rechecks and both helper resources; retains explicit activation, exact-path staging, scope/mixed/staged-only disclosure, Conventional Commits and separate push approval after remote assessment. Wording condensed without changing approval/scope guarantees; prefer a short push command when its destination is unambiguous. Prior designs and audit: git show 0cbbc14:docs/audits/bdv-smart-commit.md.",
+    "reason": "2026-10-15: user-approved simplification to conversation-based scope, proposal/approval, commit and separately approved optional push. Select shared-task work and flag unrelated edits; otherwise propose all user-made changes. Follow repository message conventions. Removes detailed Git policy and automatic PR/MR links. Focused local AI smoke results were reported in conversation. Native render expectations updated; original migration hashes retained.",
     "activation": "explicit",
     "hashes": {
-      "instructions.md": "c3c181b66c86e8acd644e5e636880359847018e4904d6218ae7121a539b5d397"
+      "instructions.md": "87ba15a92cf1655a2f5f0ad04c657d671b32c42442e1cc28a924bbbbfd1410bf"
     }
   }
 ]

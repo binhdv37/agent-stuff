@@ -1,9 +1,8 @@
 schema_version: 1
 kind: skill
 id: bdv-smart-commit
-description: Review changes and warn about uncertain or unrelated edits; propose
-  exact file staging commands and a Conventional Commit for user approval,
-  execute the approved commands, then offer a separately approved push and a
-  pull or merge request link. Invoke explicitly as bdv-smart-commit.
+description: Commit completed work when the user asks to commit changes. Infer
+  scope from the conversation, flag unrelated edits, follow repository message
+  conventions, and get approval before committing or optionally pushing.
 activation: explicit
 instructions: instructions.md
