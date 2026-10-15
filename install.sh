@@ -12,10 +12,24 @@ if ! command -v node >/dev/null || ! command -v npm >/dev/null; then
   exit 1
 fi
 node -e 'if (Number(process.versions.node.split(".")[0]) < 22) { console.error("Node.js 22 or newer is required"); process.exit(1); }'
+run_npm() {
+  local log status
+  log="$(mktemp)"
+  if npm --prefix "$SOURCE_ROOT" "$@" >"$log" 2>&1; then
+    rm -f "$log"
+  else
+    status=$?
+    cat "$log" >&2
+    rm -f "$log"
+    return "$status"
+  fi
+}
 if [[ ! -d "$SOURCE_ROOT/node_modules" ]]; then
-  npm --prefix "$SOURCE_ROOT" ci >&2
+  run_npm ci
 fi
-npm --prefix "$SOURCE_ROOT" run build >&2
+if ! node "$SOURCE_ROOT/scripts/build-cache.mjs"; then
+  run_npm run build
+fi
 if [[ $# -eq 0 || ( "$1" == --* && "$1" != --help ) ]]; then
   set -- install "$@"
 fi

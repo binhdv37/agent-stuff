@@ -6,14 +6,17 @@ import { z } from 'zod';
 import { adapterIds, type AdapterId, type OutputFile } from '../../../adapters/index.js';
 import { getAdapter } from '../../../adapters/index.js';
 import { relativePath, inside, assertNoSymlinks } from '../../../core/src/index.js';
+import { packageSourceSchema, type Source } from '../source.js';
 
 export const hash = (content: Buffer | string): string => createHash('sha256').update(content).digest('hex');
 const assetKey = z.string().regex(/^(skill|agent|command)\/[a-z0-9]+(-[a-z0-9]+)*$/);
 const recordSchema = z.strictObject({ asset: assetKey, path: relativePath, hash: z.string().regex(/^[a-f0-9]{64}$/) });
-const manifestSchema = z.strictObject({
-  schema_version: z.literal(1), adapter: z.enum(adapterIds), adapter_version: z.number().int().positive(),
-  source: z.string(), content_digest: z.string(), target: z.string(), files: z.array(recordSchema),
-});
+const manifestFields = { adapter: z.enum(adapterIds), adapter_version: z.number().int().positive(),
+  content_digest: z.string(), target: z.string(), files: z.array(recordSchema) };
+const manifestSchema = z.discriminatedUnion('schema_version', [
+  z.strictObject({ ...manifestFields, schema_version: z.literal(1), source: z.string() }),
+  z.strictObject({ ...manifestFields, schema_version: z.literal(2), source: packageSourceSchema }),
+]);
 export type Manifest = z.infer<typeof manifestSchema>;
 export type Context = { adapter: AdapterId; target: string; manifest: string };
 export type Conflict = { reason: 'modified' | 'unmanaged' } | { reason: 'other-asset'; owner: string };
@@ -72,7 +75,7 @@ export async function readManifest(context: Context): Promise<Manifest | null> {
 
 export type InstallationStatus = {
   agent: AdapterId; target: string; manifest: string; installed: boolean;
-  source: string | null; adapter_version: number | null; assets: string[];
+  source: Source | null; adapter_version: number | null; assets: string[];
   files: { asset: string; path: string; status: 'unchanged' | 'modified' | 'missing' | 'unreadable'; error: string | null }[];
   error: string | null;
 };
@@ -107,7 +110,7 @@ const journalPath = (context: Context): string => `${context.manifest}.journal`;
 const same = (a: Buffer | null, b: Buffer | null): boolean => a === null ? b === null : b !== null && a.equals(b);
 const encodedManifest = (manifest: Manifest): Buffer => Buffer.from(JSON.stringify(manifest, null, 2) + '\n');
 
-export async function planInstall(context: Context, files: OutputFile[], source: string, removeAssets: string[] = []): Promise<Plan> {
+export async function planInstall(context: Context, files: OutputFile[], source: Source, removeAssets: string[] = []): Promise<Plan> {
   validateOutputs(files);
   await assertNoSymlinks(context.target);
   if (await readOptional(journalPath(context))) throw new Error('Interrupted transaction found; run recover first');
@@ -145,8 +148,9 @@ export async function planInstall(context: Context, files: OutputFile[], source:
   }
   for (const file of files) records.set(file.path, { asset: file.asset, path: file.path, hash: hash(file.content) });
   const all = [...records.values()].sort((a, b) => a.path.localeCompare(b.path));
-  const nextManifest: Manifest = { schema_version: 1, adapter: context.adapter, adapter_version: getAdapter(context.adapter).version,
-    source: path.resolve(source), content_digest: hash(JSON.stringify(all)), target: context.target, files: all };
+  const nextManifest: Manifest = { ...(typeof source === 'string' ? { schema_version: 1 as const, source: path.resolve(source) }
+    : { schema_version: 2 as const, source }), adapter: context.adapter, adapter_version: getAdapter(context.adapter).version,
+    content_digest: hash(JSON.stringify(all)), target: context.target, files: all };
   // Validate collisions against assets outside this selection as well.
   parseManifest(encodedManifest(nextManifest), context);
   return { context, changes, previousManifest, nextManifest };
@@ -267,7 +271,7 @@ export async function applyInstall(plan: Plan, onProgress?: (completed: number) 
     for (const change of plan.changes) {
       if (!same(await readOptional(inside(context.target, change.path)), change.before)) throw new Error(`File changed since preview: ${change.path}`);
     }
-    if (plan.changes.every(c => c.action === 'unchanged')) return;
+    if (plan.changes.every(c => c.action === 'unchanged') && same(plan.previousManifest, encodedManifest(plan.nextManifest))) return;
     const journal: Journal = { version: 1, target: context.target, adapter: context.adapter,
       previous: plan.previousManifest?.toString('base64') ?? null, next: encodedManifest(plan.nextManifest).toString('base64'),
       changes: plan.changes.filter(c => c.action !== 'unchanged').map(c => ({ asset: c.asset, path: c.path,

@@ -8,9 +8,10 @@ import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/
 import { getAdapter, adapterIds } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, inspectInstallation, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
 import { Cancelled, InteractiveFlow, catalogItems, formatList, formatStatus, formatCompatibility, formatPreview } from './prompts.js';
+import { resolveSource } from './source.js';
 
 const commands = ['list', 'status', 'install', 'update', 'uninstall', 'recover', 'validate', 'build'];
-const usage = (command: string): string => `Usage: bash install.sh ${command} [options]`;
+const usage = (command: string): string => `Usage: agent-stuff ${command} [options]`;
 const options: Record<string, string> = {
   source: '<checkout>  Read core content from this checkout/package (default: source accompanying CLI)',
   agent: 'opencode|codex|claude-code  Choose an AI tool',
@@ -40,7 +41,7 @@ const commandHelp: Record<string, { description: string; flags: string[]; exampl
     note: 'Without flags, prompts guide installation. Without a terminal, supply --agent, --scope, --project for project scope, and --yes unless previewing.' },
   update: { description: 'Update managed items using their recorded source and selection by default.',
     flags: ['source', ...targetOptions, ...applyOptions, 'accept-limitations'],
-    example: 'update --agent codex --scope global --dry-run', note: 'For update, --source defaults to the recorded installation source; --only defaults to all installed items.' },
+    example: 'update --agent codex --scope global --dry-run', note: 'Update uses the recorded local directory or the invoked package version. --source explicitly switches to a local directory; --only defaults to all installed items.' },
   uninstall: { description: 'Remove managed files, preserving modified and unrelated files.',
     flags: [...targetOptions, ...applyOptions], example: 'uninstall --agent codex --scope global --only skill/bdv-api-handoff --dry-run' },
   recover: { description: 'Recover an interrupted installation from its journal.',
@@ -54,18 +55,19 @@ const commandHelp: Record<string, { description: string; flags: string[]; exampl
 
 function help(command?: string): string {
   if (!command) return [
-    'Usage: bash install.sh [command] [options]', '', 'End-user commands:',
+    'Usage: agent-stuff [command] [options]', '', 'End-user commands:',
     ...commands.slice(0, 6).map(name => `  ${name.padEnd(12)} ${commandHelp[name]!.description}`),
     '', 'Contributor commands:',
     ...commands.slice(6).map(name => `  ${name.padEnd(12)} ${commandHelp[name]!.description}`),
-    '', 'With no command, the CLI defaults to install. Run bash install.sh <command> --help for flags and defaults.',
+    '', 'Run with npx agent-stuff@latest, or bash install.sh from a checkout.',
+    'With no command, the CLI defaults to install. Run agent-stuff <command> --help for flags and defaults.',
     '--verbose: show individual files and full compatibility details on install/update/uninstall; all tracked files on status.',
-    '', 'Examples:', '  bash install.sh list --agent claude-code', '  bash install.sh status', '  bash install.sh install',
+    '', 'Examples:', '  agent-stuff list --agent claude-code', '  agent-stuff status', '  agent-stuff install',
   ].join('\n');
   const entry = commandHelp[command]!;
   return [usage(command), '', entry.description, '', 'Options:',
     ...[...entry.flags, 'help'].map(flag => `  --${flag} ${command === 'status' && flag === 'verbose' ? 'Show every tracked file, including unchanged files' : options[flag]}`),
-    ...(entry.note ? ['', entry.note] : []), '', 'Example:', `  bash install.sh ${entry.example}`,
+    ...(entry.note ? ['', entry.note] : []), '', 'Example:', `  agent-stuff ${entry.example}`,
   ].join('\n');
 }
 
@@ -95,7 +97,7 @@ function suggestion(value: string, choices: string[]): string {
 function checkSelection(keys: string[] | undefined, available: string[], action = 'Unknown item'): void {
   const unknown = keys?.filter(key => !available.includes(key));
   if (unknown?.length) throw new Error(unknown.map(key => `${action} in --only: "${key}".${suggestion(key, available)}`).join('\n') +
-    '\nRun `bash install.sh list` to see available items; pass a full key with --only.');
+    '\nRun `agent-stuff list` to see available items; pass a full key with --only.');
 }
 
 async function checkProject(project: string): Promise<void> {
@@ -134,21 +136,21 @@ async function main(): Promise<void> {
       ? `Unknown option "${option}". Remove it or use a supported flag.`
       : switches.includes(option ?? '') ? `${option} does not take a value.\nPass ${option} without an argument or =value.`
         : `Missing or invalid value for ${option ?? 'an option'}.\nPass ${option ?? 'the option'} <value>; use ${option}=<value> if the value starts with a dash.`;
-    throw new Error(`${message}\n${usage(command)}\nRun \`bash install.sh ${command} --help\` for options.`);
+    throw new Error(`${message}\n${usage(command)}\nRun \`agent-stuff ${command} --help\` for options.`);
   }
   const { values, positionals } = args;
   const command = positionals[0] ?? 'install';
-  if (!commands.includes(command)) throw new Error(`Unknown command "${command}".\nChoose ${commands.join(', ')}; run \`bash install.sh --help\` for options.`);
+  if (!commands.includes(command)) throw new Error(`Unknown command "${command}".\nChoose ${commands.join(', ')}; run \`agent-stuff --help\` for options.`);
   if (positionals.length > 1) throw new Error(`Unexpected argument "${positionals[1]}" for ${command}.\n${usage(command)}\nRemove extra arguments; select items with --only <kind/id>.`);
   if (values.help) { console.log(help(positionals[0])); return; }
-  if (values.json && !['list', 'status'].includes(command)) throw new Error(`--json is only supported by list and status.\nRun \`bash install.sh ${command} --help\` for options.`);
+  if (values.json && !['list', 'status'].includes(command)) throw new Error(`--json is only supported by list and status.\nRun \`agent-stuff ${command} --help\` for options.`);
   if (['list', 'status'].includes(command)) {
     const unsupported = Object.keys(values).filter(flag => !commandHelp[command]!.flags.includes(flag));
-    if (unsupported.length) throw new Error(`Unsupported options for ${command}: ${unsupported.map(flag => `--${flag}`).join(', ')}.\nRun \`bash install.sh ${command} --help\` for options.`);
+    if (unsupported.length) throw new Error(`Unsupported options for ${command}: ${unsupported.map(flag => `--${flag}`).join(', ')}.\nRun \`agent-stuff ${command} --help\` for options.`);
   }
   const interactive = process.stdin.isTTY && !values.yes;
   const flow = interactive ? new InteractiveFlow() : undefined;
-  const missing = (...flags: string[]): never => { throw new Error(`Missing required options for ${command}: ${flags.join(', ')}.\nPass ${flags.join(' and ')}; run \`bash install.sh ${command} --help\` for values.`); };
+  const missing = (...flags: string[]): never => { throw new Error(`Missing required options for ${command}: ${flags.join(', ')}.\nPass ${flags.join(' and ')}; run \`agent-stuff ${command} --help\` for values.`); };
   try {
     if (values.agent && !adapterIds.includes(values.agent as typeof adapterIds[number])) {
       throw new Error(`Unknown --agent value "${values.agent}".${suggestion(values.agent, [...adapterIds])}\nUse --agent ${adapterIds.join('|')}.`);
@@ -213,9 +215,9 @@ async function main(): Promise<void> {
       plan = await planUninstall(context!, values.only);
     } else {
       const installed = command === 'update' ? await readManifest(context!) : null;
-      if (command === 'update' && !installed) throw new Error(`No managed installation found for --agent ${agent} --scope ${scope}.\nRun \`bash install.sh install\` with the same target options first.`);
-      const source = path.resolve(values.source ?? installed?.source ?? fileURLToPath(new URL('../../../', import.meta.url)));
-      const catalog = await loadCatalog(path.join(source, 'core'));
+      if (command === 'update' && !installed) throw new Error(`No managed installation found for --agent ${agent} --scope ${scope}.\nRun \`agent-stuff install\` with the same target options first.`);
+      const { root: sourceRoot, source } = await resolveSource(fileURLToPath(new URL('../../../', import.meta.url)), values.source, installed?.source);
+      const catalog = await loadCatalog(path.join(sourceRoot, 'core'));
       let keys = values.only;
       if (installed) {
         const installedKeys = [...new Set(installed.files.map(f => f.asset))];
@@ -245,7 +247,7 @@ async function main(): Promise<void> {
       limited = selected.some(a => adapter.check(a, catalog).status === 'limited');
       selectedKeys = (keys ?? selected.map(a => a.key)).filter(key => selected.some(a => a.key === key));
       const files = selected.flatMap(a => adapter.render(a, catalog));
-      if (!files.length && !removed.length) throw new Error(`No compatible assets selected for --agent ${agent}.\nRun \`bash install.sh list\` and choose supported items with --only, or choose another --agent.`);
+      if (!files.length && !removed.length) throw new Error(`No compatible assets selected for --agent ${agent}.\nRun \`agent-stuff list\` and choose supported items with --only, or choose another --agent.`);
       validateOutputs(files);
       if (command === 'build') {
         if (!values.out) throw new Error('Build requires --out <new directory>');

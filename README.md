@@ -22,7 +22,7 @@ A few examples from the collection:
 | Continue work in another session | [bdv-handoff](core/skills/bdv-handoff/instructions.md) | A concise handoff document with sensitive information redacted |
 
 These are examples, rather than a complete catalog. To see the available stuff
-and descriptions from your checkout, run:
+and descriptions from a local repository copy, run:
 
 ```bash
 bash install.sh list
@@ -54,9 +54,17 @@ been verified in your tool.
 
 ## Get started
 
-You need **Node.js 22+**, **npm**, **Git**, and the AI tool you want to use.
+You need **Node.js 22+**, **npm**, and the AI tool you want to use.
 The filesystem installer is tested on macOS; its launcher and filesystem
 operations are intended for macOS/Linux.
+
+Install without cloning or building the repository:
+
+```bash
+npx agent-stuff@latest
+```
+
+To work from a local repository copy instead, you also need Git:
 
 ```bash
 git clone https://github.com/binhdv37/agent-stuff.git
@@ -67,15 +75,16 @@ bash install.sh
 Follow the prompts to choose your AI tool, where to install, and the stuff you
 want, then confirm installation.
 
-To use a particular source version, check out that tag or commit before running
-the launcher.
+For a specific published version, replace `@latest` with `@<version>`. For a local
+repository copy, check out the desired tag or commit before running the launcher.
+The launcher reuses an up-to-date build and only shows npm logs if preparation fails.
 
 ## Use an installed workflow
 
 For example, to prepare API documentation with Codex:
 
-1. Run `bash install.sh`, choose `codex` and `project`, and enter the path to your
-   backend project.
+1. Run the installer using either method above, choose `codex` and `project`, and
+   enter the path to your backend project.
 2. Select `skill/bdv-api-handoff`, review the preview, and confirm installation.
 3. Open a new Codex session in that backend project and make an explicit request:
 
@@ -96,43 +105,52 @@ slash commands; OpenCode provides separate commands for selected workflows.
 
 ## Preview, update, and remove
 
+The following commands use npm. From a local repository copy,
+replace `npx agent-stuff@latest` with `bash install.sh`.
+
 To see installed assets and locally modified or missing files in a project:
 
 ```bash
-bash install.sh status --scope project --project /path/to/backend
+npx agent-stuff@latest status --scope project --project /path/to/backend
 ```
 
 Without filters, `status` checks all tools in the current project and global scope.
 Use `--agent codex` to narrow the tool, `--verbose` to show every tracked file, or
 `--json` for scripts. Status only reads managed installation state and files; it
-does not need the original source checkout.
+does not need the original source directory.
 
-From your checkout, you can preview a specific installation without changing the
-target project:
+Preview a specific installation without changing the target project:
 
 ```bash
-bash install.sh install --agent codex --scope project \
+npx agent-stuff@latest install --agent codex --scope project \
   --project /path/to/backend --only skill/bdv-api-handoff --dry-run
 ```
 
 For the same project, preview an update or removal:
 
 ```bash
-bash install.sh update --agent codex --scope project \
+npx agent-stuff@latest update --agent codex --scope project \
   --project /path/to/backend --dry-run
 
-bash install.sh uninstall --agent codex --scope project \
+npx agent-stuff@latest uninstall --agent codex --scope project \
   --project /path/to/backend --dry-run
 ```
 
 Remove `--dry-run` to review and confirm applying the changes. For a global
-installation, use `--scope global` and omit `--project`. Update uses the source
-recorded at installation unless you supply `--source /path/to/checkout`.
+installation, use `--scope global` and omit `--project`.
+
+- **npm installs:** update uses the content bundled with the package version you
+  invoke. `@latest` selects the latest published release; `@<version>` selects a
+  specific release. Clearing the npm cache does not break future updates.
+- **Local-repository installs:** update reads the recorded directory, even when
+  invoked through npm. Pull newer changes in that directory first.
+- **Explicit source:** `--source /path/to/checkout` switches the installation to
+  that local directory for this and future updates.
 
 For scripted installation, provide the selection flags and `--yes`. Items
 reported as limited also require `--accept-limitations` after you review them.
 `--yes` does not accept limitations or bypass file conflicts. Run
-`bash install.sh --help` for available options.
+`npx agent-stuff@latest --help` for available options.
 
 ### Common installation issues
 
@@ -145,7 +163,8 @@ reported as limited also require `--accept-limitations` after you review them.
 - **Locally edited installed files:** update and uninstall stop when they would
   overwrite or remove modified files. Preserve your edits before resolving the
   conflict. Unrelated files are left in place.
-- **Interrupted installation:** run `bash install.sh recover` with the same
+- **Interrupted installation:** run `npx agent-stuff@latest recover` (or
+  `bash install.sh recover` from a local repository copy) with the same
   `--agent`, `--scope`, and project path as the interrupted operation.
 
 ## How it works

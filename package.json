@@ -1,7 +1,6 @@
 {
   "name": "agent-stuff",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -33,14 +32,9 @@
     "dist/adapters/",
     "adapters/README.md",
     "adapters/docs/",
-    "core/",
-    "scripts/check-activation.mjs",
-    "README.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "tool/README.md",
-    "tool/docs/",
-    "docs/testing.md",
-    "verification/"
+    "core/skills/",
+    "core/agents/",
+    "core/commands/",
+    "README.md"
   ]
 }

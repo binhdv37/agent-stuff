@@ -1,6 +1,7 @@
 import { cp, rm } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { recordBuild } from './build-cache.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 // Remove compiler output so moved/deleted modules cannot survive in npm packs.
@@ -15,4 +16,5 @@ if (result.error) throw result.error;
 process.exitCode = result.status ?? 1;
 if (process.exitCode === 0) {
   await cp(new URL('../core/docs/', import.meta.url), new URL('../dist/core/docs/', import.meta.url), { recursive: true });
+  await recordBuild();
 }

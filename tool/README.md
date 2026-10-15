@@ -5,10 +5,20 @@ là hướng dẫn end user. Tool điều phối public API core/adapter; instal
 filesystem, selection/confirmation, manifest và recovery. Không định nghĩa lại
 contract core hoặc native mapping.
 
-## Chạy từ checkout
+## Chạy từ npm hoặc checkout
 
-Node.js 22+, npm và Git. Filesystem installer đã test trên macOS; launcher/sync
+Node.js 22+ và npm; Git chỉ cần khi dùng checkout. Filesystem installer đã test trên macOS; launcher/sync
 hướng tới macOS/Linux, chưa hỗ trợ Windows native.
+
+Dùng CLI từ npm đã build sẵn, không cần clone hoặc compiler trên máy người dùng:
+
+```bash
+npx agent-stuff@latest
+npx agent-stuff@latest list
+npx agent-stuff@latest update --agent codex --scope global --dry-run
+```
+
+Thay `@latest` bằng `@<version>` để chọn release cụ thể. Từ checkout, dùng:
 
 ```bash
 npm ci
@@ -19,7 +29,9 @@ npm run cli -- list
 npm run cli -- install
 ```
 
-`bash install.sh` chuẩn bị dependencies/build rồi gọi CLI. CLI dùng `@clack/prompts`
+`bash install.sh` chuẩn bị dependencies/build rồi gọi CLI; bỏ build khi fingerprint
+inputs và outputs không đổi. Npm logs chỉ hiện trên stderr nếu preparation thất bại,
+không trộn vào stdout JSON. CLI dùng `@clack/prompts`
 cho menu harness/scope và checkbox asset theo nhóm, có mô tả ngắn; unsupported bị
 disable kèm lý do. Arrow keys di chuyển, Space chọn, Enter tiếp tục; mặc định không
 chọn asset nào, A chọn tất cả compatible một cách chủ động. Project path phải nhập
@@ -29,8 +41,7 @@ chối confirm báo `Cancelled. No files changed.`; install thành công gợi �
 item đã chọn. Không có terminal hoặc dùng `--yes` thì truyền đủ flags.
 `list` và `status` không prompt; `bash install.sh --help` liệt kê commands cho end
 user trước commands contributor. `<command> --help` nêu flags, defaults và ví dụ
-riêng. Launcher gửi output chuẩn bị dependencies/build sang stderr để stdout JSON
-không bị trộn log.
+riêng.
 CLI báo các flags bắt buộc còn thiếu cùng lúc; lỗi input nêu flag/value và cách sửa.
 `--only` thiếu kind hoặc gõ sai gợi ý full key gần nhất; tên trùng giữa các kind
 được liệt kê để người dùng chọn rõ.
@@ -54,8 +65,10 @@ npm run cli -- install --agent codex --scope project --project /path/to/project 
 ```
 
 - `--out` phải là thư mục mới. Build không cài vào personal config.
-- `--source` là checkout/package có core, mặc định source cùng CLI; project đích
-  độc lập. Tool resolve `<source>/core`; thư viện core chỉ nhận core root.
+- `--source` là directory checkout/package có core; khi truyền rõ, installer ghi
+  directory đó làm local source cho cả các lần update sau. Install mặc định dùng
+  source cùng CLI; project đích độc lập. Tool resolve `<source>/core`; thư viện core
+  chỉ nhận core root. Quy tắc source mặc định cho update ở phần lifecycle bên dưới.
 - `--only` lặp được, dùng `skill/id`, `command/id`, `agent/id`; planner tự thêm helper.
 - `--dry-run` chỉ preview. Bỏ flag để confirm/apply; script dùng `--yes`.
 - Limited cần `--accept-limitations` sau review. `--yes` không chấp nhận thay,
@@ -80,7 +93,8 @@ source còn tồn tại, không thay đổi files/state, locks hoặc recovery j
 unchanged/modified/missing/unreadable, kèm path tương đối của file khác unchanged.
 `--verbose` hiện mọi tracked file; file ngoài manifest không được kiểm kê.
 `status --json` trả `{schema_version: 1, installations}`, gồm scope, agent, target,
-manifest, source, adapter_version, assets, files và errors. Không có manifest là
+manifest, source, adapter_version, assets, files và errors. `source` là path string,
+object `{kind: 'package', name, version}`, hoặc null khi chưa cài. Không có manifest là
 kết quả bình thường; manifest rỗng vẫn được phân biệt với chưa cài. File modified
 hoặc missing không làm exit lỗi; unreadable files hoặc manifest lỗi trả exit 1 và
 giữ kết quả các installation khác.
@@ -94,15 +108,26 @@ npm run cli -- uninstall --agent codex --scope global --only skill/bdv-api-hando
 npm run cli -- recover --agent codex --scope global --yes
 ```
 
-Install thêm/cập nhật selection, không gỡ phần ngoài selection. Update mặc định
-dùng source/selection đã ghi trong manifest; có thể truyền lại. File/resource hoặc
-asset biến mất được lên kế hoạch remove sau preview. Catalog rỗng là lỗi validate;
-muốn gỡ tất cả dùng uninstall.
+Install thêm/cập nhật selection, không gỡ phần ngoài selection. Update mặc định dùng
+selection đã ghi; `--only` chọn trong các item đã cài. Source phụ thuộc installation:
+
+- Local source: đọc directory đã ghi, kể cả khi CLI được gọi qua npm. Pull thay đổi
+  trong checkout trước khi update.
+- Package source: dùng content của package đang được gọi, kiểm tra cùng package
+  name và ghi version mới. `npx agent-stuff@latest update` chọn release mới nhất;
+  CLI không tự tải release, không cần path cache cũ. CLI từ checkout yêu cầu gọi
+  đúng package hoặc truyền `--source` để chủ động chuyển sang local source.
+- `--source <directory>` luôn ưu tiên và chuyển source sang directory đó.
+
+File/resource hoặc asset biến mất được lên kế hoạch remove sau preview. Catalog
+rỗng là lỗi validate; muốn gỡ tất cả dùng uninstall.
 
 Manifest: `<base>/.agent-stuff/installations/<scope>/<harness>.json`, base là home
-hoặc project. Nó lưu target, source local, adapter revision, file hashes và owner.
-Một installation dùng một catalog; chưa tải release hoặc lưu source riêng từng asset.
-Legacy adapter revision 1 vẫn đọc được; uninstall/recover không cần source còn tồn tại.
+hoặc project. Nó lưu target, source, adapter revision, file hashes và owner. Manifest
+schema 1 giữ source path string như trước; schema 2 ghi package source object, không
+ghi npm cache path. Version/source mới vẫn được commit khi file contents không đổi.
+Một installation dùng một catalog, không lưu source riêng từng asset. Manifest cũ
+và adapter revision 1 vẫn đọc được; uninstall/recover không cần source còn tồn tại.
 
 Conflict phân biệt file đã sửa từ lúc cài, file unmanaged có sẵn (kể cả cùng nội
 dung), hoặc path được ghi dưới owner khác. Preview nêu nguyên nhân, item, path tương
@@ -145,12 +170,16 @@ hoặc chống process cố ý đổi path giữa check/write.
 npm pack --pack-destination /path/to/output
 ```
 
-Prepack build. Gói gồm compiled modules, core content và tài liệu hiện hành được
-link và hồ sơ verification được giữ lại; không đóng gói tests, plan/audit hoặc
-output chạy tạm. Chưa publish package.
-Smoke tarball trong thư mục tạm: API/docs/catalog, strict TypeScript consumer,
-CLI validate/list/install dry-run từ ngoài checkout. Dependency symlink chỉ chứng
-minh package contents, không chứng minh fresh registry install.
+Prepack build. Gói gồm compiled modules, core skills/agents/commands, core docs qua
+compiled API, adapter docs và README; không đóng gói TypeScript sources, tests,
+verification records hoặc output chạy tạm.
+
+`tests/distribution.test.ts` kiểm tarball, install/update cho cả ba harnesses ở hai
+scopes, xóa source package cũ, source override và legacy path updates. Test dùng
+dependency symlink để không cần registry; không chứng minh fresh npm install.
+Smoke npm thật trong context tạm: chạy tarball qua `npm exec --yes --package=/path/to/agent-stuff-<version>.tgz -- agent-stuff`,
+install vào project tạm, xóa cache riêng rồi chạy update từ tarball lần nữa. Dùng
+HOME và `npm_config_cache` riêng để không đụng personal config/cache.
 
 ## Dùng bản cũ
 

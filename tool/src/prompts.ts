@@ -6,6 +6,7 @@ import type { Asset } from '../../core/src/index.js';
 import { adapters, type Adapter, type Compatibility } from '../../adapters/index.js';
 import type { Plan, InstallationStatus } from './installation/index.js';
 import { formatConflict } from './conflicts.js';
+import { formatSource } from './source.js';
 
 export class Cancelled extends Error {}
 
@@ -136,7 +137,7 @@ export function formatStatus(installations: (InstallationStatus & { scope: strin
     const lines = [`${harnessNames[installation.agent]} · ${installation.scope}`, `Target: ${installation.target}`];
     if (installation.error) return [...lines, `Error: ${installation.error}`].join('\n');
     if (!installation.installed) return [...lines, 'No managed installation found.'].join('\n');
-    lines.push(`Source: ${installation.source}`, `Assets (${installation.assets.length}):`,
+    lines.push(`Source: ${formatSource(installation.source!)}`, `Assets (${installation.assets.length}):`,
       ...installation.assets.map(asset => `  ${asset}`));
     const counts = ['unchanged', 'modified', 'missing', 'unreadable'].flatMap(status => {
       const count = installation.files.filter(file => file.status === status).length;
