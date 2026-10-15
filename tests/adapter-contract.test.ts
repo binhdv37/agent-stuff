@@ -18,7 +18,7 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
 
 test('contract version and field vocabulary drift block both check and direct render', async () => {
   const catalog = await loadCatalog('core');
-  const asset = catalog.get('skill/bdv-brainstorm-first')!;
+  const asset = catalog.get('skill/bdv-product-brief')!;
   let calls = 0;
   for (const mutate of [
     (c: ReturnType<typeof getContract>) => { c.contractVersion = 99; },
@@ -42,7 +42,7 @@ test('contract version and field vocabulary drift block both check and direct re
 
 test('unknown definition fields and unmapped behavior cannot be silently rendered', async () => {
   const catalog = await loadCatalog('core');
-  const original = catalog.get('skill/bdv-brainstorm-first')!;
+  const original = catalog.get('skill/bdv-product-brief')!;
   for (const adapter of adapters) {
     const asset = structuredClone(original);
     Object.assign(asset.definition, { future_behavior: true });
@@ -99,7 +99,10 @@ test('all native output bytes match the baseline captured before the adapter ref
     for (const file of adapter.render(asset, catalog)) outputs.push({ adapter: adapter.id, asset: asset.key, path: file.path,
       sha256: createHash('sha256').update(file.content).digest('hex') });
   }
-  assert.deepEqual(outputs, baseline.outputs);
+  // Preserve historical hashes; retirement removes outputs, not their history.
+  const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
+    'skill/bdv-change-report', 'skill/bdv-explain-code', 'command/bdv-change-report', 'command/bdv-explain-code']);
+  assert.deepEqual(outputs, baseline.outputs.filter((output: { asset: string }) => !retired.has(output.asset)));
 });
 
 test('adapters operate independently with core and dependencies, without tool files', async t => {
@@ -110,7 +113,7 @@ test('adapters operate independently with core and dependencies, without tool fi
   await symlink(path.resolve('node_modules'), path.join(root, 'node_modules'));
   const api = await import(pathToFileURL(path.join(root, 'adapters/index.js')).href);
   const catalog = await loadCatalog('core');
-  const asset = catalog.get('skill/bdv-api-handoff')!;
+  const asset = catalog.get('skill/bdv-product-brief')!;
   for (const adapter of api.adapters) {
     assert.deepEqual(adapter.supportedContractVersions, [3]);
     assert.notEqual(adapter.check(asset, catalog).status, 'unsupported');

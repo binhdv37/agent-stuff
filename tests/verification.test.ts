@@ -21,15 +21,15 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
 
 async function recordAt(source: string): Promise<Record> {
   const catalog = await loadCatalog(path.join(source, 'core'));
-  const evidencePath = 'evidence/skill/bdv-api-handoff/codex/latest.md';
+  const evidencePath = 'evidence/skill/bdv-product-brief/codex/latest.md';
   const bytes = 'Synthetic evidence for verification infrastructure tests only.\n';
   const artifact = path.join(source, 'verification/stuff', evidencePath);
   await mkdir(path.dirname(artifact), { recursive: true });
   await writeFile(artifact, bytes);
   return recordSchema.parse({
-    schema_version: 1, asset: 'skill/bdv-api-handoff', harness: 'codex',
+    schema_version: 1, asset: 'skill/bdv-product-brief', harness: 'codex',
     checked_at: '2026-10-01T01:00:00Z',
-    fingerprint: await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex'),
+    fingerprint: await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex'),
     environment: { harness_version: 'test-binary', adapter_revision: getAdapter('codex').version, model: 'test-model',
       scopes: ['project'], platform: 'test-platform', configuration: 'Isolated test fixture; no real model run' },
     contract: 'Test the verification ledger itself', limitations: [],
@@ -50,10 +50,10 @@ async function save(source: string, record: Record): Promise<void> {
 test('verification matrix includes missing and unsupported targets without inventing passes', async t => {
   const source = await temporary(t);
   const rows = await inspect(source);
-  assert.equal(rows.length, 48);
+  assert.equal(rows.length, 30);
   assert.ok(rows.every(row => row.status === 'not-tested' && row.checkedAt === null));
   assert.equal(rows.find(row => row.asset === 'agent/experimental-plan' && row.harness === 'codex')!.compatibility, 'unsupported');
-  assert.match(report(rows), /Not tested: 48/);
+  assert.match(report(rows), /Not tested: 30/);
 });
 
 test('results are derived from cases and a newer blocked run replaces a previous pass', async t => {
@@ -63,7 +63,7 @@ test('results are derived from cases and a newer blocked run replaces a previous
   let row = (await inspect(source)).find(row => row.asset === record.asset && row.harness === record.harness)!;
   assert.equal(row.status, 'passed');
   assert.equal(row.stale, false);
-  assert.match(report(await inspect(source)), /skill\/bdv-api-handoff \| limited \| Xem hồ sơ trên \| supported/);
+  assert.match(report(await inspect(source)), /skill\/bdv-product-brief \| limited \| Xem hồ sơ trên \| supported/);
   record.cases[3]!.outcome = 'blocked';
   record.cases[3]!.observed = 'Model inference could not run';
   record.checked_at = '2026-10-01T02:00:00Z';
@@ -74,7 +74,7 @@ test('results are derived from cases and a newer blocked run replaces a previous
   assert.ok(row.issues.some(issue => issue.includes('Model inference could not run')));
   assert.match(report([row]), /1 blocked/);
   assert.ok(!report([row]).includes('Model inference could not run'));
-  assert.match(report([row]), /\]\(stuff\/skill\/bdv-api-handoff\/codex\.yaml\)/);
+  assert.match(report([row]), /\]\(stuff\/skill\/bdv-product-brief\/codex\.yaml\)/);
   record.cases[0]!.outcome = 'failed';
   assert.equal(statusOf(record), 'failed');
   record.cases = record.cases.slice(0, 3).map(c => ({ ...c, outcome: 'passed' }));
@@ -124,16 +124,24 @@ test('complete cases cannot mark a currently unsupported mapping as passed', asy
 
 test('fingerprints cover resources, command workflows, delegated agents and implementation changes', async t => {
   const source = await temporary(t);
+  const commandDirectory = path.join(source, 'core/commands/example');
+  await mkdir(commandDirectory, { recursive: true });
+  await writeFile(path.join(commandDirectory, 'definition.yaml'),
+    'schema_version: 1\nkind: command\nid: example\ndescription: Test workflow reference\nworkflow: skill/bdv-product-brief\n');
   let catalog = await loadCatalog(path.join(source, 'core'));
-  const skill = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
-  const command = await fingerprint(source, catalog, 'command/bdv-change-report', 'opencode');
+  const skill = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
+  const command = await fingerprint(source, catalog, 'command/example', 'opencode');
   const agent = await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode');
-  await writeFile(path.join(source, 'core/skills/bdv-api-handoff/references/handoff-template.md'), 'Changed resource');
-  await writeFile(path.join(source, 'core/skills/bdv-change-report/instructions.md'), 'Changed workflow');
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/assets/product-brief.md'), 'Changed resource');
+  catalog = await loadCatalog(path.join(source, 'core'));
+  assert.notEqual((await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex')).core, skill.core);
+  const resourceOnlyCommand = await fingerprint(source, catalog, 'command/example', 'opencode');
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed workflow');
   await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/instructions.md'), 'Changed helper');
   catalog = await loadCatalog(path.join(source, 'core'));
-  assert.notEqual((await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex')).core, skill.core);
-  assert.notEqual((await fingerprint(source, catalog, 'command/bdv-change-report', 'opencode')).core, command.core);
+  const changedCommand = await fingerprint(source, catalog, 'command/example', 'opencode');
+  assert.notEqual(changedCommand.core, command.core);
+  assert.notEqual(changedCommand.core, resourceOnlyCommand.core);
   assert.notEqual((await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode')).core, agent.core);
   const record = await recordAt(source);
   await save(source, record);
@@ -146,7 +154,7 @@ test('fingerprints cover resources, command workflows, delegated agents and impl
 test('fingerprints cover the public core entrypoint and every moved implementation file', async t => {
   const source = await temporary(t);
   const catalog = await loadCatalog(path.join(source, 'core'));
-  let previous = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
+  let previous = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
   const files = [
     ...['index', 'contract', 'schema', 'catalog', 'paths', 'docs', 'errors'].map(name => `core/src/${name}.ts`),
     ...['README', 'concepts', 'format'].map(name => `core/docs/${name}.md`),
@@ -154,7 +162,7 @@ test('fingerprints cover the public core entrypoint and every moved implementati
   for (const relative of files) {
     const file = path.join(source, relative);
     await writeFile(file, (await readFile(file, 'utf8')) + '\n// fingerprint change\n');
-    const current = await fingerprint(source, catalog, 'skill/bdv-api-handoff', 'codex');
+    const current = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
     assert.notEqual(current.implementation, previous.implementation, relative);
     assert.equal(current.core, previous.core, relative);
     previous = current;
@@ -165,8 +173,8 @@ test('verification CLI checks the summary and refuses unverified completion targ
   const source = await temporary(t);
   const cli = path.resolve('dist/tool/src/verification/cli.js');
   const run = (...args: string[]) => execFileSync(process.execPath, [cli, ...args, '--source', source], { encoding: 'utf8', stdio: 'pipe' });
-  assert.match(run('validate'), /48 asset\/harness pairs/);
-  assert.throws(() => run('validate', '--require-passed', '--asset', 'skill/bdv-api-handoff', '--harness', 'codex'), /Target is not currently verified/);
+  assert.match(run('validate'), /30 asset\/harness pairs/);
+  assert.throws(() => run('validate', '--require-passed', '--asset', 'skill/bdv-product-brief', '--harness', 'codex'), /Target is not currently verified/);
   const record = await recordAt(source);
   await save(source, record);
   run('validate', '--require-passed', '--asset', record.asset, '--harness', record.harness);
@@ -175,6 +183,6 @@ test('verification CLI checks the summary and refuses unverified completion targ
   const summary = path.join(source, 'verification/README.md');
   await writeFile(summary, (await readFile(summary, 'utf8')) + 'Manual edit\n');
   assert.throws(() => run('report', '--check'), /summary is out of date/);
-  await writeFile(path.join(source, 'core/skills/bdv-api-handoff/instructions.md'), 'Changed content');
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed content');
   assert.throws(() => run('validate', '--require-passed', '--asset', record.asset, '--harness', record.harness), /Target is not currently verified/);
 });

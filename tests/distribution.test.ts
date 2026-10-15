@@ -15,7 +15,7 @@ test('npm artifact updates all harnesses/scopes after its original source is rem
   const names: string[] = packed.files.map((file: { path: string }) => file.path);
   assert.ok(names.includes('dist/tool/src/cli.js'));
   assert.ok(names.includes('dist/core/docs/concepts.md'));
-  assert.ok(names.includes('core/skills/bdv-explain-code/instructions.md'));
+  assert.ok(names.includes('core/skills/bdv-product-brief/instructions.md'));
   assert.ok(!names.some(name => /^(tests|verification|tool|scripts)\//.test(name)));
   assert.ok(!names.some(name => /^(core\/src|dist\/tests)\//.test(name)));
   const oldRoot = path.join(dir, 'package');
@@ -27,7 +27,7 @@ test('npm artifact updates all harnesses/scopes after its original source is rem
   for (const root of [oldRoot, newRoot]) await symlink(path.resolve('node_modules'), path.join(root, 'node_modules'));
   const metadata = JSON.parse(await readFile(path.join(newRoot, 'package.json'), 'utf8'));
   await writeFile(path.join(newRoot, 'package.json'), JSON.stringify({ ...metadata, version: '0.2.0' }));
-  const instructions = path.join(newRoot, 'core/skills/bdv-explain-code/instructions.md');
+  const instructions = path.join(newRoot, 'core/skills/bdv-product-brief/instructions.md');
   await writeFile(instructions, await readFile(instructions, 'utf8') + '\nPackage update marker.\n');
   const home = path.join(dir, 'home');
   const project = path.join(dir, 'project');
@@ -42,7 +42,7 @@ test('npm artifact updates all harnesses/scopes after its original source is rem
   const flags = (agent: string, scope: string) => ['--agent', agent, '--scope', scope, '--project', project, '--yes'];
   run(oldRoot, 'validate');
   for (const agent of adapterIds) for (const scope of ['project', 'global']) {
-    run(oldRoot, 'install', ...flags(agent, scope), '--only', 'skill/bdv-explain-code', '--accept-limitations');
+    run(oldRoot, 'install', ...flags(agent, scope), '--only', 'skill/bdv-product-brief', '--accept-limitations');
     const context = await targetContext(scope, project, home, agent);
     const installed = (await readManifest(context))!;
     assert.equal(installed.schema_version, 2);
@@ -54,11 +54,11 @@ test('npm artifact updates all harnesses/scopes after its original source is rem
     const context = await targetContext(scope, project, home, agent);
     const installed = (await readManifest(context))!;
     assert.deepEqual(installed.source, { kind: 'package', name: metadata.name, version: '0.2.0' });
-    assert.match(await readFile(path.join(context.target, 'skills/bdv-explain-code/SKILL.md'), 'utf8'), /Package update marker/);
+    assert.match(await readFile(path.join(context.target, 'skills/bdv-product-brief/SKILL.md'), 'utf8'), /Package update marker/);
     const status = JSON.parse(run(newRoot, 'status', '--agent', agent, '--scope', scope, '--project', project, '--json'));
     assert.deepEqual(status.installations[0].source, installed.source);
     assert.match(run(newRoot, 'status', '--agent', agent, '--scope', scope, '--project', project), /Source: agent-stuff@0.2.0/);
-    assert.ok(installed.files.every(file => file.asset === 'skill/bdv-explain-code'));
+    assert.ok(installed.files.every(file => file.asset === 'skill/bdv-product-brief'));
   }
   await writeFile(path.join(newRoot, 'package.json'), JSON.stringify({ ...metadata, version: '0.2.1' }));
   run(newRoot, 'update', ...flags('codex', 'project'), '--accept-limitations');
@@ -73,13 +73,13 @@ test('npm artifact updates all harnesses/scopes after its original source is rem
   const context = await targetContext('project', project, home, 'codex');
   assert.equal((await readManifest(context))!.schema_version, 1);
   assert.equal((await readManifest(context))!.source, local);
-  const localInstructions = path.join(local, 'core/skills/bdv-explain-code/instructions.md');
+  const localInstructions = path.join(local, 'core/skills/bdv-product-brief/instructions.md');
   await writeFile(localInstructions, await readFile(localInstructions, 'utf8') + '\nLocal update marker.\n');
   run(newRoot, 'update', ...flags('codex', 'project'), '--accept-limitations');
-  assert.match(await readFile(path.join(context.target, 'skills/bdv-explain-code/SKILL.md'), 'utf8'), /Local update marker/);
+  assert.match(await readFile(path.join(context.target, 'skills/bdv-product-brief/SKILL.md'), 'utf8'), /Local update marker/);
   // Modified managed files continue to block package updates.
   const global = await targetContext('global', project, home, 'codex');
-  const managed = path.join(global.target, 'skills/bdv-explain-code/SKILL.md');
+  const managed = path.join(global.target, 'skills/bdv-product-brief/SKILL.md');
   await writeFile(managed, 'personal edits');
   const rejected = spawnSync(process.execPath, [path.join(newRoot, 'dist/tool/src/cli.js'), 'update', ...flags('codex', 'global')], {
     cwd: project, env: { ...process.env, HOME: home }, encoding: 'utf8',

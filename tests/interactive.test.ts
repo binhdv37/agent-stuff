@@ -51,7 +51,7 @@ test('asset picker starts empty, requires selection and disables unsupported ite
   const catalog = await loadCatalog('core');
   for (const id of adapterIds) {
     const adapter = getAdapter(id);
-    const chosen = 'skill/bdv-explain-code';
+    const chosen = 'skill/bdv-product-brief';
     const flow = new InteractiveFlow({ ...prompts, bar: noopBar,
       multiselect: (async options => {
         assert.deepEqual(options.initialValues, []);
@@ -113,12 +113,12 @@ test('success gives the location and a usable next step for the selected item an
       note: message => { next = message ?? ''; }, outro: message => { completion = message ?? ''; },
     });
     const plan = { context: { adapter: id, target: '/example/target' } } as Plan;
-    flow.complete('install', plan, 'project', '/example/project', ['skill/bdv-explain-code']);
+    flow.complete('install', plan, 'project', '/example/project', ['skill/bdv-product-brief']);
     assert.match(next, /Open .* in \/example\/project/);
-    assert.match(next, id === 'claude-code' ? /Run \/bdv-explain-code/ : /Ask: Use bdv-explain-code/);
+    assert.match(next, id === 'claude-code' ? /Run \/bdv-product-brief/ : /Ask: Use bdv-product-brief/);
     assert.match(next, /Location: \/example\/target/);
     assert.equal(completion, 'Ready to use.');
-    flow.complete('install', plan, 'global', '/irrelevant', ['skill/bdv-explain-code']);
+    flow.complete('install', plan, 'global', '/irrelevant', ['skill/bdv-product-brief']);
     assert.match(next, /in your project/);
   }
 });
@@ -169,7 +169,7 @@ test('compatibility wraps columns and uses compact rows on narrow terminals with
 test('verbose compatibility includes every field reason and effect within the terminal width', async () => {
   const catalog = await loadCatalog('core');
   const adapter = getAdapter('opencode');
-  const results = ['skill/bdv-handoff', 'skill/bdv-explain-code'].map(key => adapter.check(catalog.get(key)!, catalog));
+  const results = ['skill/bdv-handoff', 'skill/bdv-product-brief'].map(key => adapter.check(catalog.get(key)!, catalog));
   const formatted = formatCompatibility(results, 60, true);
   const normalized = formatted.replace(/\s+/g, ' ');
   assert.ok(formatted.split('\n').every(line => line.length <= 60));
@@ -229,8 +229,8 @@ test('previews summarize file actions by destination, with relative individual f
 
 function progressPlan(): Plan {
   return { context: { adapter: 'claude-code', target: '/example/target' }, changes: [
-    { asset: 'skill/bdv-explain-code', action: 'create' },
-    { asset: 'skill/bdv-explain-code', action: 'create' },
+    { asset: 'skill/bdv-product-brief', action: 'create' },
+    { asset: 'skill/bdv-product-brief', action: 'create' },
     { asset: 'skill/bdv-handoff', action: 'unchanged' },
     { asset: 'skill/bdv-handoff', action: 'remove' },
   ] } as Plan;
@@ -303,7 +303,7 @@ test('progress follows the real operation, finishes before usage guidance, and s
   assert.deepEqual(events, ['start: Installing selected items', 'update: 1']);
   release();
   await applying;
-  flow.complete('install', plan, 'project', '/example/project', ['skill/bdv-explain-code']);
+  flow.complete('install', plan, 'project', '/example/project', ['skill/bdv-product-brief']);
   assert.deepEqual(events, [
     'start: Installing selected items', 'update: 1', `success: ${completionSummary('install', plan)}`,
     'note: Next step', 'outro: Ready to use.',
@@ -322,7 +322,7 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
       const base = path.join(dir, `${id}-${scope}`);
       await mkdir(base);
       const env = { ...process.env, HOME: base };
-      const flags = ['--agent', id, '--scope', scope, '--project', base, '--only', 'skill/bdv-explain-code', '--yes'];
+      const flags = ['--agent', id, '--scope', scope, '--project', base, '--only', 'skill/bdv-product-brief', '--yes'];
       const context = await targetContext(scope, base, base, id);
       if (id === 'opencode') {
         const rejected = spawnSync(process.execPath, [cli, 'install', ...flags], { env, encoding: 'utf8' });
@@ -343,7 +343,7 @@ test('flag-driven installs, updates, uninstalls and limitation gates still work 
       assert.match(installed, /install complete/);
       assert.doesNotMatch(installed, /\u001b\[/);
       const manifest = (await readManifest(context))!;
-      assert.deepEqual([...new Set(manifest.files.map(f => f.asset))], ['skill/bdv-explain-code']);
+      assert.deepEqual([...new Set(manifest.files.map(f => f.asset))], ['skill/bdv-product-brief']);
       assert.ok(await readFile(path.join(context.target, manifest.files[0]!.path)));
       assert.match(execFileSync(process.execPath, [cli, 'update', ...flags], { env, encoding: 'utf8' }), /update complete/);
       assert.match(execFileSync(process.execPath, [cli, 'uninstall', ...flags], { env, encoding: 'utf8' }), /uninstall complete/);
@@ -418,10 +418,10 @@ test('CLI argument and selection errors name the cause, give a fix, and never mu
     { name: 'unsupported explicit item', args: [...flags, '--only', 'agent/solution-architect'],
       patterns: [/unsupported assets for --agent claude-code: agent\/solution-architect/, /Remove the unsupported --only entries/, /--compatible-only/],
       absent: /use --only or --compatible-only/ },
-    { name: 'missing kind prefix', args: [...flags, '--only', 'bdv-explain-code'],
-      patterns: [/--only: "bdv-explain-code"/, /Did you mean skill\/bdv-explain-code or command\/bdv-explain-code\?/, /agent-stuff list/] },
-    { name: 'typo', args: [...flags, '--only', 'skill/bdv-explan-code'],
-      patterns: [/--only: "skill\/bdv-explan-code"/, /Did you mean skill\/bdv-explain-code\?/] },
+    { name: 'missing kind prefix', args: [...flags, '--only', 'bdv-product-brief'],
+      patterns: [/--only: "bdv-product-brief"/, /Did you mean skill\/bdv-product-brief\?/, /agent-stuff list/] },
+    { name: 'typo', args: [...flags, '--only', 'skill/bdv-product-brif'],
+      patterns: [/--only: "skill\/bdv-product-brif"/, /Did you mean skill\/bdv-product-brief\?/] },
     { name: 'unrelated item', args: [...flags, '--only', 'skill/zzzzzzzzzzzzzz'],
       patterns: [/Unknown item/, /full key with --only/], absent: /Did you mean/ },
     { name: 'informal harness name', args: ['--agent', 'claude', ...target],
@@ -431,8 +431,8 @@ test('CLI argument and selection errors name the cause, give a fix, and never mu
     { name: 'missing build output', args: ['build', '--agent', 'claude-code'],
       patterns: [/Missing required options for build: --out/, /Pass --out/] },
     { name: 'unknown command', args: ['instal'], patterns: [/Unknown command "instal"/, /Choose list/, /agent-stuff --help/] },
-    { name: 'extra positional', args: ['install', 'bdv-explain-code'],
-      patterns: [/Unexpected argument "bdv-explain-code"/, /select items with --only/] },
+    { name: 'extra positional', args: ['install', 'bdv-product-brief'],
+      patterns: [/Unexpected argument "bdv-product-brief"/, /select items with --only/] },
     { name: 'unaccepted limitations', args: [...flags, '--source', path.resolve('tests/fixtures'), '--only', 'skill/bdv-handoff'],
       patterns: [/No files changed/, /--accept-limitations/, /--yes alone does not accept limitations/] },
   ];
@@ -456,17 +456,17 @@ test('update and uninstall suggest installed keys without mutating installation 
   const flags = ['--agent', 'claude-code', '--scope', 'project', '--project', dir, '--yes'];
   const run = (command: string, ...args: string[]) => spawnSync(process.execPath, [cli, command, ...flags, ...args],
     { encoding: 'utf8', env: { ...process.env, HOME: dir } });
-  const installed = run('install', '--only', 'skill/bdv-explain-code');
+  const installed = run('install', '--only', 'skill/bdv-product-brief');
   assert.equal(installed.status, 0, installed.stderr);
   const context = await targetContext('project', dir, dir, 'claude-code');
   const before = await readFile(context.manifest);
   const manifest = (await readManifest(context))!;
   const contents = await Promise.all(manifest.files.map(file => readFile(path.join(context.target, file.path))));
   for (const command of ['update', 'uninstall']) {
-    const result = run(command, '--only', 'bdv-explain-code');
+    const result = run(command, '--only', 'bdv-product-brief');
     assert.equal(result.status, 1, result.stderr);
-    assert.match(result.stderr, /Item is not installed in --only: "bdv-explain-code"/);
-    assert.match(result.stderr, /Did you mean skill\/bdv-explain-code\?/);
+    assert.match(result.stderr, /Item is not installed in --only: "bdv-product-brief"/);
+    assert.match(result.stderr, /Did you mean skill\/bdv-product-brief\?/);
     assert.deepEqual(await readFile(context.manifest), before);
     for (const [index, file] of manifest.files.entries()) {
       assert.deepEqual(await readFile(path.join(context.target, file.path)), contents[index]);
@@ -477,7 +477,7 @@ test('update and uninstall suggest installed keys without mutating installation 
 test('flag-driven conflicts explain how to resolve them without changing files or state in either scope', async t => {
   const dir = await temporary(t);
   const cli = path.resolve('dist/tool/src/cli.js');
-  const editedAsset = 'skill/bdv-explain-code';
+  const editedAsset = 'skill/bdv-product-brief';
   const otherAsset = 'skill/bdv-grill-me';
   for (const id of adapterIds) {
     for (const scope of ['project', 'global']) {
@@ -489,7 +489,7 @@ test('flag-driven conflicts explain how to resolve them without changing files o
       const run = (command: string, ...extra: string[]) => spawnSync(process.execPath, [cli, command, ...flags, ...extra],
         { env, encoding: 'utf8' });
       const context = await targetContext(scope, base, base, id);
-      const editedPath = 'skills/bdv-explain-code/SKILL.md';
+      const editedPath = 'skills/bdv-product-brief/SKILL.md';
       const destination = path.join(context.target, editedPath);
       await mkdir(path.dirname(destination), { recursive: true });
       await writeFile(destination, 'existing unmanaged file');

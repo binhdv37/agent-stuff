@@ -22,9 +22,9 @@ test('loads representative assets and preserves instruction and resource bytes',
   assert.equal(catalog.size, 7);
   for (const asset of catalog.values()) {
     if (asset.definition.kind !== 'skill') continue;
-    const original = await readFile(`core/skills/${asset.definition.id}/instructions.md`, 'utf8');
+    const original = await readFile(path.join(fixture, `core/skills/${asset.definition.id}/instructions.md`), 'utf8');
     assert.equal(asset.body, original);
-    for (const [resource, content] of asset.resources) assert.deepEqual(content, await readFile(`core/skills/${asset.definition.id}/${resource}`));
+    for (const [resource, content] of asset.resources) assert.deepEqual(content, await readFile(path.join(fixture, `core/skills/${asset.definition.id}/${resource}`)));
   }
   assert.equal(catalog.get('skill/bdv-teach')!.resources.size, 4);
   assert.equal(catalog.get('skill/bdv-handoff')!.definition.display_name, 'Handoff');

@@ -10,7 +10,12 @@ import { getAdapter } from '../adapters/index.js';
 
 test('migration preserves baseline content except documented core revisions', async () => {
   const catalog = await loadCatalog(path.join('.', 'core'));
-  assert.equal(catalog.size, 16);
+  assert.equal(catalog.size, 10);
+  const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
+    'skill/bdv-change-report', 'skill/bdv-explain-code']);
+  for (const key of [...retired, 'command/bdv-change-report', 'command/bdv-explain-code']) {
+    assert.equal(catalog.has(key), false, `${key} must remain retired`);
+  }
   const inventory = JSON.parse(await readFile('tests/fixtures/migration-inventory.json', 'utf8')) as { key: string; activation: string; hashes: Record<string, string> }[];
   assert.equal(inventory.length, 11);
   assert.equal(inventory.filter(a => a.activation === 'explicit').length, 9);
@@ -22,6 +27,7 @@ test('migration preserves baseline content except documented core revisions', as
     assert.ok(revision.reason.trim().length > 0);
   }
   for (const baseline of inventory) {
+    if (retired.has(baseline.key)) continue;
     const expected = revisions.find(r => r.key === baseline.key) ?? baseline;
     const asset = catalog.get(expected.key)!;
     assert.equal(asset.definition.kind, 'skill');
@@ -34,7 +40,7 @@ test('migration preserves baseline content except documented core revisions', as
   for (const id of ['codex', 'claude-code', 'opencode']) {
     const adapter = getAdapter(id);
     const skills = [...catalog.values()].filter(a => a.definition.kind === 'skill');
-    assert.equal(skills.filter(a => adapter.check(a, catalog).status !== 'unsupported').length, 11);
+    assert.equal(skills.filter(a => adapter.check(a, catalog).status !== 'unsupported').length, 7);
   }
 });
 

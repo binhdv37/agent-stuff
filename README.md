@@ -3,7 +3,7 @@
 Reusable workflows and agent roles for OpenCode, Codex, and Claude Code.
 
 Agent Stuff helps you give your AI coding tool a repeatable way to handle tasks
-such as documenting an API, explaining code, or handing work over to another
+such as preparing a product brief, learning a concept, or handing work over to another
 session. Choose the workflows you need and install them into your tool, globally
 or for a specific project.
 
@@ -17,8 +17,7 @@ A few examples from the collection:
 
 | When you need to… | Try | Expected result |
 |---|---|---|
-| Help frontend engineers integrate a backend API | [bdv-api-handoff](core/skills/bdv-api-handoff/instructions.md) | Markdown documentation of requests, responses, errors, and frontend-relevant behavior |
-| Understand unfamiliar code | [bdv-explain-code](core/skills/bdv-explain-code/instructions.md) | An explanation of the code and how it works |
+| Develop a product idea | [bdv-product-brief](core/skills/bdv-product-brief/instructions.md) | A structured product brief |
 | Continue work in another session | [bdv-handoff](core/skills/bdv-handoff/instructions.md) | A concise handoff document with sensitive information redacted |
 
 These are examples, rather than a complete catalog. To see the available stuff
@@ -29,8 +28,8 @@ bash install.sh list
 bash install.sh list --agent claude-code
 ```
 
-You can also browse the [skills](core/skills/), [agents](core/agents/), and
-[commands](core/commands/) before installing. With `--agent`, the catalog marks each
+You can also browse the [skills](core/skills/) and [agents](core/agents/)
+before installing. With `--agent`, the catalog marks each
 item as supported, limited, or unsupported for your chosen tool. Add `--json` for
 complete machine-readable output.
 
@@ -82,27 +81,24 @@ The launcher reuses an up-to-date build and only shows npm logs if preparation f
 
 ## Use an installed workflow
 
-For example, to prepare API documentation with Codex:
+For example, to prepare a product brief with Codex:
 
 1. Run the installer using either method above, choose `codex` and `project`, and
-   enter the path to your backend project.
-2. Select `skill/bdv-api-handoff`, review the preview, and confirm installation.
-3. Open a new Codex session in that backend project and make an explicit request:
+   enter the path to your project.
+2. Select `skill/bdv-product-brief`, review the preview, and confirm installation.
+3. Open a new Codex session in that project and make an explicit request:
 
 ```text
-Use bdv-api-handoff to document the orders API for frontend integration.
-Start from the routes and handlers in src/orders.
+Use bdv-product-brief to turn this idea into a product brief:
+A shared reading list for a small team.
 ```
 
-Replace the API name and path with your own. The workflow inspects the
-implementation and prepares Markdown covering the request and response contract,
-authentication, errors, and behavior relevant to the frontend. It asks for
-clarification when product meaning cannot be established from the code.
+Replace the example idea with your own.
 
 For other skills, explicitly name the workflow and describe the target or outcome
 you want. Most skills require explicit invocation; check the selected skill's
 `definition.yaml` for its activation policy. Claude Code also exposes skills as
-slash commands; OpenCode provides separate commands for selected workflows.
+slash commands; OpenCode supports separately defined commands.
 
 ## Preview, update, and remove
 
@@ -124,7 +120,7 @@ Preview a specific installation without changing the target project:
 
 ```bash
 npx agent-stuff@latest install --agent codex --scope project \
-  --project /path/to/backend --only skill/bdv-api-handoff --dry-run
+  --project /path/to/backend --only skill/bdv-product-brief --dry-run
 ```
 
 For the same project, preview an update or removal:

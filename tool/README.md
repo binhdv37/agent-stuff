@@ -62,7 +62,7 @@ và Next step. Failure dừng bar rồi giữ lỗi gốc.
 ```bash
 npm run cli -- build --agent codex --compatible-only --out dist/codex-preview
 npm run cli -- install --agent codex --scope project --project /path/to/project \
-  --only skill/bdv-api-handoff --dry-run
+  --only skill/bdv-product-brief --dry-run
 ```
 
 - `--out` phải là thư mục mới. Build không cài vào personal config.
@@ -105,7 +105,7 @@ npm run cli -- list --agent claude-code
 npm run cli -- status --scope project --project /path/to/project
 npm run cli -- status --json
 npm run cli -- update --agent codex --scope global --dry-run
-npm run cli -- uninstall --agent codex --scope global --only skill/bdv-api-handoff --dry-run
+npm run cli -- uninstall --agent codex --scope global --only skill/bdv-product-brief --dry-run
 npm run cli -- recover --agent codex --scope global --yes
 ```
 

@@ -43,7 +43,7 @@ const output = (id: string, content = id) => ({
 test('list summaries reuse short descriptions and omit activation without changing core content', async () => {
   const catalog = await loadCatalog('core');
   assert.equal(assetSummary(catalog.get('skill/bdv-handoff')!), 'Compact a conversation into a handoff');
-  const api = catalog.get('skill/bdv-api-handoff')!;
+  const api = (await loadCatalog('tests/fixtures/core')).get('skill/bdv-api-handoff')!;
   assert.match(assetSummary(api), /e\.g\. "document this API"/);
   const before = api.definition.description;
   for (const asset of catalog.values()) {
@@ -61,11 +61,12 @@ test('list groups items, preserves support labels, and keeps one bounded line pe
     for (const width of [1, 36, 60, 100, 160]) {
       const formatted = formatList(items, width);
       assert.ok(formatted.split('\n').every(line => line.length <= width));
-      assert.equal(formatted.split('\n').filter(Boolean).length, catalog.size + 3);
+      const groups = new Set(items.map(item => item.kind)).size;
+      assert.equal(formatted.split('\n').filter(Boolean).length, catalog.size + groups);
       assert.doesNotMatch(formatted, /\u001b\[/);
       if (width === 160) {
-        assert.ok(formatted.indexOf('Skills') < formatted.indexOf('Commands'));
-        assert.ok(formatted.indexOf('Commands') < formatted.indexOf('Agents'));
+        assert.ok(formatted.indexOf('Skills') < formatted.indexOf('Agents'));
+        assert.ok(!formatted.includes('Commands'));
         for (const item of items) {
           const row = formatted.split('\n').find(line => line.includes(item.key))!;
           assert.ok(row, item.key);

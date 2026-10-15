@@ -63,8 +63,8 @@ A skill supplies knowledge or a way to do a task; a command provides an explicit
 entry point; an agent supplies the assistant's role and execution permissions.
 They have distinct responsibilities even when their instructions overlap.
 
-For example, `skill/bdv-explain-code` owns the code explanation workflow, while
-`command/bdv-explain-code` references it as a user-invoked entry point.
+For example, a skill owns a workflow, while a command can reference that skill
+as a user-invoked entry point.
 Separately, `agent/solution-architect` defines an architecture advisor: its
 instructions guide the advice, and its policy denies workspace writes and shell
 execution.

@@ -10,12 +10,12 @@ source adapter/tool làm baseline.
 
 ```bash
 npm run build
-npm run verification -- fingerprint --asset skill/bdv-api-handoff --harness codex
+npm run verification -- fingerprint --asset skill/bdv-product-brief --harness codex
 npm run verification -- validate
 npm run verification -- report
 npm run verification -- report --check
 npm run verification -- validate --require-passed \
-  --asset skill/bdv-api-handoff --harness codex
+  --asset skill/bdv-product-brief --harness codex
 ```
 
 Truyền `--source /path/to/checkout` khi gọi từ nơi khác. Capture fingerprint trước
@@ -34,7 +34,7 @@ Ví dụ chưa test (placeholder phải thay bằng hash thật):
 
 ```yaml
 schema_version: 1
-asset: skill/bdv-api-handoff
+asset: skill/bdv-product-brief
 harness: codex
 checked_at: null
 fingerprint:
@@ -47,13 +47,13 @@ environment:
   scopes: [project]
   platform: macOS
   configuration: Home/project tạm; mô tả permissions/config thực tế
-contract: Tạo API handoff đúng implementation
+contract: Tạo product brief đúng yêu cầu
 cases:
   - id: behavior-happy-path
     stage: behavior
     required: true
     procedure: Fixture, prompt chính xác và cách chạy
-    expected: Handoff đúng nội dung và format
+    expected: Product brief đúng nội dung và format
     observed: Chưa chạy
     outcome: not-run
     evidence: []
