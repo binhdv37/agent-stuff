@@ -1,0 +1,15 @@
+schema_version: 1
+kind: skill
+id: bdv-code-review
+description: Review code changes before merge through five independent perspectives
+  (correctness, readability, architecture, security, and performance), then merge
+  findings and verification results into one verdict. Use when the user requests
+  this multi-perspective review workflow.
+activation: explicit
+instructions: instructions.md
+resources:
+  - axes/correctness.md
+  - axes/readability.md
+  - axes/architecture.md
+  - axes/security.md
+  - axes/performance.md

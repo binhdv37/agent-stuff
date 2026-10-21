@@ -103,7 +103,7 @@ test('compiled core runs independently with only its own files and declared depe
   await symlink(path.resolve('node_modules'), path.join(directory, 'node_modules'));
   const api = await import(pathToFileURL(path.join(directory, 'library/src/index.js')).href);
   const catalog = await api.loadCatalog(path.join(directory, 'catalog'));
-  assert.equal(catalog.size, 10);
+  assert.equal(catalog.size, 12);
   assert.equal(api.getContract().contractVersion, 3);
   assert.match(api.getDocs('concepts'), /i-agent/);
   assert.match(api.getDocs('format'), /definition.yaml/);

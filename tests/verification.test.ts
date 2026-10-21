@@ -50,10 +50,10 @@ async function save(source: string, record: Record): Promise<void> {
 test('verification matrix includes missing and unsupported targets without inventing passes', async t => {
   const source = await temporary(t);
   const rows = await inspect(source);
-  assert.equal(rows.length, 30);
+  assert.equal(rows.length, 36);
   assert.ok(rows.every(row => row.status === 'not-tested' && row.checkedAt === null));
   assert.equal(rows.find(row => row.asset === 'agent/experimental-plan' && row.harness === 'codex')!.compatibility, 'unsupported');
-  assert.match(report(rows), /Not tested: 30/);
+  assert.match(report(rows), /Not tested: 36/);
 });
 
 test('results are derived from cases and a newer blocked run replaces a previous pass', async t => {
@@ -173,7 +173,7 @@ test('verification CLI checks the summary and refuses unverified completion targ
   const source = await temporary(t);
   const cli = path.resolve('dist/tool/src/verification/cli.js');
   const run = (...args: string[]) => execFileSync(process.execPath, [cli, ...args, '--source', source], { encoding: 'utf8', stdio: 'pipe' });
-  assert.match(run('validate'), /30 asset\/harness pairs/);
+  assert.match(run('validate'), /36 asset\/harness pairs/);
   assert.throws(() => run('validate', '--require-passed', '--asset', 'skill/bdv-product-brief', '--harness', 'codex'), /Target is not currently verified/);
   const record = await recordAt(source);
   await save(source, record);

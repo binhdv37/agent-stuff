@@ -10,7 +10,7 @@ import { getAdapter } from '../adapters/index.js';
 
 test('migration preserves baseline content except documented core revisions', async () => {
   const catalog = await loadCatalog(path.join('.', 'core'));
-  assert.equal(catalog.size, 10);
+  assert.equal(catalog.size, 12);
   const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
     'skill/bdv-change-report', 'skill/bdv-explain-code']);
   for (const key of [...retired, 'command/bdv-change-report', 'command/bdv-explain-code']) {
@@ -40,7 +40,7 @@ test('migration preserves baseline content except documented core revisions', as
   for (const id of ['codex', 'claude-code', 'opencode']) {
     const adapter = getAdapter(id);
     const skills = [...catalog.values()].filter(a => a.definition.kind === 'skill');
-    assert.equal(skills.filter(a => adapter.check(a, catalog).status !== 'unsupported').length, 7);
+    assert.equal(skills.filter(a => adapter.check(a, catalog).status !== 'unsupported').length, 8);
   }
 });
 

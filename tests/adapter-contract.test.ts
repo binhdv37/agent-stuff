@@ -102,7 +102,11 @@ test('all native output bytes match the baseline captured before the adapter ref
   // Preserve historical hashes; retirement removes outputs, not their history.
   const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
     'skill/bdv-change-report', 'skill/bdv-explain-code', 'command/bdv-change-report', 'command/bdv-explain-code']);
-  assert.deepEqual(outputs, baseline.outputs.filter((output: { asset: string }) => !retired.has(output.asset)));
+  // Code review was added after this historical baseline; its installation and
+  // permission mapping are covered in code-review.test.ts, not migration hashes.
+  const additions = new Set(['skill/bdv-code-review', 'agent/bdv-reviewer']);
+  assert.deepEqual(outputs.filter(output => !additions.has(output.asset)),
+    baseline.outputs.filter((output: { asset: string }) => !retired.has(output.asset)));
 });
 
 test('adapters operate independently with core and dependencies, without tool files', async t => {
