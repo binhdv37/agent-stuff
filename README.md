@@ -47,9 +47,9 @@ changes. In OpenCode, explicit-only invocation is expressed through instructions
 rather than native enforcement.
 
 See [compatibility](adapters/docs/compatibility.md) for details and version baselines, and
-[verification results](verification/README.md) for recorded workflow checks
-and remaining gaps. Installation support alone does not mean every workflow has
-been verified in your tool.
+[owner-testing records](verification/README.md) for confirmed use and known issues.
+Installation checks and owner workflow testing are separate; an absent owner record
+does not mean installation is unsupported.
 
 ## Get started
 

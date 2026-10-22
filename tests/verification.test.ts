@@ -6,183 +6,125 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stringify } from 'yaml';
 import { loadCatalog } from '../core/src/index.js';
-import { getAdapter } from '../adapters/index.js';
-import { fingerprint, inspect, recordSchema, report, sha256, statusOf, type Record } from '../tool/src/verification/index.js';
+import { fingerprint, inspect, ownerTestsSchema, report, type OwnerTest } from '../tool/src/verification/index.js';
 
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
-  const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-verification-')));
-  t.after(() => rm(directory, { recursive: true, force: true }));
-  await cp('core', path.join(directory, 'core'), { recursive: true });
-  await cp('tool/src', path.join(directory, 'tool/src'), { recursive: true });
-  await cp('adapters', path.join(directory, 'adapters'), { recursive: true });
-  await cp('package-lock.json', path.join(directory, 'package-lock.json'));
-  return directory;
+  const source = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-owner-tests-')));
+  t.after(() => rm(source, { recursive: true, force: true }));
+  await cp('core', path.join(source, 'core'), { recursive: true });
+  await mkdir(path.join(source, 'verification'));
+  await save(source, []);
+  return source;
 }
 
-async function recordAt(source: string): Promise<Record> {
-  const catalog = await loadCatalog(path.join(source, 'core'));
-  const evidencePath = 'evidence/skill/bdv-product-brief/codex/latest.md';
-  const bytes = 'Synthetic evidence for verification infrastructure tests only.\n';
-  const artifact = path.join(source, 'verification/stuff', evidencePath);
-  await mkdir(path.dirname(artifact), { recursive: true });
-  await writeFile(artifact, bytes);
-  return recordSchema.parse({
-    schema_version: 1, asset: 'skill/bdv-product-brief', harness: 'codex',
-    checked_at: '2026-10-01T01:00:00Z',
-    fingerprint: await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex'),
-    environment: { harness_version: 'test-binary', adapter_revision: getAdapter('codex').version, model: 'test-model',
-      scopes: ['project'], platform: 'test-platform', configuration: 'Isolated test fixture; no real model run' },
-    contract: 'Test the verification ledger itself', limitations: [],
-    cases: ['core', 'render-install', 'discovery', 'behavior'].map((stage, index) => ({
-      id: `case-${index}`, stage, required: true, procedure: 'Synthetic infrastructure test',
-      expected: 'Fixture accepted', observed: 'Fixture accepted', outcome: 'passed',
-      evidence: [{ path: evidencePath, sha256: sha256(bytes) }],
-    })),
-  });
+async function save(source: string, records: OwnerTest[]): Promise<void> {
+  await writeFile(path.join(source, 'verification/owner-tests.yaml'), stringify({ schema_version: 1, records }));
 }
 
-async function save(source: string, record: Record): Promise<void> {
-  const destination = path.join(source, `verification/stuff/${record.asset}/${record.harness}.yaml`);
-  await mkdir(path.dirname(destination), { recursive: true });
-  await writeFile(destination, stringify(record));
+async function recordAt(source: string): Promise<OwnerTest> {
+  return { asset: 'skill/bdv-product-brief', harness: 'codex', scope: 'project', tested_on: '2026-10-01',
+    result: 'works', fingerprint: fingerprint(await loadCatalog(path.join(source, 'core')), 'skill/bdv-product-brief', 'codex'),
+    notes: 'Synthetic record for ledger tests only; not a real owner confirmation.' };
 }
 
-test('verification matrix includes missing and unsupported targets without inventing passes', async t => {
+test('owner records are optional, strict, scoped, and reject ambiguous or invalid entries', async t => {
   const source = await temporary(t);
-  const rows = await inspect(source);
-  assert.equal(rows.length, 36);
-  assert.ok(rows.every(row => row.status === 'not-tested' && row.checkedAt === null));
-  assert.equal(rows.find(row => row.asset === 'agent/experimental-plan' && row.harness === 'codex')!.compatibility, 'unsupported');
-  assert.match(report(rows), /Not tested: 36/);
-});
-
-test('results are derived from cases and a newer blocked run replaces a previous pass', async t => {
-  const source = await temporary(t);
+  assert.deepEqual(await inspect(source), []);
+  assert.match(report([]), /Chưa có xác nhận/);
   const record = await recordAt(source);
-  await save(source, record);
-  let row = (await inspect(source)).find(row => row.asset === record.asset && row.harness === record.harness)!;
-  assert.equal(row.status, 'passed');
-  assert.equal(row.stale, false);
-  assert.match(report(await inspect(source)), /skill\/bdv-product-brief \| limited \| Xem hồ sơ trên \| supported/);
-  record.cases[3]!.outcome = 'blocked';
-  record.cases[3]!.observed = 'Model inference could not run';
-  record.checked_at = '2026-10-01T02:00:00Z';
-  await save(source, record);
-  row = (await inspect(source)).find(row => row.asset === record.asset && row.harness === record.harness)!;
-  assert.equal(row.status, 'blocked');
-  assert.equal(row.checkedAt, record.checked_at);
-  assert.ok(row.issues.some(issue => issue.includes('Model inference could not run')));
-  assert.match(report([row]), /1 blocked/);
-  assert.ok(!report([row]).includes('Model inference could not run'));
-  assert.match(report([row]), /\]\(stuff\/skill\/bdv-product-brief\/codex\.yaml\)/);
-  record.cases[0]!.outcome = 'failed';
-  assert.equal(statusOf(record), 'failed');
-  record.cases = record.cases.slice(0, 3).map(c => ({ ...c, outcome: 'passed' }));
-  assert.equal(statusOf(record), 'partial');
-});
-
-test('verification rejects unsubstantiated outcomes, changed evidence, wrong identity and unsafe references', async t => {
-  const source = await temporary(t);
-  const record = await recordAt(source);
-  const noEvidence = structuredClone(record);
-  noEvidence.cases[0]!.evidence = [];
-  assert.equal(recordSchema.safeParse(noEvidence).success, false);
-  assert.equal(recordSchema.safeParse({ ...record, checked_at: null }).success, false);
-  assert.equal(recordSchema.safeParse({ ...record, status: 'passed' }).success, false);
-  await save(source, { ...record, environment: { ...record.environment, model: null } });
-  await assert.rejects(inspect(source), /requires harness version and model/);
-  await save(source, record);
-  const artifact = path.join(source, 'verification/stuff', record.cases[0]!.evidence[0]!.path);
-  await writeFile(artifact, 'Replaced evidence');
-  await assert.rejects(inspect(source), /hash mismatch/);
-  record.cases[0]!.evidence[0]!.path = '../outside';
-  assert.equal(recordSchema.safeParse(record).success, false);
-  const fresh = await recordAt(source);
-  await save(source, { ...fresh, asset: 'skill/missing' });
+  assert.equal(ownerTestsSchema.safeParse({ schema_version: 1, records: [record] }).success, true);
+  for (const change of [{ tested_on: '2026-02-30' }, { result: 'passed' }, { fingerprint: 'unknown' },
+    { harness: 'other' }, { scope: 'both' }, { notes: '' }, { cases: [] }]) {
+    assert.equal(ownerTestsSchema.safeParse({ schema_version: 1, records: [{ ...record, ...change }] }).success, false);
+  }
+  await save(source, [record, record]);
+  await assert.rejects(inspect(source), /Duplicate asset\/harness\/scope/);
+  await save(source, [record, { ...record, scope: 'global' }]);
+  assert.equal((await inspect(source)).length, 2);
+  await save(source, [{ ...record, asset: 'skill/missing' }]);
   await assert.rejects(inspect(source), /Unknown asset/);
-  await rm(path.join(source, 'verification/stuff/skill/missing'), { recursive: true });
-  await save(source, fresh);
-  await rm(artifact);
-  await symlink(path.join(source, 'package-lock.json'), artifact);
+  const file = path.join(source, 'verification/owner-tests.yaml');
+  await rm(file);
+  await symlink(path.join(source, 'core/skills/bdv-product-brief/definition.yaml'), file);
   await assert.rejects(inspect(source), /Symlink not allowed/);
 });
 
-test('complete cases cannot mark a currently unsupported mapping as passed', async t => {
-  const source = await temporary(t);
-  const record = await recordAt(source);
-  const catalog = await loadCatalog(path.join(source, 'core'));
-  record.asset = 'agent/experimental-plan';
-  record.fingerprint = await fingerprint(source, catalog, record.asset, record.harness);
-  const evidencePath = 'evidence/agent/experimental-plan/codex/latest.md';
-  const artifact = path.join(source, 'verification/stuff', evidencePath);
-  await mkdir(path.dirname(artifact), { recursive: true });
-  await writeFile(artifact, await readFile(path.join(source, 'verification/stuff', record.cases[0]!.evidence[0]!.path)));
-  for (const c of record.cases) c.evidence[0]!.path = evidencePath;
-  await save(source, record);
-  await assert.rejects(inspect(source), /Cannot pass an unsupported mapping/);
-});
-
-test('fingerprints cover resources, command workflows, delegated agents and implementation changes', async t => {
+test('fingerprints track installed resources and declared dependencies rather than unrelated repository edits', async t => {
   const source = await temporary(t);
   const commandDirectory = path.join(source, 'core/commands/example');
   await mkdir(commandDirectory, { recursive: true });
   await writeFile(path.join(commandDirectory, 'definition.yaml'),
-    'schema_version: 1\nkind: command\nid: example\ndescription: Test workflow reference\nworkflow: skill/bdv-product-brief\n');
+    'schema_version: 1\nkind: command\nid: example\ndescription: Test workflow reference\nworkflow: skill/bdv-grill-me\n');
   let catalog = await loadCatalog(path.join(source, 'core'));
-  const skill = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
-  const command = await fingerprint(source, catalog, 'command/example', 'opencode');
-  const agent = await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode');
-  await writeFile(path.join(source, 'core/skills/bdv-product-brief/assets/product-brief.md'), 'Changed resource');
+  const skill = fingerprint(catalog, 'skill/bdv-product-brief', 'codex');
+  const command = fingerprint(catalog, 'command/example', 'opencode');
+  const agent = fingerprint(catalog, 'agent/experimental-plan', 'opencode');
+  await writeFile(path.join(source, 'core/docs/format.md'), 'Unrelated authoring-document edit\n');
+  await writeFile(path.join(source, 'package-lock.json'), 'Unrelated dependency change\n');
+  assert.equal(fingerprint(await loadCatalog(path.join(source, 'core')), 'skill/bdv-product-brief', 'codex'), skill);
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/assets/product-brief.md'), 'Changed resource\n');
+  await writeFile(path.join(source, 'core/skills/bdv-grill-me/instructions.md'), 'Changed workflow\n');
+  await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/instructions.md'), 'Changed delegate\n');
   catalog = await loadCatalog(path.join(source, 'core'));
-  assert.notEqual((await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex')).core, skill.core);
-  const resourceOnlyCommand = await fingerprint(source, catalog, 'command/example', 'opencode');
-  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed workflow');
-  await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/instructions.md'), 'Changed helper');
-  catalog = await loadCatalog(path.join(source, 'core'));
-  const changedCommand = await fingerprint(source, catalog, 'command/example', 'opencode');
-  assert.notEqual(changedCommand.core, command.core);
-  assert.notEqual(changedCommand.core, resourceOnlyCommand.core);
-  assert.notEqual((await fingerprint(source, catalog, 'agent/experimental-plan', 'opencode')).core, agent.core);
-  const record = await recordAt(source);
-  await save(source, record);
-  await writeFile(path.join(source, 'adapters/codex/index.ts'), '// changed implementation\n');
-  const row = (await inspect(source)).find(row => row.asset === record.asset && row.harness === record.harness)!;
-  assert.equal(row.stale, true);
-  assert.match(report([row]), /Passed \(Stale\)/);
+  assert.notEqual(fingerprint(catalog, 'skill/bdv-product-brief', 'codex'), skill);
+  assert.notEqual(fingerprint(catalog, 'command/example', 'opencode'), command);
+  assert.notEqual(fingerprint(catalog, 'agent/experimental-plan', 'opencode'), agent);
+  assert.throws(() => fingerprint(catalog, 'skill/missing', 'codex'), /Unknown asset/);
+  assert.throws(() => fingerprint(catalog, 'agent/bdv-reviewer', 'codex'), /unsupported mapping/);
 });
 
-test('fingerprints cover the public core entrypoint and every moved implementation file', async t => {
+test('changed output and unsupported mappings do not rewrite owner history or imply a fresh success', async t => {
   const source = await temporary(t);
+  const record = await recordAt(source);
+  await save(source, [record]);
+  const original = await readFile(path.join(source, 'verification/owner-tests.yaml'), 'utf8');
+  assert.equal((await inspect(source))[0]!.stale, false);
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed instructions\n');
+  const row = (await inspect(source))[0]!;
+  assert.equal(row.result, 'works');
+  assert.equal(row.tested_on, record.tested_on);
+  assert.equal(row.stale, true);
+  assert.match(report([row]), /Changed since test/);
+  assert.equal(await readFile(path.join(source, 'verification/owner-tests.yaml'), 'utf8'), original);
+  await save(source, [{ ...record, result: 'has-issues', notes: 'Review | needs work\n<script>' },
+    { ...record, asset: 'agent/bdv-reviewer', result: 'needs-retest' }]);
+  const rows = await inspect(source);
+  assert.equal(rows[1]!.compatibility, 'unsupported');
+  assert.equal(rows[1]!.stale, true);
+  const markdown = report(rows);
+  assert.match(markdown, /Has issues/);
+  assert.match(markdown, /Needs retest \| unsupported \| Unavailable/);
+  assert.match(markdown, /Review &#124; needs work &lt;script&gt;/);
   const catalog = await loadCatalog(path.join(source, 'core'));
-  let previous = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
-  const files = [
-    ...['index', 'contract', 'schema', 'catalog', 'paths', 'docs', 'errors'].map(name => `core/src/${name}.ts`),
-    ...['README', 'concepts', 'format'].map(name => `core/docs/${name}.md`),
-  ];
-  for (const relative of files) {
-    const file = path.join(source, relative);
-    await writeFile(file, (await readFile(file, 'utf8')) + '\n// fingerprint change\n');
-    const current = await fingerprint(source, catalog, 'skill/bdv-product-brief', 'codex');
-    assert.notEqual(current.implementation, previous.implementation, relative);
-    assert.equal(current.core, previous.core, relative);
-    previous = current;
-  }
+  await save(source, [{ ...record, asset: 'agent/experimental-plan', harness: 'opencode',
+    fingerprint: fingerprint(catalog, 'agent/experimental-plan', 'opencode') }]);
+  const helperDefinition = path.join(source, 'core/agents/bdv-plan-reviewer/definition.yaml');
+  await writeFile(helperDefinition, (await readFile(helperDefinition, 'utf8')) + '\nresources: [extra.md]\n');
+  await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/extra.md'), 'Unsupported agent resource\n');
+  assert.equal((await inspect(source))[0]!.compatibility, 'unsupported');
+  assert.equal((await inspect(source))[0]!.stale, true);
 });
 
-test('verification CLI checks the summary and refuses unverified completion targets', async t => {
+test('verification CLI validates owner data and checks summaries without a model-behavior gate', async t => {
   const source = await temporary(t);
   const cli = path.resolve('dist/tool/src/verification/cli.js');
   const run = (...args: string[]) => execFileSync(process.execPath, [cli, ...args, '--source', source], { encoding: 'utf8', stdio: 'pipe' });
-  assert.match(run('validate'), /36 asset\/harness pairs/);
-  assert.throws(() => run('validate', '--require-passed', '--asset', 'skill/bdv-product-brief', '--harness', 'codex'), /Target is not currently verified/);
+  assert.match(run('validate'), /Validated 0 owner-testing records/);
   const record = await recordAt(source);
-  await save(source, record);
-  run('validate', '--require-passed', '--asset', record.asset, '--harness', record.harness);
+  assert.deepEqual(JSON.parse(run('fingerprint', '--asset', record.asset, '--harness', record.harness)), { fingerprint: record.fingerprint });
+  await save(source, [record]);
+  assert.match(run('validate'), /Validated 1 owner-testing records/);
   run('report');
   assert.match(run('report', '--check'), /summary is current/);
-  const summary = path.join(source, 'verification/README.md');
-  await writeFile(summary, (await readFile(summary, 'utf8')) + 'Manual edit\n');
+  const ledger = await readFile(path.join(source, 'verification/owner-tests.yaml'), 'utf8');
+  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed after owner use\n');
   assert.throws(() => run('report', '--check'), /summary is out of date/);
-  await writeFile(path.join(source, 'core/skills/bdv-product-brief/instructions.md'), 'Changed content');
-  assert.throws(() => run('validate', '--require-passed', '--asset', record.asset, '--harness', record.harness), /Target is not currently verified/);
+  assert.match(run('validate'), /Validated 1 owner-testing records/);
+  run('report');
+  assert.match(await readFile(path.join(source, 'verification/README.md'), 'utf8'), /Changed since test/);
+  for (const args of [['validate', '--require-passed'], ['fingerprint', '--asset', 'skill/missing', '--harness', 'codex'],
+    ['fingerprint', '--asset', record.asset, '--harness', 'unknown'], ['validate', '--asset', record.asset]]) {
+    assert.throws(() => run(...args));
+  }
+  assert.equal(await readFile(path.join(source, 'verification/owner-tests.yaml'), 'utf8'), ledger);
 });

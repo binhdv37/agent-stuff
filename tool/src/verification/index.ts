@@ -1,215 +1,104 @@
 import { createHash } from 'node:crypto';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { adapterIds, type AdapterId } from '../../../adapters/index.js';
-import { loadCatalog, selectAssets, assertNoSymlinks, inside, relativePath, type Asset } from '../../../core/src/index.js';
-import { getAdapter } from '../../../adapters/index.js';
+import { adapterIds, getAdapter, type AdapterId, type Compatibility, type OutputFile } from '../../../adapters/index.js';
+import { assertNoSymlinks, loadCatalog, type Asset } from '../../../core/src/index.js';
 
-const nonempty = z.string().trim().min(1);
-const digest = z.string().regex(/^[a-f0-9]{64}$/);
-const stage = z.enum(['core', 'render-install', 'discovery', 'behavior']);
-const stages = stage.options;
-const outcome = z.enum(['passed', 'failed', 'blocked', 'not-run']);
-export const recordSchema = z.strictObject({
-  schema_version: z.literal(1),
+export const ownerTestSchema = z.strictObject({
   asset: z.string().regex(/^(skill|agent|command)\/[a-z0-9]+(-[a-z0-9]+)*$/),
   harness: z.enum(adapterIds),
-  checked_at: z.iso.datetime({ offset: true }).nullable(),
-  fingerprint: z.strictObject({ core: digest, implementation: digest }),
-  environment: z.strictObject({
-    harness_version: nonempty.nullable(), adapter_revision: z.number().int().positive(),
-    model: nonempty.nullable(), scopes: z.array(z.enum(['project', 'global'])).min(1),
-    platform: nonempty, configuration: nonempty,
-  }),
-  contract: nonempty,
-  cases: z.array(z.strictObject({
-    id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/), stage, required: z.boolean(),
-    procedure: nonempty, expected: nonempty, observed: nonempty, outcome,
-    evidence: z.array(z.strictObject({ path: relativePath, sha256: digest })),
-  })),
-  limitations: z.array(nonempty),
-}).superRefine((record, ctx) => {
-  const ids = record.cases.map(c => c.id);
-  if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', message: 'Duplicate case ID' });
-  const attempted = record.cases.some(c => c.outcome !== 'not-run');
-  if (attempted !== (record.checked_at !== null)) {
-    ctx.addIssue({ code: 'custom', message: 'checked_at must identify the latest attempted run; null only before testing' });
-  }
-  for (const c of record.cases) {
-    if (c.outcome !== 'not-run' && !c.evidence.length) {
-      ctx.addIssue({ code: 'custom', message: `Case ${c.id} requires evidence for its outcome` });
-    }
-    if (c.outcome === 'not-run' && c.evidence.length) {
-      ctx.addIssue({ code: 'custom', message: `Unrun case ${c.id} cannot cite evidence` });
-    }
+  scope: z.enum(['project', 'global']),
+  tested_on: z.iso.date(),
+  result: z.enum(['works', 'has-issues', 'needs-retest']),
+  fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  notes: z.string().trim().min(1).optional(),
+});
+export type OwnerTest = z.infer<typeof ownerTestSchema>;
+
+export const ownerTestsSchema = z.strictObject({
+  schema_version: z.literal(1),
+  records: z.array(ownerTestSchema),
+}).superRefine(({ records }, ctx) => {
+  const targets = records.map(record => `${record.asset}:${record.harness}:${record.scope}`);
+  if (new Set(targets).size !== targets.length) {
+    ctx.addIssue({ code: 'custom', message: 'Duplicate asset/harness/scope; keep one latest owner record per target' });
   }
 });
-export type Record = z.infer<typeof recordSchema>;
-export type Status = 'not-tested' | 'passed' | 'failed' | 'blocked' | 'partial';
-export const sha256 = (bytes: Buffer | string): string => createHash('sha256').update(bytes).digest('hex');
 
-export function statusOf(record: Record): Status {
-  if (!record.cases.some(c => c.outcome !== 'not-run')) return 'not-tested';
-  // A failing optional case is still visible: it must not disappear behind green required cases.
-  if (record.cases.some(c => c.outcome === 'failed')) return 'failed';
-  if (record.cases.some(c => c.outcome === 'blocked')) return 'blocked';
-  const required = record.cases.filter(c => c.required);
-  return stages.every(s => required.some(c => c.stage === s)) && required.every(c => c.outcome === 'passed')
-    ? 'passed' : 'partial';
-}
+const sha256 = (bytes: Buffer | string): string => createHash('sha256').update(bytes).digest('hex');
 
-const implementationFiles = [
-  'adapters/types.ts', 'adapters/render.ts', 'adapters/runtime.ts', 'adapters/index.ts', 'tool/src/cli.ts',
-  'core/src/index.ts', 'core/src/contract.ts', 'core/src/schema.ts',
-  'core/src/catalog.ts', 'core/src/paths.ts',
-  'core/src/docs.ts', 'core/src/errors.ts',
-  'core/docs/README.md', 'core/docs/concepts.md', 'core/docs/format.md',
-  'tool/src/installation/index.ts', 'package-lock.json',
-];
-
-export async function fingerprint(source: string, catalog: Map<string, Asset>, key: string, harness: AdapterId): Promise<Record['fingerprint']> {
+function installedOutput(catalog: Map<string, Asset>, key: string, harness: AdapterId): {
+  compatibility: Compatibility['status']; files: OutputFile[];
+} {
   const closure = new Map<string, Asset>();
-  function visit(asset: Asset): void {
-    if (closure.has(asset.key)) return;
-    closure.set(asset.key, asset);
-    if (asset.definition.kind === 'command') visit(catalog.get(asset.definition.workflow)!);
+  function visit(key: string): void {
+    if (closure.has(key)) return;
+    const asset = catalog.get(key);
+    if (!asset) throw new Error(`Unknown asset: ${key}`);
+    closure.set(key, asset);
+    if (asset.definition.kind === 'command') visit(asset.definition.workflow);
     if (asset.definition.kind === 'agent') {
-      for (const target of asset.definition.policy.delegation_targets) visit(catalog.get(target)!);
+      for (const target of asset.definition.policy.delegation_targets) visit(target);
     }
   }
-  for (const asset of selectAssets(catalog, [key])) visit(asset);
-  const content: [string, string][] = [];
-  for (const asset of [...closure.values()].sort((a, b) => a.key.localeCompare(b.key))) {
-    const d = asset.definition;
-    const root = `core/${d.kind}s/${d.id}`;
-    const paths = ['definition.yaml', ...(d.kind === 'command' ? [] : [d.instructions, ...d.resources])];
-    for (const relative of paths.sort()) {
-      const file = `${root}/${relative}`;
-      await assertNoSymlinks(inside(source, file));
-      content.push([file, sha256(await readFile(inside(source, file)))]);
-    }
-  }
-  const implementation: [string, string][] = [];
-  for (const file of [...implementationFiles, `adapters/${harness}/index.ts`].sort()) {
-    const absolute = inside(source, file);
-    await assertNoSymlinks(absolute);
-    implementation.push([file, sha256(await readFile(absolute))]);
-  }
-  return { core: sha256(JSON.stringify(content)), implementation: sha256(JSON.stringify(implementation)) };
+  visit(key);
+  const adapter = getAdapter(harness);
+  const assets = [...closure.values()];
+  const statuses = assets.map(asset => adapter.check(asset, catalog).status);
+  if (statuses.includes('unsupported')) return { compatibility: 'unsupported', files: [] };
+  return { compatibility: statuses.includes('limited') ? 'limited' : 'supported',
+    files: assets.flatMap(asset => adapter.render(asset, catalog)) };
 }
 
-export type Row = {
-  asset: string; harness: AdapterId; compatibility: string; status: Status;
-  stale: boolean; checkedAt: string | null; issues: string[]; recordPath: string | null;
-  caseCounts: { failed: number; blocked: number; notRun: number; missingStages: number };
-};
+/** Hash installed bytes and declared dependencies, not unrelated repository implementation. */
+function outputFingerprint(files: OutputFile[], harness: AdapterId): string {
+  const hashes = files.map(file => [file.asset, file.path, sha256(file.content)]);
+  hashes.sort((a, b) => {
+    const left = `${a[0]}\0${a[1]}`, right = `${b[0]}\0${b[1]}`;
+    return left < right ? -1 : left > right ? 1 : 0;
+  });
+  return sha256(JSON.stringify({ harness, files: hashes }));
+}
 
-export async function inspect(source: string, verificationRoot = path.join(source, 'verification/stuff')): Promise<Row[]> {
+export function fingerprint(catalog: Map<string, Asset>, key: string, harness: AdapterId): string {
+  const output = installedOutput(catalog, key, harness);
+  if (output.compatibility === 'unsupported') throw new Error(`Cannot fingerprint unsupported mapping: ${key} on ${harness}`);
+  return outputFingerprint(output.files, harness);
+}
+
+export type Row = OwnerTest & { compatibility: Compatibility['status']; stale: boolean };
+
+export async function inspect(source: string): Promise<Row[]> {
   const catalog = await loadCatalog(path.join(source, 'core'));
-  const records = new Map<string, { record: Record; relative: string }>();
-  for (const kind of ['skill', 'agent', 'command']) {
-    const directory = path.join(verificationRoot, kind);
-    await assertNoSymlinks(directory);
-    let entries;
-    try { entries = await readdir(directory, { withFileTypes: true }); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue; throw error; }
-    for (const entry of entries) {
-      if (!entry.isDirectory()) throw new Error(`Expected asset verification directory: ${entry.name}`);
-      for (const file of await readdir(path.join(directory, entry.name))) {
-        const relative = `${kind}/${entry.name}/${file}`;
-        const absolute = inside(verificationRoot, relative);
-        await assertNoSymlinks(absolute);
-        if (!file.endsWith('.yaml')) throw new Error(`Unexpected verification file: ${relative}`);
-        try {
-          const record = recordSchema.parse(parse(await readFile(absolute, 'utf8')));
-          if (record.asset !== `${kind}/${entry.name}` || file !== `${record.harness}.yaml`) {
-            throw new Error('Record identity does not match path');
-          }
-          if (!catalog.has(record.asset)) throw new Error(`Unknown asset: ${record.asset}`);
-          for (const c of record.cases) {
-            for (const evidence of c.evidence) {
-              if (!evidence.path.startsWith(`evidence/${kind}/${entry.name}/${record.harness}/`)) {
-                throw new Error(`Evidence must belong to this asset/harness: ${evidence.path}`);
-              }
-              const artifact = inside(verificationRoot, evidence.path);
-              await assertNoSymlinks(artifact);
-              const bytes = await readFile(artifact);
-              if (!bytes.length || sha256(bytes) !== evidence.sha256) throw new Error(`Evidence missing content or hash mismatch: ${evidence.path}`);
-            }
-          }
-          if (statusOf(record) === 'passed') {
-            if (!record.environment.harness_version || !record.environment.model) {
-              throw new Error('Passed runtime verification requires harness version and model');
-            }
-          }
-          records.set(`${record.asset}:${record.harness}`, { record, relative });
-        } catch (error) { throw new Error(`${relative}: ${(error as Error).message}`); }
-      }
-    }
-  }
-  const rows: Row[] = [];
-  for (const asset of catalog.values()) {
-    for (const harness of adapterIds) {
-      const adapter = getAdapter(harness);
-      const compatibility = adapter.check(asset, catalog);
-      const saved = records.get(`${asset.key}:${harness}`);
-      const issues = compatibility.issues.map(i => `${i.field}: ${i.reason} Effect: ${i.effect}`);
-      let stale = false;
-      if (saved) {
-        const current = await fingerprint(source, catalog, asset.key, harness);
-        stale = current.core !== saved.record.fingerprint.core || current.implementation !== saved.record.fingerprint.implementation ||
-          saved.record.environment.adapter_revision !== adapter.version;
-        if (!stale && statusOf(saved.record) === 'passed' && compatibility.status === 'unsupported') {
-          throw new Error(`${saved.relative}: Cannot pass an unsupported mapping`);
-        }
-        if (stale) issues.push('Source/mapping changed since this record');
-        for (const c of saved.record.cases.filter(c => c.outcome !== 'passed')) issues.push(`${c.id}: ${c.outcome} — ${c.observed}`);
-        for (const s of stages) {
-          if (!saved.record.cases.some(c => c.required && c.stage === s)) issues.push(`Missing required stage: ${s}`);
-        }
-        issues.push(...saved.record.limitations);
-      } else issues.push('No per-asset runtime verification record');
-      rows.push({ asset: asset.key, harness, compatibility: compatibility.status,
-        status: saved ? statusOf(saved.record) : 'not-tested', stale,
-        checkedAt: saved?.record.checked_at ?? null, issues, recordPath: saved?.relative ?? null,
-        caseCounts: {
-          failed: saved?.record.cases.filter(c => c.outcome === 'failed').length ?? 0,
-          blocked: saved?.record.cases.filter(c => c.outcome === 'blocked').length ?? 0,
-          notRun: saved?.record.cases.filter(c => c.outcome === 'not-run').length ?? 0,
-          missingStages: saved ? stages.filter(s => !saved.record.cases.some(c => c.required && c.stage === s)).length : 0,
-        } });
-    }
-  }
-  return rows;
+  const file = path.join(source, 'verification/owner-tests.yaml');
+  await assertNoSymlinks(file);
+  const { records } = ownerTestsSchema.parse(parse(await readFile(file, 'utf8')));
+  return records.map(record => {
+    const asset = catalog.get(record.asset);
+    if (!asset) throw new Error(`verification/owner-tests.yaml: Unknown asset: ${record.asset}`);
+    const output = installedOutput(catalog, record.asset, record.harness);
+    return { ...record, compatibility: output.compatibility,
+      stale: output.compatibility === 'unsupported' || outputFingerprint(output.files, record.harness) !== record.fingerprint };
+  });
 }
 
-const escape = (value: string): string => value.replaceAll('|', '\\|').replace(/[\r\n]+/g, ' ');
+const escape = (value: string): string => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;').replaceAll('|', '&#124;').replace(/[\r\n]+/g, ' ');
+
 export function report(rows: Row[]): string {
-  const labels: { [S in Status]: string } = { 'not-tested': 'Not tested', passed: 'Passed', failed: 'Failed', blocked: 'Blocked', partial: 'Partial' };
-  const counts = Object.entries(labels).map(([status, label]) => `${label}: ${rows.filter(r => r.status === status).length}`).join(' · ');
-  const recorded = rows.filter(r => r.recordPath);
-  const missing = [...new Set(rows.filter(r => !r.recordPath).map(r => r.asset))];
-  const cases = (r: Row): string => [
-    r.caseCounts.failed ? `${r.caseCounts.failed} failed` : '',
-    r.caseCounts.blocked ? `${r.caseCounts.blocked} blocked` : '',
-    r.caseCounts.notRun ? `${r.caseCounts.notRun} chưa chạy` : '',
-    r.caseCounts.missingStages ? `${r.caseCounts.missingStages} thiếu stage` : '',
-  ].filter(Boolean).join('; ') || '—';
-  return '# Kiểm chứng stuff\n\n' +
+  const introduction = '# Owner testing\n\n' +
     'Generated by `npm run verification -- report`. Không sửa bảng bằng tay.\n\n' +
-    '[Testing](../docs/testing.md) · [Format/tooling](../tool/docs/verification.md) · ' +
-    '[Compatibility](../adapters/docs/compatibility.md). Mapping không đồng nghĩa verified; chi tiết cases/giới hạn nằm trong hồ sơ.\n\n' +
-    `${counts} · Stale: ${rows.filter(r => r.stale).length}\n\n` +
-    '## Có hồ sơ\n\n' +
-    (recorded.length ? '| Stuff | Harness | Mapping | Kết quả | Lượt gần nhất | Cases còn lại |\n|---|---|---|---|---|---|\n' +
-      recorded.map(r => `| [${r.asset}](stuff/${r.recordPath}) | ${r.harness} | ${r.compatibility} | ${labels[r.status]}${r.stale ? ' (Stale)' : ''} | ${r.checkedAt ?? '—'} | ${cases(r)} |`).join('\n') : 'Chưa có hồ sơ.') +
-    '\n\n## Chưa có hồ sơ\n\nTarget thiếu hồ sơ đều **Not tested**; bảng chỉ ghi mapping hoặc dẫn tới hồ sơ trên.\n\n' +
-    (missing.length ? '| Stuff | OpenCode | Codex | Claude Code |\n|---|---|---|---|\n' +
-      missing.map(asset => `| ${escape(asset)} | ${adapterIds.map(harness => {
-        const row = rows.find(r => r.asset === asset && r.harness === harness);
-        return row?.recordPath ? 'Xem hồ sơ trên' : row?.compatibility ?? '—';
-      }).join(' | ')} |`).join('\n') : 'Không có target thiếu hồ sơ.') +
-    '\n';
+    '[Testing](../docs/testing.md) · [Record format](../tool/docs/verification.md) · ' +
+    '[Compatibility](../adapters/docs/compatibility.md)\n\n' +
+    'Chỉ ghi xác nhận dùng thử của owner, không phải kết quả automated tests hay bảo đảm mọi tình huống. ' +
+    'Chưa có record không chặn implementation/commit.\n\n';
+  if (!rows.length) return introduction + 'Chưa có xác nhận owner testing được ghi nhận.\n';
+  const labels = { works: 'Works for owner', 'has-issues': 'Has issues', 'needs-retest': 'Needs retest' };
+  return introduction +
+    '| Asset | Harness | Scope | Tested on | Owner result | Mapping | Output | Notes |\n' +
+    '|---|---|---|---|---|---|---|---|\n' +
+    rows.map(row => `| ${escape(row.asset)} | ${row.harness} | ${row.scope} | ${row.tested_on} | ` +
+      `${labels[row.result]} | ${row.compatibility} | ${row.compatibility === 'unsupported' ? 'Unavailable' : row.stale ? 'Changed since test' : 'Matches recorded output'} | ${escape(row.notes ?? '—')} |`).join('\n') + '\n';
 }

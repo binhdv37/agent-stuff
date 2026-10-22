@@ -39,7 +39,7 @@ Chỉ nói **owner-tested** khi owner xác nhận đã thử, không suy từ ap
 owner testing; thiếu owner test là chưa thử, không phải implementation failure.
 Khi owner yêu cầu lưu xác nhận, ghi asset, harness/scope được xác nhận và giới hạn
 đã biết; không suy rộng sang target khác hoặc coi đó là exhaustive verification.
-Format/tooling cho xác nhận nhẹ này chưa được triển khai.
+Ledger và cách ghi nhận ở [owner-testing records](../tool/docs/verification.md).
 
 ## Checks từ checkout
 
@@ -49,10 +49,9 @@ npm run typecheck
 npm run cli -- validate --source .
 ```
 
-`npm test` build, chạy repository tests, check generated fields và verification
-integrity/summary; không chạy model và không yêu cầu mọi stuff Passed. Cách ghi
-hồ sơ verification hiện có, format, fingerprints và gate ở
-[verification tooling](../tool/docs/verification.md); trạng thái ở
+`npm test` build, chạy repository tests, check generated fields và owner-record
+integrity/summary; không chạy model và không yêu cầu mọi stuff đã được owner thử.
+Format và fingerprints ở [owner-testing records](../tool/docs/verification.md); trạng thái ở
 [summary](../verification/README.md), khả năng mapping ở
 [compatibility](../adapters/docs/compatibility.md).
 
@@ -107,14 +106,11 @@ Nguồn runner: [Codex app-server](https://learn.chatgpt.com/docs/app-server),
 [Claude headless](https://code.claude.com/docs/en/headless),
 [Claude CLI](https://code.claude.com/docs/en/cli-reference).
 
-## Hồ sơ verification hiện có
+## Records và evidence
 
-Nếu user yêu cầu một lượt formal verification, dùng format và quy tắc evidence
-của [verification tooling](../tool/docs/verification.md). Artifact được giữ tại
-`verification/`; output tạm ở ngoài Git. Không giữ secrets/log thô hoặc tạo hồ sơ
-workflow giả để làm đầy bảng. Cập nhật hồ sơ/summary cần documentation approval.
-
-`validate --require-passed` vẫn kiểm **formal records** theo schema hiện có;
-không phải gate cho implementation/commit hoặc xác nhận owner-tested. Không đổi
-hash/timestamp hay biến missing/stale evidence thành Passed. Docs/tooling-only
-changes chạy checks phù hợp, không chạy model chỉ để xác nhận sửa tài liệu.
+Owner confirmations được ghi khi owner yêu cầu, theo format đã dẫn ở trên;
+không có formal four-stage gate. Không tạo hồ sơ hoặc chạy model để làm đầy bảng.
+Giữ evidence adapter/refactor còn giá trị tại `verification/`, output tạm ở ngoài
+Git. Không giữ secrets/log thô; cập nhật records/summary cần documentation approval.
+Docs/tooling-only changes chạy checks phù hợp, không chạy model chỉ để xác nhận
+sửa tài liệu.
