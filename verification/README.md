@@ -27,7 +27,7 @@ Target thiếu hồ sơ đều **Not tested**; bảng chỉ ghi mapping hoặc d
 | skill/bdv-interview-coach | limited | supported | supported |
 | skill/bdv-product-brief | limited | supported | supported |
 | skill/bdv-teach | limited | limited | limited |
-| agent/bdv-plan-reviewer | supported | unsupported | unsupported |
-| agent/bdv-reviewer | supported | unsupported | unsupported |
+| agent/bdv-plan-reviewer | supported | unsupported | supported |
+| agent/bdv-reviewer | supported | unsupported | supported |
 | agent/experimental-plan | supported | unsupported | unsupported |
 | agent/solution-architect | supported | unsupported | unsupported |

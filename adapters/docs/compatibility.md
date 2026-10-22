@@ -1,7 +1,7 @@
 # Tương thích adapter
 
-Trạng thái dưới đây là implementation hiện tại: adapter revision **2**, core
-contract **3**, YAML schema **1**. Supported mapping không đồng nghĩa workflow đã
+Trạng thái dưới đây là implementation hiện tại: OpenCode/Codex revision **2**,
+Claude Code revision **3**, core contract **3**, YAML schema **1**. Supported mapping không đồng nghĩa workflow đã
 verified; kết quả từng stuff nằm ở [verification](../../verification/README.md).
 
 ## Hỗ trợ
@@ -10,7 +10,7 @@ verified; kết quả từng stuff nằm ở [verification](../../verification/R
 |---|---|---|---|
 | OpenCode V1 | Skills/resources; explicit activation limited | Command riêng inline skill | Primary và helper delegated với policy được mapping |
 | Codex | Skills/resources, UI metadata, invocation policy | Dùng skill tương ứng; command riêng unsupported | Unsupported |
-| Claude Code | Skills/resources, slash entry, invocation policy | Dùng skill slash command; command riêng unsupported | Unsupported |
+| Claude Code | Skills/resources, slash entry, invocation policy | Dùng skill slash command; command riêng unsupported | Delegated chỉ đọc với tool allowlist; primary và policy khác unsupported |
 
 Unsupported ở đây phản ánh adapter, không khẳng định harness thiếu capability.
 
@@ -38,6 +38,17 @@ V1 dùng singular `permission`, catch-all deny trước exceptions:
 
 OpenCode 1.18.32/1.18.33 đã nạp role/tool/permission qua debug runtime. Chưa có
 phiên model đầy đủ chứng minh tạo plan và từ chối ghi ngoài plan directory.
+
+## Agent policy Claude Code
+
+Revision 3 render delegated agent thành `.claude/agents/<id>.md` ở project hoặc
+`~/.claude/agents/<id>.md` ở global, dùng `tools: [Read, Glob, Grep]` làm allowlist.
+Chỉ hỗ trợ workspace_read allow; workspace_write, shell, questions và delegation
+deny; không có write_paths, delegation_targets hoặc agent resources. Các tổ hợp
+khác bị chặn, không đổi role hay dùng prompt thay enforcement.
+
+Mapping dựa trên [native baseline](harnesses/claude-code.md), chưa có owner/runtime
+test cho output mới. Codex agent vẫn unsupported trong adapter.
 
 ## Phạm vi bằng chứng
 

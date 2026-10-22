@@ -105,7 +105,9 @@ test('all native output bytes match the baseline captured before the adapter ref
   // Code review was added after this historical baseline; its installation and
   // permission mapping are covered in code-review.test.ts, not migration hashes.
   const additions = new Set(['skill/bdv-code-review', 'agent/bdv-reviewer']);
-  assert.deepEqual(outputs.filter(output => !additions.has(output.asset)),
+  // Claude Code delegated-agent mapping was introduced after the refactor baseline.
+  const newMappings = new Set(['claude-code:agent/bdv-plan-reviewer']);
+  assert.deepEqual(outputs.filter(output => !additions.has(output.asset) && !newMappings.has(`${output.adapter}:${output.asset}`)),
     baseline.outputs.filter((output: { asset: string }) => !retired.has(output.asset)));
 });
 

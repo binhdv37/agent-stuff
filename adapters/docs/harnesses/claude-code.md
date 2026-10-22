@@ -1,9 +1,9 @@
 # Claude Code: native baseline
 
-Target: local `.claude/skills`, global/project. Docs đọc **2026-09-30**, không pin
-release. Binary lúc author: chưa ghi nhận. Adapter `claude-code`, revision 2;
-code `adapters/claude-code/index.ts`. Native mapping giữ từ revision 1;
-revision 2 không có lượt đọc docs mới.
+Target: local `.claude/skills` và `.claude/agents`, global/project. Adapter
+`claude-code`, revision **3**; code `adapters/claude-code/index.ts`. Skills giữ
+baseline **2026-09-30**; subagent docs đọc **2026-10-22**, không pin release.
+Máy phát triển chưa có Claude Code binary; output mới chưa được owner/runtime test.
 
 ## Mapping đang dùng
 
@@ -20,13 +20,33 @@ Nguồn: [Skills — invocation, arguments, command equivalence](https://code.cl
 Tests: `tests/core-adapter.test.ts`, `tests/lifecycle.test.ts`,
 `tests/adapter-contract.test.ts`. Runtime: [compatibility](../compatibility.md).
 
+### Delegated agents (revision 3)
+
+- Project `.claude/agents/<id>.md`, global `~/.claude/agents/<id>.md`.
+  Frontmatter có `name`, `description`, `tools`; body giữ nguyên core instructions.
+- `tools: [Read, Glob, Grep]` là subagent tool allowlist, khác skill `allowed-tools`.
+  Không inherit Bash, write/edit, Agent, AskUserQuestion hay MCP tools; không bật
+  memory vì memory có thể tự thêm quyền ghi.
+- Chỉ map delegated role với workspace_read allow và workspace_write/shell/
+  questions/delegation deny; write_paths/delegation_targets phải rỗng. Agent resources,
+  primary role và policy khác bị chặn. Không ghi shared settings, không set model
+  hoặc permissionMode, không thay enforcement bằng instructions.
+- Claude Code cũng cho chạy agent bằng `--agent` ở main thread; adapter này chỉ
+  công bố delegated mapping, không coi khả năng đó là hỗ trợ core primary role.
+
+Nguồn: [Subagent files và scopes](https://code.claude.com/docs/en/sub-agents#choose-the-subagent-scope),
+[tool allowlist](https://code.claude.com/docs/en/sub-agents#restrict-which-tools-a-subagent-can-use),
+[permission modes](https://code.claude.com/docs/en/sub-agents#permission-modes),
+[memory tự bật quyền ghi](https://code.claude.com/docs/en/sub-agents#enable-persistent-memory).
+Đây là cơ sở mapping, không phải bằng chứng output đã chạy đúng trong harness.
+
 ## Lưu ý khi mở rộng
 
 Những capability đã research dưới đây **chưa được adapter implement**:
 
-- [Subagents](https://code.claude.com/docs/en/sub-agents): Markdown agents có tools,
-  disallowedTools, permissionMode; `--agent` có thể chạy main thread. Delegation
-  restrictions/parent mode khác giữa main và subagent; test cả hai trước mapping.
+- [Subagents](https://code.claude.com/docs/en/sub-agents): primary role, policy khác
+  read-only subset và agent resources chưa mapping. Delegation restrictions và
+  permissionMode khác giữa main/subagent; không suy rộng subset đã hỗ trợ.
 - [Permissions](https://code.claude.com/docs/en/permissions): deny → ask → allow;
   allow cụ thể không mở broad deny. Project allow cần trust. Không dịch máy móc
   catch-all deny/allow exceptions từ OpenCode.
