@@ -56,11 +56,13 @@ Validation checks definitions, not execution or model behavior.
    behavior, constraints, and success criteria; prefer reuse or revision.
 2. For a new skill, ask whether automatic invocation is wanted; default to
    `explicit`. Check that the existing format can express the requirements.
-   Before development, select target harnesses/scopes and required scenarios using
+   Select affected harnesses/scopes for rendering and installation checks using
    the [testing guide](../../docs/testing.md).
 3. Write instructions once, declare configuration and resources in
    `definition.yaml`, and let commands reference skills instead of duplicating them.
-4. Validate with `loadCatalog`; test defaults, errors, references, and constraints.
+4. Validate with `loadCatalog`; check affected defaults, errors, references,
+   constraints, rendering, and installation. Actual workflow use is owner-tested
+   under the testing guide, not a required model-behavior suite.
 5. For every new or changed skill, complete the required
    [checklist review and user approval](skill-checklist.md#required-review-and-user-approval).
    Present findings and verification limits for the user's decision; known issues

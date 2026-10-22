@@ -1,27 +1,45 @@
-# Kiểm thử xuyên module và runtime
+# Kiểm thử repo và owner testing
 
-Dành cho người kiểm tra core → adapter → installer → harness. Test/render thành
-công không chứng minh workflow chạy đúng. Contract/validation thuộc core, mapping
-thuộc adapter, lifecycle/conflict/recovery thuộc tool; fixture và expected output
-ở tests, kết quả cần lưu ở verification, output tạm ở thư mục tạm ngoài Git.
+Dành cho contributors và coding agents. Đây là nguồn quy tắc testing: repo tự
+động kiểm code và output cài đặt; owner đánh giá việc dùng skill/agent/command
+trong harness thật. Test/render thành công không chứng minh model sẽ luôn làm
+đúng instructions.
 
-## Chọn phạm vi
+## Automated repository checks
 
-Trước khi phát triển stuff, chốt asset/harness/scope và contract cần kiểm chứng.
-Lập required scenarios: input đủ, thiếu/sai, ngoài phạm vi và allowed/denied
-boundary. Không giảm required cases sau failure để lấy Passed. Global/project
-chỉ được claim khi bằng chứng bao phủ cả hai; ghi model/config và giới hạn quan sát.
+Chọn harness/scopes bị ảnh hưởng và kiểm đúng phần deterministic của thay đổi:
 
-| Stage | Cần chứng minh |
+| Phần | Cần kiểm |
 |---|---|
-| core | Schema, references/resources và nội dung hợp lệ; validate/test semantics |
-| render-install | Native output đúng, resources/config đủ, cài qua shared installer |
-| discovery | Harness thật tìm/nạp đúng asset; không có API thì ghi quan sát model |
-| behavior | Workflow thật với input/prompt cụ thể; đối chiếu output/tác động |
+| core | Schema/defaults/errors, references, resources và constraints |
+| adapter | Native filenames/content/configuration, policy mapping và supported/limited/unsupported |
+| installer/CLI | Cài đúng file/đường dẫn ở project/global; preview, repeat install, update/uninstall, conflicts và recovery |
+| scripts/code | Hành vi deterministic của code thực thi, kể cả code đi kèm stuff khi cần |
 
-Với permissions thử cả thao tác được phép và bị cấm. Skill commit cần test
-approval/refusal và kiểm lịch sử Git thật; activation probe không thay thế test này.
-Dùng home/project tạm, không personal config. Một model run không bảo đảm mọi prompt.
+Filesystem tests dùng home/project tạm, không personal config. Kiểm instructions
+và resources được giữ đúng, metadata/permissions được render đúng, trạng thái cài
+đặt chính xác và file của user được bảo toàn. Test cả mapping được hỗ trợ và bị
+chặn; một tool allowlist được render đúng chưa phải chứng minh runtime enforcement.
+
+Không xây test suite mô phỏng từng dòng instructions, mọi prompt/response hoặc
+mọi tình huống của từng skill/agent/command. Test code trực tiếp khi cần bảo đảm
+deterministic; kiểm Git semantics dùng trong một workflow không đồng nghĩa kiểm
+model có chọn đúng lệnh đó. Discovery/config inspection không gọi model có thể
+dùng để kiểm integration, không phải yêu cầu cho mọi content change.
+
+## Owner workflow testing
+
+Owner dùng output đã cài để đánh giá workflow có hữu ích và làm theo cách mong
+muốn đủ tốt hay không. Model behavior không được bảo đảm 100%; không yêu cầu ma
+trận runtime cases hoặc model runs cho mọi asset/harness trước khi hoàn tất hay
+commit. Coding agent chỉ thêm hoặc chạy model-behavior tests khi user yêu cầu rõ.
+
+Chỉ nói **owner-tested** khi owner xác nhận đã thử, không suy từ approval, file
+đúng format hay automated tests passed. Báo riêng kết quả repository checks và
+owner testing; thiếu owner test là chưa thử, không phải implementation failure.
+Khi owner yêu cầu lưu xác nhận, ghi asset, harness/scope được xác nhận và giới hạn
+đã biết; không suy rộng sang target khác hoặc coi đó là exhaustive verification.
+Format/tooling cho xác nhận nhẹ này chưa được triển khai.
 
 ## Checks từ checkout
 
@@ -31,14 +49,17 @@ npm run typecheck
 npm run cli -- validate --source .
 ```
 
-`npm test` build, chạy implementation tests, check generated fields và verification
-integrity/summary; không chạy model và không yêu cầu mọi stuff Passed. Runtime
-discovery/behavior là bước riêng. Cách ghi hồ sơ, format, fingerprints và gate ở
+`npm test` build, chạy repository tests, check generated fields và verification
+integrity/summary; không chạy model và không yêu cầu mọi stuff Passed. Cách ghi
+hồ sơ verification hiện có, format, fingerprints và gate ở
 [verification tooling](../tool/docs/verification.md); trạng thái ở
 [summary](../verification/README.md), khả năng mapping ở
 [compatibility](../adapters/docs/compatibility.md).
 
-## Activation/discovery smoke
+## Activation/discovery smoke (opt-in)
+
+Runner hiện có để chẩn đoán integration khi cần; không phải completion checklist
+cho từng stuff. Chỉ dùng `--run-models` khi user yêu cầu model testing.
 
 `scripts/check-activation.mjs` tạo core probe tạm chỉ trả marker ngẫu nhiên, render
 qua adapter và cài bằng installer. Mỗi scope chạy explicit invocation,
@@ -86,14 +107,14 @@ Nguồn runner: [Codex app-server](https://learn.chatgpt.com/docs/app-server),
 [Claude headless](https://code.claude.com/docs/en/headless),
 [Claude CLI](https://code.claude.com/docs/en/cli-reference).
 
-## Lưu evidence và hoàn tất
+## Hồ sơ verification hiện có
 
-Giữ artifact đủ đánh giá/tái hiện: stuff tại `verification/stuff/`, probe mapping
-tại `verification/adapters/`, checks xuyên module tại `verification/system/` khi
-cần. Không giữ log thô hoặc viết nhật ký plan đã hoàn thành. Lượt mới phải lưu cả
-failure/blocker và generate summary; lịch sử ở Git, không làm mới fingerprint cũ.
+Nếu user yêu cầu một lượt formal verification, dùng format và quy tắc evidence
+của [verification tooling](../tool/docs/verification.md). Artifact được giữ tại
+`verification/`; output tạm ở ngoài Git. Không giữ secrets/log thô hoặc tạo hồ sơ
+workflow giả để làm đầy bảng. Cập nhật hồ sơ/summary cần documentation approval.
 
-Chỉ claim verified sau gate `validate --require-passed` cho mỗi target đã chọn.
-Missing/partial/failed/blocked/stale còn incomplete; báo implementation và phần
-chưa kiểm chứng riêng. Docs/tooling-only changes chạy checks phù hợp, không tạo
-hồ sơ workflow giả hoặc chạy model chỉ để xác nhận di chuyển tài liệu.
+`validate --require-passed` vẫn kiểm **formal records** theo schema hiện có;
+không phải gate cho implementation/commit hoặc xác nhận owner-tested. Không đổi
+hash/timestamp hay biến missing/stale evidence thành Passed. Docs/tooling-only
+changes chạy checks phù hợp, không chạy model chỉ để xác nhận sửa tài liệu.

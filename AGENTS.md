@@ -16,7 +16,7 @@ confirmation and apply → harness discovery/run.
 | `adapters/` | Native mapping, compatibility and harness baselines |
 | `tool/` | CLI, shared installer and verification tooling |
 | `tests/` | Tests, fixtures and migration/content baselines |
-| `docs/testing.md` | Cross-module/runtime test procedure |
+| `docs/testing.md` | Automated repository checks and owner workflow testing |
 | `verification/` | Recorded results and evidence, not session instructions |
 
 ## Rules
@@ -77,7 +77,7 @@ Read the relevant source and tests alongside these docs; no full-docs startup to
 | Change core API/schema | [Core API](core/docs/README.md), [fields](core/docs/fields.md) |
 | Change native mapping | [Adapter API/development](adapters/README.md), [compatibility](adapters/docs/compatibility.md), relevant harness note |
 | Change CLI/installer/build | [Tool](tool/README.md) |
-| Test stuff or native behavior | [Testing](docs/testing.md) |
+| Test rendering/installation or report owner testing | [Testing](docs/testing.md) |
 | Change verification tooling/records | [Verification format](tool/docs/verification.md) |
 
 ## Requests and communication
@@ -114,12 +114,12 @@ not permission to execute. When complete, say so rather than inventing work.
 - Schema/field metadata changes: after documentation approval, build, then run
   `npm run core:docs`; never hand-edit generated fields. Keep migration hashes;
   intentional content revisions need a reason.
-- Before developing stuff, select harnesses/scopes and required scenarios using
-  the testing guide. Validate/render tests do not prove runtime workflow behavior.
-  With documentation approval, save the latest results, including failures/blockers,
-  and generate the summary with `npm run verification -- report`. Claim verified
-  only after each agreed target passes `validate --require-passed`; missing/stale
-  evidence remains incomplete.
+- Follow the [testing guide](docs/testing.md): automate repository code,
+  rendering/configuration and installation checks in the selected harnesses/scopes.
+  The owner tests actual workflow behavior; do not add model-behavior suites or run
+  model workflows unless explicitly requested. Report implementation checks and
+  owner-test status separately. Pending owner testing does not block completion or
+  commit; approval and passing repository tests do not mean owner-tested.
 - Propose updates to the owning doc when behavior changes, README when public
   usage/support changes, under the documentation approval rule. Report required
   documentation changes as pending until approved and applied. Catalog comes from

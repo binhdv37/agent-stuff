@@ -90,10 +90,10 @@ separate: only the user approves the skill, and they may accept known issues.
 - [ ] Re-check the facts when the environment or code they describe changes.
 - [ ] After real use, remove demonstrated redundancy and add evidenced gaps; retain necessary uncommon failure handling.
 
-## 10. Behavioral Verification
+## 10. Installation Checks and Owner Testing
 
-- [ ] Select target harnesses/scopes and required scenarios before development using the [testing guide](../../docs/testing.md); do not duplicate its procedures here.
-- [ ] Check the ordinary case, missing/invalid inputs, out-of-scope requests, and relevant allowed/denied boundaries against the stated completion criteria.
-- [ ] Confirm that required resources are available after installation and that the workflow can use them successfully.
-- [ ] Verify actual results and side effects before reporting success. Structural validation or successful rendering alone does not prove behavior.
-- [ ] Report tested versions/configurations and evidence limits; missing, blocked, or stale evidence remains Not verified, even if the user approves the skill.
+- [ ] Select affected harnesses/scopes and repository checks using the [testing guide](../../docs/testing.md); do not duplicate its procedures here.
+- [ ] Validate definitions/references and check rendered files, configuration, policy mapping, and installation paths where affected.
+- [ ] Confirm that required instructions and resources are preserved and available after installation.
+- [ ] Report repository check results and actual effects separately from owner workflow testing; structural validation or successful rendering does not prove model behavior.
+- [ ] Apply the guide's owner-testing rules: report only confirmed use and its limits. Pending owner testing does not prevent approval or commit; do not require exhaustive behavioral coverage.

@@ -48,12 +48,16 @@ chúng. Factory không render khi check thất bại, không ghi file hoặc g�
 2. Khi thêm/sửa native behavior hoặc có regression, mở nguồn chính thức hiện tại.
    Đánh giá supported/limited/unsupported, cơ chế enforce và phương án thay thế.
    Không suy luật harness này từ harness khác. Thiếu bằng chứng thì ghi chưa xác minh.
-3. Implement check/render và test trong adapter; thử cả allowed/denied,
-   limited/unsupported và dependency. Core validation thuộc core; lifecycle thuộc tool.
-4. Test discovery khi đổi native discovery/config; test behavior thật nếu tuyên bố
-   enforce. Theo [testing](../docs/testing.md), dùng context tạm và lưu evidence.
-5. Cập nhật note/baseline, compatibility và generate verification summary để hiện
-   stale; test lại các target đã cam kết trước khi tuyên bố verified.
+3. Implement check/render và test output/configuration của adapter; kiểm policy
+   mapping allowed/denied, limited/unsupported và dependency. Core validation thuộc
+   core; lifecycle thuộc tool.
+4. Kiểm CLI/shared installer tạo đúng files/resources và đường dẫn ở scopes bị ảnh
+   hưởng, dùng home/project tạm. Discovery/config inspection không gọi model có thể
+   dùng khi cần; không suy từ đó rằng workflow hoặc runtime enforcement đã verified.
+5. Cập nhật note/baseline, compatibility và generated summary khi bị ảnh hưởng,
+   dưới documentation approval. Báo mapping/installation checks và owner workflow
+   testing riêng theo [testing](../docs/testing.md); không tự thêm model-behavior
+   suites hoặc chạy model workflows khi user chưa yêu cầu.
 
 Policy không enforce được phải chặn, không thay bằng prompt. “Chưa mapping” khác
 “harness không có capability”; native capability không tự thành adapter support.
