@@ -1,0 +1,8 @@
+schema_version: 1
+kind: skill
+id: bdv-implement
+description: Coordinate implementation through a dedicated implementer helper, keeping
+  detailed execution out of the main conversation. Use only when the user explicitly
+  invokes bdv-implement.
+activation: explicit
+instructions: instructions.md

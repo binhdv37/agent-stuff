@@ -1,0 +1,13 @@
+schema_version: 1
+kind: agent
+id: bdv-implementer
+description: Implement a clearly scoped delegated task, run relevant checks, and
+  return a concise result or a specific blocker to the coordinating agent.
+role: delegated
+instructions: instructions.md
+policy:
+  workspace_read: allow
+  workspace_write: allow
+  shell: allow
+  questions: deny
+  delegation: deny
