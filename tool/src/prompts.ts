@@ -104,6 +104,7 @@ export function catalogItems(catalog: Map<string, Asset>, adapter?: Adapter) {
   return [...catalog.values()].map(asset => ({
     key: asset.key, kind: asset.definition.kind,
     description: asset.definition.description, summary: assetSummary(asset),
+    install_with: asset.definition.install_with,
     compatibility: adapter ? adapter.check(asset, catalog) : null,
   }));
 }
@@ -126,7 +127,7 @@ export function formatList(items: ReturnType<typeof catalogItems>, width: number
       const support = item.compatibility ? statuses[item.compatibility.status] : '';
       const prefix = hasCompatibility && width < keyWidth + 20 ? `${support}  ${item.key}`
         : `${item.key.padEnd(keyWidth)}${hasCompatibility ? `  ${support.padEnd(13)}` : ''}`;
-      lines.push(shorten(`${prefix}  ${item.summary}`, width));
+      lines.push(shorten(`${prefix}  ${item.install_with.length ? `[with ${item.install_with.join(', ')}] ` : ''}${item.summary}`, width));
     }
   }
   return lines.join('\n');
@@ -316,6 +317,15 @@ export class InteractiveFlow {
     return answer(await this.ui.multiselect({
       message: 'Choose what to install (Space to toggle, A to select all, Enter to continue)',
       options, initialValues: [], required: true, maxItems: 12,
+    }));
+  }
+
+  async companions(items: { key: string; from: string[] }[], catalog: Map<string, Asset>, adapter: Adapter): Promise<string[]> {
+    return answer(await this.ui.multiselect({
+      message: 'Install accompanying items (deselect any to install only part)',
+      options: items.map(item => ({ value: item.key, label: item.key,
+        hint: `with ${item.from.join(', ')} · ${adapter.check(catalog.get(item.key)!, catalog).status}` })),
+      initialValues: items.map(item => item.key), required: false,
     }));
   }
 

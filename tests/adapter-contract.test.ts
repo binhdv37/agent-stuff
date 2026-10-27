@@ -28,14 +28,14 @@ test('contract version and field vocabulary drift block both check and direct re
   ]) {
     const contract = getContract();
     mutate(contract);
-    const adapter = defineAdapter({ id: 'codex', version: 2, supportedContractVersions: [3],
+    const adapter = defineAdapter({ id: 'codex', version: 3, supportedContractVersions: [4],
       directories: { global: '.agents', project: '.agents' }, mappedFields: {},
       check(a) { calls++; return compatibility(a, 'should not run'); },
       render() { calls++; return []; },
     }, () => contract);
     assert.throws(() => adapter.check(asset, catalog), AdapterContractError);
     const render = adapter.render;
-    assert.throws(() => render(asset, catalog), /expected core contract \[3\], actual/);
+    assert.throws(() => render(asset, catalog), /expected core contract \[4\], actual/);
   }
   assert.equal(calls, 0);
 });
@@ -52,7 +52,7 @@ test('unknown definition fields and unmapped behavior cannot be silently rendere
     assert.throws(() => adapter.render(asset, catalog), /future_behavior/);
   }
   let rendered = false;
-  const adapter = defineAdapter({ id: 'codex', version: 2, supportedContractVersions: [3],
+  const adapter = defineAdapter({ id: 'codex', version: 3, supportedContractVersions: [4],
     directories: { global: '.agents', project: '.agents' },
     mappedFields: { skill: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources'] },
     check(a) { return compatibility(a, 'native output'); },
@@ -101,7 +101,8 @@ test('all native output bytes match the baseline captured before the adapter ref
   }
   // Preserve historical hashes; retirement removes outputs, not their history.
   const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
-    'skill/bdv-change-report', 'skill/bdv-explain-code', 'command/bdv-change-report', 'command/bdv-explain-code']);
+    'skill/bdv-change-report', 'skill/bdv-explain-code', 'command/bdv-change-report', 'command/bdv-explain-code',
+    'agent/experimental-plan', 'agent/bdv-plan-reviewer']);
   // Code review was added after this historical baseline; its installation and
   // permission mapping are covered in code-review.test.ts, not migration hashes.
   const additions = new Set(['skill/bdv-code-review', 'agent/bdv-reviewer',
@@ -122,7 +123,7 @@ test('adapters operate independently with core and dependencies, without tool fi
   const catalog = await loadCatalog('core');
   const asset = catalog.get('skill/bdv-product-brief')!;
   for (const adapter of api.adapters) {
-    assert.deepEqual(adapter.supportedContractVersions, [3]);
+    assert.deepEqual(adapter.supportedContractVersions, [4]);
     assert.notEqual(adapter.check(asset, catalog).status, 'unsupported');
     assert.ok(adapter.render(asset, catalog).length);
   }
@@ -148,7 +149,7 @@ test('CLI refuses limited metadata until accepted and retains legacy manifest co
   execFileSync(process.execPath, [cli, ...args, '--accept-limitations'], { stdio: 'pipe' });
   const context = await targetContext('project', root, root, 'codex');
   const manifest = (await readManifest(context))!;
-  assert.equal(manifest.adapter_version, 2);
+  assert.equal(manifest.adapter_version, 3);
   await writeFile(context.manifest, JSON.stringify({ ...manifest, adapter_version: 1 }));
   assert.equal((await readManifest(context))!.adapter_version, 1);
   assert.ok((await planUninstall(context)).changes.every(c => c.action === 'remove'));
@@ -183,13 +184,13 @@ test('CLI contract mismatch is blocked before writes in both scopes, even with b
   await symlink(path.resolve('node_modules'), path.join(source, 'node_modules'));
   const file = path.join(source, 'dist/core/src/contract.js');
   const before = await readFile(file, 'utf8');
-  assert.match(before, /contractVersion: 3/);
-  await writeFile(file, before.replace('contractVersion: 3', 'contractVersion: 99'));
+  assert.match(before, /contractVersion: 4/);
+  await writeFile(file, before.replace('contractVersion: 4', 'contractVersion: 99'));
   for (const scope of ['global', 'project']) {
     assert.throws(() => execFileSync(process.execPath, [path.join(source, 'dist/tool/src/cli.js'),
       'install', '--agent', 'codex', '--scope', scope, '--project', project, '--source', source,
       '--only', 'skill/bdv-api-handoff', '--yes', '--compatible-only', '--accept-limitations'],
-    { env: { ...process.env, HOME: home }, encoding: 'utf8', stdio: 'pipe' }), /expected core contract \[3\], actual 99/);
+    { env: { ...process.env, HOME: home }, encoding: 'utf8', stdio: 'pipe' }), /expected core contract \[4\], actual 99/);
     const target = scope === 'global' ? home : project;
     await assert.rejects(access(path.join(target, '.agents')));
     await assert.rejects(access(path.join(target, '.agent-stuff')));

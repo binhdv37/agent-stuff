@@ -2,7 +2,9 @@
 
 Target: local CLI/IDE, `.agents/skills`, global/project; không suy sang cloud/hosted.
 Docs đọc **2026-09-30**, không pin release. Binary lúc author ban đầu: chưa ghi nhận.
-Adapter `codex`, revision 2; code `adapters/codex/index.ts`. Quy tắc native giữ từ
+Adapter `codex`, revision 3; code `adapters/codex/index.ts`. Revision 3 nhận core
+contract 4 và `install_with` do installer xử lý, không đổi native mapping hoặc đọc
+lại docs native. Quy tắc native giữ từ
 revision 1; revision 2 chỉ refactor/diagnostic, không có lượt đọc docs mới.
 
 ## Mapping đang dùng

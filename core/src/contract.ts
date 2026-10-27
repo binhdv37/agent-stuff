@@ -25,6 +25,7 @@ export type CoreContract = {
 const rules = [
   'JSON Schema draft 2020-12 describes YAML input; required fields, defaults, types, and enums come from the validators. Unknown definition and policy fields are rejected.',
   'loadCatalog performs full validation, including custom constraints, files, and catalog references that JSON Schema alone cannot check.',
+  'install_with references must exist, be unique, and not reference self. Selection expands directed companions transitively with cycle deduplication; users may omit companions. Delegation permissions do not expand installation selection.',
   'Relative paths must be non-empty and normalized: no absolute paths, backslashes, colons, NUL, or empty, dot, or dot-dot segments. Instructions and resources must exist without symlinks.',
   'Resources must be unique, instructions non-empty, kind/id consistent with directories, and the catalog non-empty. Workflow and delegation references must resolve to the correct kinds.',
   'Non-empty write_paths cannot accompany workspace_write: allow. delegation_targets must be empty unless delegation is allow; allow requires at least one delegated target with workspace_write, shell, and delegation denied and no write_paths.',
@@ -60,5 +61,5 @@ export function getContract(): CoreContract {
       fields: fieldMeanings(jsonSchema),
     };
   }
-  return { contractVersion: 3, definitionSchemaVersion: 1, kinds, rules: [...rules] };
+  return { contractVersion: 4, definitionSchemaVersion: 1, kinds, rules: [...rules] };
 }

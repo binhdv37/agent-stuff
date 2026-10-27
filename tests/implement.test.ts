@@ -16,7 +16,8 @@ for (const scope of ['project', 'global'] as const) {
     const skill = catalog.get('skill/bdv-implement')!;
     const helper = catalog.get('agent/bdv-implementer')!;
     assert.equal(skill.definition.kind === 'skill' && skill.definition.activation, 'explicit');
-    assert.deepEqual(selectAssets(catalog, [skill.key]).map(asset => asset.key), [skill.key]);
+    assert.deepEqual(selectAssets(catalog, [skill.key]).map(asset => asset.key), [skill.key, helper.key]);
+    assert.deepEqual(selectAssets(catalog, [skill.key], false).map(asset => asset.key), [skill.key]);
     const adapter = getAdapter('opencode');
     assert.equal(adapter.check(skill, catalog).status, 'limited');
     assert.equal(adapter.check(helper, catalog).status, 'supported');

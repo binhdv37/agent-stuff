@@ -10,10 +10,11 @@ import { getAdapter } from '../adapters/index.js';
 
 test('migration preserves baseline content except documented core revisions', async () => {
   const catalog = await loadCatalog(path.join('.', 'core'));
-  assert.equal(catalog.size, 14);
+  assert.equal(catalog.size, 12);
   const retired = new Set(['skill/bdv-api-handoff', 'skill/bdv-brainstorm-first',
     'skill/bdv-change-report', 'skill/bdv-explain-code']);
-  for (const key of [...retired, 'command/bdv-change-report', 'command/bdv-explain-code']) {
+  for (const key of [...retired, 'command/bdv-change-report', 'command/bdv-explain-code',
+    'agent/experimental-plan', 'agent/bdv-plan-reviewer']) {
     assert.equal(catalog.has(key), false, `${key} must remain retired`);
   }
   const inventory = JSON.parse(await readFile('tests/fixtures/migration-inventory.json', 'utf8')) as { key: string; activation: string; hashes: Record<string, string> }[];

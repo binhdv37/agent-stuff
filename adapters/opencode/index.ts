@@ -4,7 +4,7 @@ import { defineAdapter, compatibility, issue } from '../runtime.js';
 import { description, markdown } from '../render.js';
 
 export const opencode = defineAdapter({
-  id: 'opencode', version: 2, supportedContractVersions: [3], directories: { global: '.config/opencode', project: '.opencode' },
+  id: 'opencode', version: 3, supportedContractVersions: [4], directories: { global: '.config/opencode', project: '.opencode' },
   mappedFields: {
     skill: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources', 'activation'],
     command: ['schema_version', 'kind', 'id', 'description', 'workflow'],

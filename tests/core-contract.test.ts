@@ -8,7 +8,7 @@ import { getContract, getDocs, loadCatalog, CoreError, definitionSchema, type Do
 
 test('public contract covers every schema field including nested policy, without extra fields', () => {
   const contract = getContract();
-  assert.equal(contract.contractVersion, 3);
+  assert.equal(contract.contractVersion, 4);
   assert.equal(contract.definitionSchemaVersion, 1);
   assert.doesNotThrow(() => JSON.stringify(contract));
   for (const validator of definitionSchema.options) {
@@ -103,14 +103,14 @@ test('compiled core runs independently with only its own files and declared depe
   await symlink(path.resolve('node_modules'), path.join(directory, 'node_modules'));
   const api = await import(pathToFileURL(path.join(directory, 'library/src/index.js')).href);
   const catalog = await api.loadCatalog(path.join(directory, 'catalog'));
-  assert.equal(catalog.size, 14);
-  assert.equal(api.getContract().contractVersion, 3);
+  assert.equal(catalog.size, 12);
+  assert.equal(api.getContract().contractVersion, 4);
   assert.match(api.getDocs('concepts'), /i-agent/);
   assert.match(api.getDocs('format'), /definition.yaml/);
   assert.match(api.getDocs('api'), /Contract API/);
   assert.equal(api.getDocs('fields'), await readFile(path.join(directory, 'library/docs/fields.md'), 'utf8'));
-  assert.deepEqual(api.selectAssets(catalog, ['agent/experimental-plan']).map((asset: { key: string }) => asset.key),
-    ['agent/bdv-plan-reviewer', 'agent/experimental-plan']);
+  assert.deepEqual(api.selectAssets(catalog, ['skill/bdv-implement']).map((asset: { key: string }) => asset.key),
+    ['skill/bdv-implement', 'agent/bdv-implementer']);
   assert.equal(api.relativePath.safeParse('../outside').success, false);
   assert.throws(() => api.inside(directory, '../outside'));
   await rm(path.join(directory, 'library/docs/concepts.md'));

@@ -5,4 +5,6 @@ description: Coordinate implementation through a dedicated implementer helper, k
   detailed execution out of the main conversation. Use only when the user explicitly
   invokes bdv-implement.
 activation: explicit
+install_with:
+  - agent/bdv-implementer
 instructions: instructions.md

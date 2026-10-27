@@ -59,6 +59,14 @@ part of the agent's declared behavior, not merely a display label.
 
 ## How they relate
 
+`install_with` declares directed installation companions on any stuff definition.
+Selecting an item includes its companions by default, transitively and without
+duplicates even in cycles. Users may omit companions for a partial installation.
+Selecting a companion does not select its parent. This relation neither grants
+permissions nor proves that a workflow is ready: required helpers must still be
+available at runtime. `policy.delegation_targets` separately restricts which helpers
+an agent may invoke; it does not select files for installation.
+
 A skill supplies knowledge or a way to do a task; a command provides an explicit
 entry point; an agent supplies the assistant's role and execution permissions.
 They have distinct responsibilities even when their instructions overlap.

@@ -7,8 +7,9 @@ one report. Use only when the user explicitly requests this workflow.
 
 The installed `agent/bdv-reviewer` must be available as a delegated helper, and
 the current orchestrator must be permitted to invoke it. Install both
-`skill/bdv-code-review` and `agent/bdv-reviewer`; a skill selection alone does not
-install the agent. Check helper availability and all five rubric resources before
+`skill/bdv-code-review` and `agent/bdv-reviewer`; the installer includes the helper
+by default, but users may omit it. Installation does not grant delegation permission.
+Check helper availability and all five rubric resources before
 starting. If delegation or a resource is unavailable, report the blocker; do not
 substitute another agent or a single-agent review without the user's agreement.
 

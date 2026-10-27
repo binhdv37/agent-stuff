@@ -12,6 +12,7 @@ async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promi
   const source = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-owner-tests-')));
   t.after(() => rm(source, { recursive: true, force: true }));
   await cp('core', path.join(source, 'core'), { recursive: true });
+  await cp('tests/fixtures/policy', path.join(source, 'core'), { recursive: true });
   await mkdir(path.join(source, 'verification'));
   await save(source, []);
   return source;
@@ -58,17 +59,17 @@ test('fingerprints track installed resources and declared dependencies rather th
   let catalog = await loadCatalog(path.join(source, 'core'));
   const skill = fingerprint(catalog, 'skill/bdv-product-brief', 'codex');
   const command = fingerprint(catalog, 'command/example', 'opencode');
-  const agent = fingerprint(catalog, 'agent/experimental-plan', 'opencode');
+  const agent = fingerprint(catalog, 'agent/test-coordinator', 'opencode');
   await writeFile(path.join(source, 'core/docs/format.md'), 'Unrelated authoring-document edit\n');
   await writeFile(path.join(source, 'package-lock.json'), 'Unrelated dependency change\n');
   assert.equal(fingerprint(await loadCatalog(path.join(source, 'core')), 'skill/bdv-product-brief', 'codex'), skill);
   await writeFile(path.join(source, 'core/skills/bdv-product-brief/assets/product-brief.md'), 'Changed resource\n');
   await writeFile(path.join(source, 'core/skills/bdv-grill-me/instructions.md'), 'Changed workflow\n');
-  await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/instructions.md'), 'Changed delegate\n');
+  await writeFile(path.join(source, 'core/agents/test-reader/instructions.txt'), 'Changed delegate\n');
   catalog = await loadCatalog(path.join(source, 'core'));
   assert.notEqual(fingerprint(catalog, 'skill/bdv-product-brief', 'codex'), skill);
   assert.notEqual(fingerprint(catalog, 'command/example', 'opencode'), command);
-  assert.notEqual(fingerprint(catalog, 'agent/experimental-plan', 'opencode'), agent);
+  assert.notEqual(fingerprint(catalog, 'agent/test-coordinator', 'opencode'), agent);
   assert.throws(() => fingerprint(catalog, 'skill/missing', 'codex'), /Unknown asset/);
   assert.throws(() => fingerprint(catalog, 'agent/bdv-reviewer', 'codex'), /unsupported mapping/);
 });
@@ -96,11 +97,11 @@ test('changed output and unsupported mappings do not rewrite owner history or im
   assert.match(markdown, /Needs retest \| unsupported \| Unavailable/);
   assert.match(markdown, /Review &#124; needs work &lt;script&gt;/);
   const catalog = await loadCatalog(path.join(source, 'core'));
-  await save(source, [{ ...record, asset: 'agent/experimental-plan', harness: 'opencode',
-    fingerprint: fingerprint(catalog, 'agent/experimental-plan', 'opencode') }]);
-  const helperDefinition = path.join(source, 'core/agents/bdv-plan-reviewer/definition.yaml');
+  await save(source, [{ ...record, asset: 'agent/test-coordinator', harness: 'opencode',
+    fingerprint: fingerprint(catalog, 'agent/test-coordinator', 'opencode') }]);
+  const helperDefinition = path.join(source, 'core/agents/test-reader/definition.yaml');
   await writeFile(helperDefinition, (await readFile(helperDefinition, 'utf8')) + '\nresources: [extra.md]\n');
-  await writeFile(path.join(source, 'core/agents/bdv-plan-reviewer/extra.md'), 'Unsupported agent resource\n');
+  await writeFile(path.join(source, 'core/agents/test-reader/extra.md'), 'Unsupported agent resource\n');
   assert.equal((await inspect(source))[0]!.compatibility, 'unsupported');
   assert.equal((await inspect(source))[0]!.stale, true);
 });

@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { mkdir, writeFile, lstat, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { loadCatalog, selectAssets, inside, assertNoSymlinks } from '../../core/src/index.js';
+import { loadCatalog, resolveSelection, inside, assertNoSymlinks } from '../../core/src/index.js';
 import { getAdapter, adapterIds } from '../../adapters/index.js';
 import { applyInstall, planInstall, planUninstall, readManifest, inspectInstallation, recoverInstall, targetContext, validateOutputs, type Plan } from './installation/index.js';
 import { Cancelled, InteractiveFlow, catalogItems, formatList, formatStatus, formatCompatibility, formatPreview } from './prompts.js';
@@ -22,6 +22,7 @@ const options: Record<string, string> = {
   'dry-run': 'Preview without applying changes',
   'accept-limitations': 'Explicitly accept reported compatibility limitations',
   'compatible-only': 'Explicitly skip unsupported items',
+  'no-install-with': 'Install/build only explicitly selected items, without companions',
   yes: 'Apply without prompts; does not accept limitations or bypass conflicts',
   verbose: 'Show individual files and full compatibility details',
   json: 'Write complete, untruncated JSON to stdout',
@@ -36,7 +37,7 @@ const commandHelp: Record<string, { description: string; flags: string[]; exampl
     flags: [...targetOptions, 'verbose', 'json'], example: 'status --scope project --project /path/to/project',
     note: 'Defaults: all AI tools, both scopes, current directory for project scope. Reports tracked files only; no source checkout is required.' },
   install: { description: 'Install selected items after reviewing compatibility and file changes.',
-    flags: ['source', ...targetOptions, ...applyOptions, 'compatible-only', 'accept-limitations'],
+    flags: ['source', ...targetOptions, ...applyOptions, 'compatible-only', 'accept-limitations', 'no-install-with'],
     example: 'install --agent codex --scope project --project /path/to/project --only skill/bdv-product-brief --dry-run',
     note: 'Without flags, prompts guide installation. Without a terminal, supply --agent, --scope, --project for project scope, and --yes unless previewing.' },
   update: { description: 'Update managed items using their recorded source and selection by default.',
@@ -49,7 +50,7 @@ const commandHelp: Record<string, { description: string; flags: string[]; exampl
     note: 'Recovery applies changes and has no dry-run mode.' },
   validate: { description: 'Validate the portable source catalog.', flags: ['source'], example: 'validate --source .' },
   build: { description: 'Render compatible items into a new output directory without installing.',
-    flags: ['source', 'agent', 'only', 'compatible-only', 'out', 'dry-run', 'verbose'],
+    flags: ['source', 'agent', 'only', 'compatible-only', 'out', 'dry-run', 'verbose', 'no-install-with'],
     example: 'build --agent codex --compatible-only --out /path/to/new-preview', note: '--agent and --out are required.' },
 };
 
@@ -123,6 +124,7 @@ async function main(): Promise<void> {
     'dry-run': { type: 'boolean' }, 'accept-limitations': { type: 'boolean' },
     'compatible-only': { type: 'boolean' }, yes: { type: 'boolean' }, help: { type: 'boolean' },
     verbose: { type: 'boolean' }, json: { type: 'boolean' },
+    'no-install-with': { type: 'boolean' },
   } });
   let args: ReturnType<typeof parse>;
   try { args = parse(); }
@@ -131,7 +133,7 @@ async function main(): Promise<void> {
     if (!e.code?.startsWith('ERR_PARSE_ARGS_')) throw error;
     const command = commands.includes(process.argv[2] ?? '') ? process.argv[2]! : 'install';
     const option = e.message.match(/'(--?[^'\s]+)/)?.[1];
-    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help', '--verbose', '--json'];
+    const switches = ['--dry-run', '--accept-limitations', '--compatible-only', '--yes', '--help', '--verbose', '--json', '--no-install-with'];
     const message = e.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
       ? `Unknown option "${option}". Remove it or use a supported flag.`
       : switches.includes(option ?? '') ? `${option} does not take a value.\nPass ${option} without an argument or =value.`
@@ -143,6 +145,9 @@ async function main(): Promise<void> {
   if (!commands.includes(command)) throw new Error(`Unknown command "${command}".\nChoose ${commands.join(', ')}; run \`agent-stuff --help\` for options.`);
   if (positionals.length > 1) throw new Error(`Unexpected argument "${positionals[1]}" for ${command}.\n${usage(command)}\nRemove extra arguments; select items with --only <kind/id>.`);
   if (values.help) { console.log(help(positionals[0])); return; }
+  if (values['no-install-with'] && !['install', 'build'].includes(command)) {
+    throw new Error('--no-install-with is only supported by install and build. Update preserves the installed selection.');
+  }
   if (values.json && !['list', 'status'].includes(command)) throw new Error(`--json is only supported by list and status.\nRun \`agent-stuff ${command} --help\` for options.`);
   if (['list', 'status'].includes(command)) {
     const unsupported = Object.keys(values).filter(flag => !commandHelp[command]!.flags.includes(flag));
@@ -226,23 +231,48 @@ async function main(): Promise<void> {
       } else checkSelection(keys, [...catalog.keys()]);
       const removed = installed ? (keys ?? []).filter(k => !catalog.has(k)) : [];
       const presentKeys = keys?.filter(k => catalog.has(k) || !installed);
-      let selected = presentKeys?.length === 0 ? [] : selectAssets(catalog, presentKeys);
       if (interactive && command === 'install' && !keys) {
         keys = await flow!.assets(catalog, adapter);
-        selected = selectAssets(catalog, keys);
       }
+      const requested = keys?.filter(k => catalog.has(k)) ?? presentKeys;
+      const selection = requested?.length === 0 ? { assets: [], requested: [], companions: [] }
+        : resolveSelection(catalog, requested);
+      let included = new Set(selection.assets.map(a => a.key));
+      if (command === 'update' || values['no-install-with']) included = new Set(selection.requested);
+      else if (flow && command === 'install' && selection.companions.length) {
+        included = new Set([...selection.requested, ...await flow.companions(selection.companions, catalog, adapter)]);
+      }
+      let selected = selection.assets.filter(a => included.has(a.key));
       const compatibility = selected.map(a => adapter.check(a, catalog));
+      if (values['compatible-only'] && command !== 'update') {
+        selected = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
+      }
+      console.log('Selection\n' + selection.assets.map(asset => {
+        const origin = selection.companions.find(item => item.key === asset.key);
+        const chosen = selected.some(item => item.key === asset.key);
+        return `  ${chosen ? 'Include' : 'Omit'} ${asset.key} — ${origin ? `with ${origin.from.join(', ')}` : command === 'update' ? 'installed selection' : 'selected'}`;
+      }).join('\n'));
       if (flow) flow.compatibility(compatibility, values.verbose);
       else console.log(`Compatibility\n${formatCompatibility(compatibility, process.stdout.columns ?? 100, values.verbose)}`);
       if (values['compatible-only']) {
         if (command === 'update') throw new Error('Update does not support --compatible-only.\nRemove --compatible-only; use --only <installed-key> to explicitly select installed items.');
-        selected = selected.filter(a => adapter.check(a, catalog).status !== 'unsupported');
       } else if (compatibility.some(c => c.status === 'unsupported')) {
         const unsupported = compatibility.filter(c => c.status === 'unsupported').map(c => c.asset);
         throw new Error(`Selection contains unsupported assets for --agent ${agent}: ${unsupported.join(', ')}.\n` +
           (command === 'update' ? 'Use --only to explicitly select supported installed items.'
+            : selection.companions.length ? 'Use --no-install-with to omit companions, choose supported --only entries, or use --compatible-only to explicitly skip unsupported items.'
             : values.only ? 'Remove the unsupported --only entries, or add --compatible-only to explicitly skip unsupported items.'
               : 'Use --only <supported-key> or --compatible-only to explicitly skip unsupported items.'));
+      }
+      for (const asset of selected) {
+        for (const companion of asset.definition.install_with) {
+          if (!selected.some(item => item.key === companion)) {
+            console.log(`Not included in this operation: ${companion} (with ${asset.key}). A workflow that requires it needs it already available; this operation does not establish readiness.`);
+          }
+        }
+      }
+      if (command === 'update' && selection.companions.some(item => !included.has(item.key))) {
+        console.log('New companions are suggestions only during update. Run install to add them.');
       }
       limited = selected.some(a => adapter.check(a, catalog).status === 'limited');
       selectedKeys = (keys ?? selected.map(a => a.key)).filter(key => selected.some(a => a.key === key));

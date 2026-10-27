@@ -48,6 +48,10 @@ export async function loadCatalogRoot(coreRoot: string): Promise<Map<string, Ass
   }
   if (!assets.size) throw new Error(`No assets found in ${root}`);
   for (const asset of assets.values()) {
+    for (const companion of asset.definition.install_with) {
+      if (companion === asset.key) throw new Error(`${asset.key}: install_with cannot reference self`);
+      if (!assets.has(companion)) throw new Error(`${asset.key}: missing install_with reference ${companion}`);
+    }
     if (asset.definition.kind === 'command' && !assets.has(asset.definition.workflow)) {
       throw new Error(`${asset.key}: missing workflow ${asset.definition.workflow}`);
     }
@@ -78,19 +82,29 @@ export async function loadCatalogRoot(coreRoot: string): Promise<Map<string, Ass
   return assets;
 }
 
-export function selectAssets(assets: Map<string, Asset>, only?: string[]): Asset[] {
+export type Selection = { assets: Asset[]; requested: string[]; companions: { key: string; from: string[] }[] };
+
+export function resolveSelection(assets: Map<string, Asset>, only?: string[], includeCompanions = true): Selection {
   const selected = only ?? [...assets.keys()];
   if (!selected.length) throw new Error('Select at least one asset');
   const result = new Map<string, Asset>();
+  const origins = new Map<string, Set<string>>();
   const visit = (key: string) => {
     const asset = assets.get(key);
     if (!asset) throw new Error(`Unknown asset: ${key}`);
     if (result.has(key)) return;
-    if (asset.definition.kind === 'agent') {
-      for (const target of asset.definition.policy.delegation_targets) visit(target);
-    }
     result.set(key, asset);
+    for (const target of asset.definition.install_with) {
+      if (!origins.has(target)) origins.set(target, new Set());
+      origins.get(target)!.add(key);
+      if (includeCompanions) visit(target);
+    }
   };
   for (const key of selected) visit(key);
-  return [...result.values()];
+  return { assets: [...result.values()], requested: [...new Set(selected)],
+    companions: [...origins].filter(([key]) => !selected.includes(key)).map(([key, from]) => ({ key, from: [...from] })) };
+}
+
+export function selectAssets(assets: Map<string, Asset>, only?: string[], includeCompanions = true): Asset[] {
+  return resolveSelection(assets, only, includeCompanions).assets;
 }

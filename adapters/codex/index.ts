@@ -2,7 +2,7 @@ import { stringify } from 'yaml';
 import { defineAdapter, compatibility, issue } from '../runtime.js';
 import { description, skillFiles } from '../render.js';
 export const codex = defineAdapter({
-  id: 'codex', version: 2, supportedContractVersions: [3], directories: { global: '.agents', project: '.agents' },
+  id: 'codex', version: 3, supportedContractVersions: [4], directories: { global: '.agents', project: '.agents' },
   mappedFields: { skill: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources',
     'activation', 'display_name', 'short_description'] },
   check(asset) {

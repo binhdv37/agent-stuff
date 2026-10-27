@@ -1,7 +1,7 @@
 import { defineAdapter, compatibility, issue } from '../runtime.js';
 import { description, markdown, skillFiles } from '../render.js';
 export const claudeCode = defineAdapter({
-  id: 'claude-code', version: 3, supportedContractVersions: [3], directories: { global: '.claude', project: '.claude' },
+  id: 'claude-code', version: 4, supportedContractVersions: [4], directories: { global: '.claude', project: '.claude' },
   mappedFields: {
     skill: ['schema_version', 'kind', 'id', 'description', 'instructions', 'resources',
       'activation', 'argument_hint'],

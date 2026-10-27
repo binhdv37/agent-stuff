@@ -1,6 +1,6 @@
 # Public contract core
 
-Contract API hiện tại: **3**. Format YAML hiện tại: **schema_version: 1**.
+Contract API hiện tại: **4**. Format YAML hiện tại: **schema_version: 1**.
 Hai phiên bản độc lập với revision adapter. Schema, loader, kiểm tra đường dẫn
 và dependency selection thuộc core; core không import tool hoặc adapter.
 Module chạy được chỉ với Node.js 22+, yaml và zod. Bắt đầu từ
@@ -29,13 +29,14 @@ const catalog = await loadCatalog('/absolute/path/to/core');
 | `getContract()` | Snapshot JSON: phiên bản, schema input theo kind, ý nghĩa/nhóm field và ràng buộc |
 | `getDocs(topic)` | Markdown; topic là `concepts`, `format`, `fields` hoặc `api` |
 | `loadCatalog(coreRoot)` | Promise của Map full key → Asset đã validate và áp dụng default |
-| `selectAssets(catalog, only?)` | Chọn full key, bổ sung helper agent; mặc định chọn tất cả |
+| `selectAssets(catalog, only?, includeCompanions = true)` | Chọn full key, mở rộng `install_with`; mặc định chọn tất cả |
+| `resolveSelection(catalog, only?, includeCompanions = true)` | Trả `assets`, `requested`, `companions` (`key`, `from`) để consumer giải thích selection |
 | `definitionSchema`, `relativePath` | Validator Zod cho cấu trúc definition và đường dẫn tương đối |
 | `inside(root, relative)` | Validate và resolve đường dẫn bên trong root |
 | `assertNoSymlinks(file)` | Kiểm tra symlink ở đường dẫn và các ancestor tồn tại |
 
 Type public: `CoreContract`, `CoreSchema`, `KindContract`, `StuffKind`, `FieldCategory`,
-`FieldMeaning`, `Definition`, `Asset`, `Catalog`, `DocsTopic`, `CoreErrorCode`.
+`FieldMeaning`, `Definition`, `Asset`, `Selection`, `Catalog`, `DocsTopic`, `CoreErrorCode`.
 Asset gồm `key`, `definition`, `body`, `resources`. Command có body rỗng;
 resources là Map đường dẫn tương đối → Buffer, giữ nguyên byte.
 
@@ -84,6 +85,9 @@ Version 2 bổ sung validator, path helper và selection public để consumer b
 import nội bộ tool. Version 1 đã có getContract/getDocs/loadCatalog; format YAML,
 default và ngữ nghĩa stuff giữ nguyên. Version 3 bổ sung annotation field trong
 schema JSON và lỗi DOCS_UNAVAILABLE khi module thiếu tài liệu đã đóng gói.
+Version 4 thêm `install_with` và provenance của selection. Selection không còn tự
+mở rộng `policy.delegation_targets`; đó chỉ là quyền gọi helper. Khi không mở rộng
+companions, `resolveSelection` vẫn trả các quan hệ trực tiếp từ những item đã chọn.
 
 `supported` bảo toàn contract; `limited` công khai khác biệt có thể chấp nhận;
 `unsupported` chặn yêu cầu bắt buộc không bảo toàn được. Không hiểu field hành vi

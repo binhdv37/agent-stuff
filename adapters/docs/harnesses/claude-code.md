@@ -1,7 +1,9 @@
 # Claude Code: native baseline
 
 Target: local `.claude/skills` và `.claude/agents`, global/project. Adapter
-`claude-code`, revision **3**; code `adapters/claude-code/index.ts`. Skills giữ
+`claude-code`, revision **4**; code `adapters/claude-code/index.ts`. Revision 4 nhận
+core contract 4 và `install_with` do installer xử lý; native mapping không đổi,
+không có lượt đọc docs native mới. Skills giữ
 baseline **2026-09-30**; subagent docs đọc **2026-10-22**, không pin release.
 Máy phát triển chưa có Claude Code binary; output mới chưa được owner/runtime test.
 

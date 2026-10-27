@@ -13,6 +13,9 @@ const field = <T extends z.ZodType>(validator: T, category: FieldCategory, descr
 
 const id = z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 const common = {
+  install_with: field(z.array(z.string().regex(/^(skill|agent|command)\/[a-z0-9]+(-[a-z0-9]+)*$/)).default([])
+    .refine(a => new Set(a).size === a.length, 'Duplicate install_with references'), 'behavior',
+  'Directed installation companions, included by default during installation but optionally omitted by the user. References must exist and cannot reference self. Does not grant permissions or imply runtime readiness.'),
   schema_version: field(z.literal(1), 'structure', 'definition.yaml format version; only 1 is accepted.'),
   id: field(id, 'structure', 'Kebab-case ID, at most 64 characters, matching the directory name. Catalog key: kind/id.'),
   description: field(z.string().min(1).max(1024), 'content', 'Purpose and usage context; may affect discovery, so not display-only metadata. 1–1024 characters.'),

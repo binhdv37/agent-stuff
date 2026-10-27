@@ -3,7 +3,7 @@ import type { Adapter, Compatibility, CompatibilityIssue } from './types.js';
 
 // Pin the field vocabulary understood by these adapters; do not derive it from
 // an upgraded core at module load time, which would silently accept new fields.
-const common = ['schema_version', 'kind', 'id', 'description', 'display_name', 'short_description'];
+const common = ['schema_version', 'kind', 'id', 'description', 'display_name', 'short_description', 'install_with'];
 const content = ['instructions', 'resources'];
 const expectedFields: Record<StuffKind, readonly string[]> = {
   skill: [...common, ...content, 'activation', 'argument_hint'],
@@ -81,7 +81,8 @@ export function defineAdapter(implementation: AdapterImplementation, readContrac
     const result = spec.check(asset, catalog);
     if (result.status === 'unsupported') return result;
     const mapped = spec.mappedFields[kind] ?? [];
-    const omitted = fields.filter(f => !mapped.includes(f)).map(field => {
+    // Installation companions are consumed by the installer, never native permissions.
+    const omitted = fields.filter(f => f !== 'install_with' && !mapped.includes(f)).map(field => {
       const metadata = contract.kinds[kind].fields[field]!.category === 'metadata';
       return issue(field, metadata ? 'limited' : 'unsupported', 'This adapter does not map this field.',
         metadata ? 'The supplied display/input hint metadata is omitted from installed files.'

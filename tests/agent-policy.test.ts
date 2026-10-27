@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, realpath, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, readFile, cp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -12,30 +12,33 @@ import { applyInstall, planInstall, targetContext } from '../tool/src/installati
 async function temporary(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
   const dir = await realpath(await mkdtemp(path.join(tmpdir(), 'agent-stuff-agents-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
+  await cp('core', path.join(dir, 'core'), { recursive: true });
+  await cp('tests/fixtures/policy', path.join(dir, 'core'), { recursive: true });
   return dir;
 }
 
-test('planner selection includes its restricted delegate and both bundled primary agents render', async () => {
-  const catalog = await loadCatalog(path.join('.', 'core'));
-  assert.deepEqual(selectAssets(catalog, ['agent/experimental-plan']).map(a => a.key),
-    ['agent/bdv-plan-reviewer', 'agent/experimental-plan']);
-  for (const id of ['experimental-plan', 'solution-architect']) {
+test('delegation permissions do not select companions and scoped primary agents render', async t => {
+  const dir = await temporary(t);
+  const catalog = await loadCatalog(path.join(dir, 'core'));
+  assert.deepEqual(selectAssets(catalog, ['agent/test-coordinator']).map(a => a.key),
+    ['agent/test-coordinator']);
+  for (const id of ['test-coordinator', 'solution-architect']) {
     const asset = catalog.get(`agent/${id}`)!;
     assert.equal(opencode.check(asset, catalog).status, 'supported');
     assert.equal(opencode.render(asset, catalog).length, 1);
   }
-  const planner = parse(opencode.render(catalog.get('agent/experimental-plan')!, catalog)[0]!.content.toString().split('---')[1]!);
+  const planner = parse(opencode.render(catalog.get('agent/test-coordinator')!, catalog)[0]!.content.toString().split('---')[1]!);
   assert.equal(planner.mode, 'primary');
   assert.deepEqual(planner.permission.edit, {
-    '*': 'deny', '.auragent/plans/*': 'allow',
+    '*': 'deny', 'plans/*': 'allow',
   });
-  assert.deepEqual(planner.permission.task, { '*': 'deny', 'bdv-plan-reviewer': 'allow' });
+  assert.deepEqual(planner.permission.task, { '*': 'deny', 'test-reader': 'allow' });
   assert.equal(planner.permission.bash, 'deny');
   assert.equal(planner.permission.external_directory, 'deny');
   const architect = parse(opencode.render(catalog.get('agent/solution-architect')!, catalog)[0]!.content.toString().split('---')[1]!);
   assert.equal(architect.permission.bash, 'deny');
   assert.equal(architect.permission.edit, 'deny');
-  const reviewer = parse(opencode.render(catalog.get('agent/bdv-plan-reviewer')!, catalog)[0]!.content.toString().split('---')[1]!);
+  const reviewer = parse(opencode.render(catalog.get('agent/test-reader')!, catalog)[0]!.content.toString().split('---')[1]!);
   assert.equal(reviewer.mode, 'subagent');
   assert.equal(reviewer.permission.edit, 'deny');
   assert.equal(reviewer.permission.bash, 'deny');
@@ -44,22 +47,20 @@ test('planner selection includes its restricted delegate and both bundled primar
 
 test('agent dependency validation refuses a delegate that can edit or use shell', async t => {
   const dir = await temporary(t);
-  const { cp, writeFile } = await import('node:fs/promises');
-  await cp('core', path.join(dir, 'core'), { recursive: true });
-  const definition = path.join(dir, 'core/agents/bdv-plan-reviewer/definition.yaml');
+  const definition = path.join(dir, 'core/agents/test-reader/definition.yaml');
   const original = await readFile(definition, 'utf8');
   await writeFile(definition, original.replace('workspace_write: deny', 'workspace_write: allow'));
-  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/bdv-plan-reviewer must be read-only/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/test-reader must be read-only/);
   await writeFile(definition, original.replace('shell: deny', 'shell: ask'));
-  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/bdv-plan-reviewer must be read-only/);
+  await assert.rejects(loadCatalog(path.join(dir, 'core')), /delegate agent\/test-reader must be read-only/);
 });
 
 test('runtime OpenCode discovers generated agents with restricted permissions', async t => {
   try { execFileSync('opencode', ['--version'], { stdio: 'ignore' }); }
   catch { t.skip('OpenCode binary is unavailable'); return; }
   const dir = await temporary(t);
-  const catalog = await loadCatalog(path.join('.', 'core'));
-  const selected = selectAssets(catalog, ['agent/experimental-plan', 'agent/solution-architect']);
+  const catalog = await loadCatalog(path.join(dir, 'core'));
+  const selected = selectAssets(catalog, ['agent/test-coordinator', 'agent/test-reader', 'agent/solution-architect']);
   const outputs = selected.flatMap(a => opencode.render(a, catalog));
   const context = await targetContext('project', dir, dir);
   await applyInstall(await planInstall(context, outputs, '.'));
@@ -78,13 +79,13 @@ test('runtime OpenCode discovers generated agents with restricted permissions', 
   assert.equal(architect.tools.edit, false);
   assert.equal(architect.tools.write, false);
   assert.equal(architect.tools.read, true);
-  const planner = debug('experimental-plan');
+  const planner = debug('test-coordinator');
   assert.equal(planner.mode, 'primary');
   assert.equal(planner.tools.bash, false);
-  assert.ok(planner.permission.some(p => p.permission === 'edit' && p.pattern === '.auragent/plans/*' && p.action === 'allow'));
-  assert.ok(planner.permission.some(p => p.permission === 'task' && p.pattern === 'bdv-plan-reviewer' && p.action === 'allow'));
+  assert.ok(planner.permission.some(p => p.permission === 'edit' && p.pattern === 'plans/*' && p.action === 'allow'));
+  assert.ok(planner.permission.some(p => p.permission === 'task' && p.pattern === 'test-reader' && p.action === 'allow'));
   assert.ok(planner.permission.some(p => p.permission === 'task' && p.pattern === '*' && p.action === 'deny'));
-  const reviewer = debug('bdv-plan-reviewer');
+  const reviewer = debug('test-reader');
   assert.equal(reviewer.mode, 'subagent');
   assert.equal(reviewer.tools.edit, false);
   assert.equal(reviewer.tools.bash, false);

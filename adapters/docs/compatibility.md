@@ -1,7 +1,7 @@
 # Tương thích adapter
 
-Trạng thái dưới đây là implementation hiện tại: OpenCode/Codex revision **2**,
-Claude Code revision **3**, core contract **3**, YAML schema **1**. Supported mapping không đồng nghĩa workflow đã
+Trạng thái dưới đây là implementation hiện tại: OpenCode/Codex revision **3**,
+Claude Code revision **4**, core contract **4**, YAML schema **1**. Supported mapping không đồng nghĩa workflow đã
 verified; kết quả từng stuff nằm ở [verification](../../verification/README.md).
 
 ## Hỗ trợ
@@ -13,6 +13,8 @@ verified; kết quả từng stuff nằm ở [verification](../../verification/R
 | Claude Code | Skills/resources, slash entry, invocation policy | Dùng skill slash command; command riêng unsupported | Delegated chỉ đọc với tool allowlist; primary và policy khác unsupported |
 
 Unsupported ở đây phản ánh adapter, không khẳng định harness thiếu capability.
+`install_with` được installer xử lý trước render và có thể bị user bỏ chọn; không
+thay đổi native permissions. Compatibility của từng companion vẫn được kiểm riêng.
 
 | Field đã khai báo nhưng chưa mapping | Hệ quả |
 |---|---|
@@ -31,10 +33,11 @@ không sửa shared config. Xem [CLI](../../tool/README.md) cho lifecycle/confli
 V1 dùng singular `permission`, catch-all deny trước exceptions:
 
 - `solution-architect`: cấm ghi và shell; cho đọc workspace và hỏi user.
-- `experimental-plan`: chỉ edit `.auragent/plans/*` trong workspace; bash và
-  external_directory deny; task chỉ mở `bdv-plan-reviewer`.
-- `bdv-plan-reviewer`: delegated chỉ đọc; edit/bash/task deny. Selection planner
-  tự thêm helper. Policy giới hạn model delegation, không cấm user gọi helper trực tiếp.
+- `bdv-reviewer`: delegated chỉ đọc; edit/bash/task/question deny.
+- `bdv-implementer`: delegated có quyền đọc/edit/bash; task/question deny.
+
+`experimental-plan` và `bdv-plan-reviewer` đã retire khỏi catalog. Policy giới hạn
+model delegation, không cấm user gọi helper trực tiếp.
 
 OpenCode 1.18.32/1.18.33 đã nạp role/tool/permission qua debug runtime. Chưa có
 phiên model đầy đủ chứng minh tạo plan và từ chối ghi ngoài plan directory.

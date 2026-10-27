@@ -45,6 +45,10 @@ required inputs, defaults, and policy constraints.
 - Resources must be unique and cannot name `definition.yaml`, `SKILL.md`, or the
   instructions file. Files directly in the definition's directory are valid resources.
 - Workflow and delegation references must resolve to valid catalog entries.
+- `install_with` is a list of full `kind/id` references, defaulting to empty. Targets
+  must exist; duplicate and self references are invalid. Cycles between distinct
+  items are allowed and deduplicated during selection. The relation is optional
+  installation grouping, not authorization or runtime dependency enforcement.
 - `policy.write_paths` patterns are relative to the project, not the definition's
   directory.
 

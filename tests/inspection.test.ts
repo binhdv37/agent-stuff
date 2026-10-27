@@ -68,7 +68,7 @@ test('list groups items, preserves support labels, and keeps one bounded line pe
         assert.ok(formatted.indexOf('Skills') < formatted.indexOf('Agents'));
         assert.ok(!formatted.includes('Commands'));
         for (const item of items) {
-          const row = formatted.split('\n').find(line => line.includes(item.key))!;
+          const row = formatted.split('\n').find(line => line.startsWith(`${item.key} `))!;
           assert.ok(row, item.key);
           assert.ok(row.includes({ supported: 'Supported', limited: 'Limited', unsupported: 'Not supported' }[item.compatibility!.status]));
         }

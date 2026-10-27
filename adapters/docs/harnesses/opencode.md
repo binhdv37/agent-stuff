@@ -2,7 +2,9 @@
 
 Target: local **V1**, project `.opencode`, global `~/.config/opencode`.
 Docs đọc **2026-09-30**, nhánh `/docs/`, không pin release; binary lúc author
-chưa ghi nhận. Adapter `opencode`, revision 2; code `adapters/opencode/index.ts`.
+chưa ghi nhận. Adapter `opencode`, revision 3; code `adapters/opencode/index.ts`.
+Revision 3 nhận core contract 4 và `install_with` do installer xử lý; native mapping
+không đổi, không có lượt đọc docs native mới.
 Revision 2 giữ native mapping revision 1, không có lượt đọc docs mới.
 
 ## Mapping đang dùng

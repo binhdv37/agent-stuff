@@ -1,0 +1,14 @@
+schema_version: 1
+kind: agent
+id: test-coordinator
+description: Synthetic scoped-write and delegation policy fixture.
+role: primary
+instructions: instructions.txt
+policy:
+  workspace_read: allow
+  workspace_write: deny
+  write_paths: [plans/*]
+  shell: deny
+  questions: allow
+  delegation: allow
+  delegation_targets: [agent/test-reader]

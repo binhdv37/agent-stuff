@@ -37,7 +37,7 @@ complete machine-readable output.
 
 | Tool | Skills | Commands | Agents |
 |---|---|---|---|
-| OpenCode | Supported; explicit invocation has a reported limitation | Separate commands | Primary agents and the planner's read-only review helper |
+| OpenCode | Supported; explicit invocation has a reported limitation | Separate commands | Primary and delegated agents, including implementation helpers |
 | Codex | Supported, including native invocation policy | Use the corresponding skills | Not mapped by this adapter |
 | Claude Code | Supported, also available as slash commands | Use skill slash commands | Not mapped by this adapter |
 
@@ -74,6 +74,12 @@ bash install.sh
 
 Follow the prompts to choose your AI tool, where to install, and the stuff you
 want, then confirm installation.
+
+Some items declare companions through `install_with`. The installer selects these
+by default and shows which item brought them in; you can deselect any companion.
+For flag-driven installs, use `--no-install-with` to install only your explicit
+selection. Omitting a helper does not make a workflow standalone: it must already
+be available when that workflow runs. Installation does not grant delegation rights.
 
 For a specific published version, replace `@latest` with `@<version>`. For a local
 repository copy, check out the desired tag or commit before running the launcher.
@@ -143,6 +149,10 @@ installation, use `--scope global` and omit `--project`.
   invoked through npm. Pull newer changes in that directory first.
 - **Explicit source:** `--source /path/to/checkout` switches the installation to
   that local directory for this and future updates.
+
+Update preserves the installed selection and suggests newly declared companions
+without adding them. Run `install` to add companions. Removing an item does not
+automatically remove its companions; select those separately if needed.
 
 For scripted installation, provide the selection flags and `--yes`. Items
 reported as limited also require `--accept-limitations` after you review them.

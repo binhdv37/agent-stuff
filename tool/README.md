@@ -70,7 +70,13 @@ npm run cli -- install --agent codex --scope project --project /path/to/project 
   directory đó làm local source cho cả các lần update sau. Install mặc định dùng
   source cùng CLI; project đích độc lập. Tool resolve `<source>/core`; thư viện core
   chỉ nhận core root. Quy tắc source mặc định cho update ở phần lifecycle bên dưới.
-- `--only` lặp được, dùng `skill/id`, `command/id`, `agent/id`; planner tự thêm helper.
+- `--only` lặp được, dùng `skill/id`, `command/id`, `agent/id`. Install/build mở rộng
+  `install_with` theo hướng, gồm cả companions bắc cầu và loại trùng/vòng lặp.
+  Interactive cho bỏ chọn từng companion; `--no-install-with` chỉ lấy selection
+  được chỉ định. Preview nêu item được chọn, đi kèm từ đâu và item bị bỏ. Thiếu helper
+  trong lượt cài không chứng minh nó chưa có; workflow vẫn kiểm availability khi chạy.
+  Unsupported companions chặn như item khác; user phải bỏ chọn hoặc dùng
+  `--compatible-only` một cách rõ ràng. Quan hệ cài kèm không cấp quyền delegation.
 - `--dry-run` chỉ preview. Bỏ flag để confirm/apply; script dùng `--yes`.
 - Limited cần `--accept-limitations` sau review. `--yes` không chấp nhận thay,
   không vượt conflict/unsupported/contract mismatch. `--compatible-only` chủ động
@@ -85,7 +91,8 @@ terminal width. Summary ưu tiên `short_description`, fallback mô tả đầu 
 kèm activation boilerplate; không sửa portable content. `--agent` đánh dấu supported,
 limited hoặc unsupported và vẫn giữ toàn bộ catalog. `list --json` trả
 `{schema_version: 1, agent, items}` với description nguyên vẹn, summary và compatibility
-đầy đủ (null khi không chọn agent).
+đầy đủ (null khi không chọn agent), cùng `install_with`. Text list ghi companions
+trước summary, vẫn rút gọn theo terminal width.
 
 `status` chỉ đọc managed manifests và so sánh hashes của tracked files; không cần
 source còn tồn tại, không thay đổi files/state, locks hoặc recovery journals. Mặc
@@ -111,6 +118,9 @@ npm run cli -- recover --agent codex --scope global --yes
 
 Install thêm/cập nhật selection, không gỡ phần ngoài selection. Update mặc định dùng
 selection đã ghi; `--only` chọn trong các item đã cài. Source phụ thuộc installation:
+
+Update không mở rộng `install_with`: companions chưa có trong selection chỉ là đề
+xuất; dùng install để thêm. Uninstall không tự gỡ companions khi gỡ item cha.
 
 - Local source: đọc directory đã ghi, kể cả khi CLI được gọi qua npm. Pull thay đổi
   trong checkout trước khi update.

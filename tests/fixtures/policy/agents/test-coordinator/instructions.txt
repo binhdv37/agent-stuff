@@ -1,0 +1,1 @@
+Synthetic policy fixture; coordinate the assigned read-only helper.

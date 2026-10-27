@@ -6,6 +6,8 @@ description: Review code changes before merge through five independent perspecti
   findings and verification results into one verdict. Use when the user requests
   this multi-perspective review workflow.
 activation: explicit
+install_with:
+  - agent/bdv-reviewer
 instructions: instructions.md
 resources:
   - axes/correctness.md

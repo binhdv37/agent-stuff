@@ -28,8 +28,10 @@ field có thể thuộc dependency, như workflow.resources.
 - `limited`: khác biệt được công khai; consumer phải xin chấp nhận trước apply.
 - `unsupported`: mất yêu cầu bắt buộc; render bị chặn.
 
-`defineAdapter` guard cả check/render, kể cả gọi render trực tiếp. Revision 2 hiểu
-core contract 3, definition schema 1 và vocabulary kind/field đã pin. Mismatch báo
+`defineAdapter` guard cả check/render, kể cả gọi render trực tiếp. OpenCode/Codex
+revision 3 và Claude Code revision 4 hiểu core contract 4, definition schema 1 và
+vocabulary kind/field đã pin. `install_with` do installer xử lý, không render vào
+native config hoặc cấp quyền. Mismatch báo
 AdapterContractError với expected/actual. Unknown field bị chặn; field có mặt nhưng
 chưa mapping: metadata có thể limited, content/behavior/enforcement unsupported.
 Optional không có nghĩa được phép bỏ giá trị đã khai báo.

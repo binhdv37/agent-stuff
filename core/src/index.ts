@@ -6,7 +6,7 @@ export { getContract } from './contract.js';
 export type { CoreContract, CoreSchema, KindContract, StuffKind, FieldCategory, FieldMeaning } from './contract.js';
 export type { Definition, Asset } from './schema.js';
 export { definitionSchema, relativePath } from './schema.js';
-export { selectAssets } from './catalog.js';
+export { selectAssets, resolveSelection, type Selection } from './catalog.js';
 export { inside, assertNoSymlinks } from './paths.js';
 export { getDocs } from './docs.js';
 export type { DocsTopic } from './docs.js';

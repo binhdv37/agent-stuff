@@ -7,8 +7,8 @@ implementation fixes. Do not implement directly, including small follow-up fixes
 ## 1. Establish the task
 
 Confirm that the installed `agent/bdv-implementer` is available and that the current
-agent may invoke it. Install both the skill and the helper; selecting the skill
-alone does not install the helper. If unavailable or denied, report the blocker;
+agent may invoke it. The installer includes the helper by default, but users may
+omit it; installation does not grant delegation permission. If unavailable or denied, report the blocker;
 do not substitute another helper or implement directly without the user's agreement.
 
 Read applicable repository instructions, inspect working-tree status, and resolve
